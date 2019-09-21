@@ -1,7 +1,12 @@
 
 dependencies {
+	implementation 'org.apache.commons:commons-lang3'
+
 	compileOnly 'jakarta.persistence:jakarta.persistence-api'
 	compileOnly 'jakarta.servlet:jakarta.servlet-api'
+	compileOnly 'jakarta.validation:jakarta.validation-api'
+
+	compileOnly 'jakarta.persistence:jakarta.persistence-api'
 	compileOnly 'jakarta.validation:jakarta.validation-api'
 
 	compileOnly 'org.springframework:spring-web'

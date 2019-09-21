@@ -5,9 +5,9 @@ services:
     build:
       context: .
       dockerfile: docker/products-db.txt
-    image: micro-service/database:latest
+    image: ascelion/poc/products-db:latest
     volumes:
-      - db-data:/var/lib/postgresql/data/
+      - products-db:/var/lib/postgresql/data/
     environment:
       - POSTGRES_PASSWORD=postgres
     ports:
@@ -17,11 +17,11 @@ services:
     build:
       context: .
       dockerfile: docker/products.txt
-    image: micro-service/products:latest
+    image: ascelion/poc/products:latest
     ports:
       - "18080:8080"
     links:
       - "products-db:db"
 
 volumes:
-  db-data:
+  products-db:

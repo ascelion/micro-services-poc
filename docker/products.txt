@@ -1,4 +1,3 @@
-
 FROM openjdk:8-jre
 
 ENV APP_NAME products
