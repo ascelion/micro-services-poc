@@ -1,0 +1,9 @@
+
+database:
+  host: localhost
+
+spring:
+  jackson:
+    serialization.indent_output: true
+  jpa:
+    properties.hibernate.show_sql: true

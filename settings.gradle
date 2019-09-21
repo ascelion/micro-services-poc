@@ -1,0 +1,22 @@
+rootProject.name = 'micro-service'
+
+include ':jersey'
+include ':shared'
+include ':spring'
+
+def renameChildren( ProjectDescriptor desc ) {
+	desc.children.each { child ->
+		File file = new File(child.projectDir, '.artifact')
+	
+		if( file.exists() ) {
+			child.name = "${file.text.trim()}"
+		}
+		else {
+			child.name = "${child.path.substring(1).replace(':', '-')}"
+		}
+
+		renameChildren child
+	}
+}
+
+renameChildren rootProject

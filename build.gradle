@@ -1,0 +1,90 @@
+buildscript {
+	repositories {
+		mavenCentral()
+		jcenter()
+	}
+	dependencies {
+		classpath "org.springframework.boot:spring-boot-gradle-plugin:$springBootVersion"
+		classpath "pl.allegro.tech.build:axion-release-plugin:1.10.+"
+	}
+}
+
+apply plugin: 'pl.allegro.tech.build.axion-release'
+
+group = 'ascelion.poc'
+version = scmVersion.version
+
+task clean {
+}
+
+allprojects {
+	repositories {
+		jcenter()
+		maven {
+			url 'https://dl.bintray.com/ascelion/repo'
+		}
+	}
+
+	apply plugin: 'eclipse'
+	
+	task 'clean-ext'(type: Delete) {
+		delete 'bin', 'target', '*.log'
+	}
+
+	clean.dependsOn 'clean-ext'
+
+	cleanEclipse {
+		delete '.settings', '.classpath'
+	}
+
+	defaultTasks 'clean', 'assemble'
+}
+
+subprojects { sub ->
+	apply plugin: 'java'
+	apply from: rootProject.file('lombok.gradle')
+	apply from: rootProject.file('tests.gradle')
+
+	group = rootProject.group
+	version = rootProject.version
+
+	sourceCompatibility = '1.8'
+	targetCompatibility = '1.8'
+
+	tasks.withType( AbstractArchiveTask ) {
+		// strip version from archive name
+		archiveVersion = ''
+	}
+
+	tasks.withType( Jar ) {
+		manifest {
+			attributes(
+				'Built-By'       : System.properties['user.name'],
+				'Build-Timestamp': new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(new Date()),
+				'Build-Branch'   : scmVersion.scmPosition.branch,
+				'Build-Commit'   : scmVersion.scmPosition.revision,
+				'Build-Revision' : "${scmVersion.version}-${scmVersion.scmPosition.shortRevision}",
+				'Created-By'     : "Gradle ${gradle.gradleVersion}",
+				'Build-Jdk'      : "${System.properties['java.version']} (${System.properties['java.vendor']} ${System.properties['java.vm.version']})",
+				'Build-OS'       : "${System.properties['os.name']} ${System.properties['os.arch']} ${System.properties['os.version']}"
+			)
+		}
+	}
+
+	dependencies {
+		constraints {
+			implementation 'jakarta.persistence:jakarta.persistence-api:2.2.2'
+			implementation 'jakarta.servlet:jakarta.servlet-api:4.0.2'
+			implementation 'jakarta.validation:jakarta.validation-api:2.0.1'
+
+			implementation 'ascelion.public:flywaydb-ext-util5:0.1.1'
+			implementation 'ascelion.public:flywaydb-ext-shared:0.1.1'
+		}
+
+		implementation platform( "org.springframework.boot:spring-boot-dependencies:$springBootVersion" )
+	}
+
+	eclipse.project.name = "${project.group}.${rootProject.name}${path.replace(':', '-')}"
+}
+
+eclipse.project.name = "${project.group}.${name}"
