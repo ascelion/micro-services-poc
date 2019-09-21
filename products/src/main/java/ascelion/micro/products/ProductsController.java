@@ -8,6 +8,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.groups.Default;
 
 import ascelion.micro.Main;
+import ascelion.micro.endpoint.EntityEndpoint;
 import ascelion.micro.utils.Mappings;
 import ascelion.micro.validation.OnCreate;
 import ascelion.micro.validation.OnPatch;
@@ -41,17 +42,18 @@ import org.springframework.web.server.ResponseStatusException;
 @RestController
 @Validated
 @RequiredArgsConstructor
-public class ProductsController {
+public class ProductsController implements EntityEndpoint<Product, ProductRequest> {
 
 	private final ProductsRepository repo;
 
 	/**
 	 * Get all products (pagination is optional).
 	 */
+	@Override
 	@ApiOperation("Get all products")
 	@GetMapping(path = "/products", produces = APPLICATION_JSON_VALUE)
 	@PreAuthorize(Main.IS_USER)
-	public List<Product> getProducts(
+	public List<Product> getEntities(
 	//@formatter:off
 	        @ApiParam("Optional parameter to get a specific page of products")
 	        @RequestParam(name = "page", required = false)
@@ -59,7 +61,7 @@ public class ProductsController {
 
 	        @ApiParam("The size of the page if a page is requested")
 	        @RequestParam(name = "size", required = false, defaultValue = "10")
-	        @Min(10) Integer size) {
+	        @Min(10) int size) {
 	//@formatter:on
 
 		return ofNullable(page)
@@ -72,10 +74,11 @@ public class ProductsController {
 	/**
 	 * Get a product by id.
 	 */
+	@Override
 	@ApiOperation("Get a product by its identifier")
 	@GetMapping(path = "/products/{id}", produces = APPLICATION_JSON_VALUE)
 	@PreAuthorize(Main.IS_USER)
-	public Product getProduct(
+	public Product getEntity(
 	//@formatter:off
 	        @ApiParam(value = "The product identifier", required = true)
 	        @PathVariable(name = "id")
@@ -89,29 +92,31 @@ public class ProductsController {
 	/**
 	 * Create a new product.
 	 */
+	@Override
 	@ApiOperation("Create a new product")
 	@PostMapping(path = "/products", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
 	@PreAuthorize(Main.IS_ADMIN)
 	@ResponseStatus(HttpStatus.CREATED)
 	@Validated({ Default.class, OnCreate.class })
-	public Product createProduct(
+	public Product createEntity(
 	//@formatter:off
 	        @ApiParam(value = "The product data", required = true)
 	        @RequestBody
-	        @NotNull @Valid ProductRequest patch) {
+	        @NotNull @Valid ProductRequest request) {
 	//@formatter:on
 
-		return this.repo.save(Mappings.copyProperties(patch, Product::new, false));
+		return this.repo.save(Mappings.copyProperties(request, Product::new, false));
 	}
 
 	/**
 	 * Update an existing product.
 	 */
+	@Override
 	@ApiOperation("Update an existing product")
 	@PutMapping(path = "/products/{id}", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
 	@PreAuthorize(Main.IS_ADMIN)
 	@Validated({ Default.class, OnUpdate.class })
-	public Product updateProduct(
+	public Product updateEntity(
 	//@formatter:off
 	        @ApiParam(value = "The product identifier", required = true)
 	        @PathVariable(name = "id")
@@ -119,11 +124,11 @@ public class ProductsController {
 
 	        @ApiParam(value = "The product data", required = true)
 	        @RequestBody
-	        @NotNull @Valid ProductRequest patch) {
+	        @NotNull @Valid ProductRequest request) {
 	//@formatter:on
 
 		return this.repo.findById(id)
-				.map(prod -> Mappings.copyProperties(patch, prod, false))
+				.map(ent -> Mappings.copyProperties(request, ent, false))
 				.map(this.repo::save)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No such product"));
 	}
@@ -131,11 +136,12 @@ public class ProductsController {
 	/**
 	 * Update an existing product.
 	 */
+	@Override
 	@ApiOperation("Partially update an existing product")
 	@PatchMapping(path = "/products/{id}", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
 	@PreAuthorize(Main.IS_ADMIN)
 	@Validated({ Default.class, OnPatch.class })
-	public Product patchProduct(
+	public Product patchEntity(
 	//@formatter:off
 	        @ApiParam(value = "The product identifier", required = true)
 	        @PathVariable(name = "id")
@@ -147,7 +153,7 @@ public class ProductsController {
 	//@formatter:on
 
 		return this.repo.findById(id)
-				.map(prod -> Mappings.copyProperties(patch, prod, true))
+				.map(ent -> Mappings.copyProperties(patch, ent, true))
 				.map(this.repo::save)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No such product"));
 	}

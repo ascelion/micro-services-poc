@@ -14,5 +14,5 @@ spring.jpa.properties.hibernate:
 
 spring.flyway:
   locations:
-    - classpath:db/migration
+    - classpath:db
     - filesystem:${dataImportLocation}

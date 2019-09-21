@@ -1,16 +1,20 @@
 import org.apache.tools.ant.filters.*
 
-task 'docker-files'(type: Copy) {
-	into file("${buildDir}/docker")
-
-	from( rootProject.file('docker') ) {
-		filter ReplaceTokens, tokens: [application: project.name]
+afterEvaluate {
+	task 'docker-files'(type: Copy) {
+		into file("${buildDir}/docker")
+	
+		from( rootProject.file('docker') ) {
+			filter ReplaceTokens, tokens: [application: project.name, port: project.ext.port]
+		}
+		from( file('data') ) {
+			into 'data'
+		}
+		from( file("$buildDir/distributions") )
 	}
-	from( file('data') ) {
-		into 'data'
-	}
-	from( file("$buildDir/distributions") )
 }
+
+def dockerFile = file('data').exists() ? 'docker-compose-data.yml' : 'docker-compose.yml'
 
 task 'docker-up'(type: Exec) {
 	dependsOn 'docker-files'
@@ -19,6 +23,7 @@ task 'docker-up'(type: Exec) {
 	executable 'docker-compose'
 	workingDir file("${buildDir}/docker")
 
+	args '-f', dockerFile
 	args 'up', '--build', '-d'
 }
 
@@ -28,6 +33,7 @@ task 'docker-stop'(type: Exec) {
 	executable 'docker-compose'
 	workingDir file("${buildDir}/docker")
 
+	args '-f', dockerFile
 	args 'stop'
 }
 
@@ -37,6 +43,7 @@ task 'docker-down'(type: Exec) {
 	executable 'docker-compose'
 	workingDir file("${buildDir}/docker")
 
+	args '-f', dockerFile
 	args 'down'
 }
 
