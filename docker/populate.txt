@@ -1,0 +1,8 @@
+FROM bash
+
+ENV APP_NAME @application@
+ENV APP_DATA /var/lib/$APP_NAME/data
+
+ADD data $APP_DATA
+
+ENTRYPOINT true

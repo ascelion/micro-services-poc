@@ -1,0 +1,59 @@
+import org.apache.tools.ant.filters.*
+
+task 'docker-files'(type: Copy) {
+	into file("${buildDir}/docker")
+
+	from( rootProject.file('docker') ) {
+		filter ReplaceTokens, tokens: [application: project.name]
+	}
+	from( file('data') ) {
+		into 'data'
+	}
+	from( file("$buildDir/distributions") )
+}
+
+task 'docker-up'(type: Exec) {
+	dependsOn 'docker-files'
+	dependsOn 'assemble'
+
+	executable 'docker-compose'
+	workingDir file("${buildDir}/docker")
+
+	args 'up', '--build', '-d'
+}
+
+task 'docker-stop'(type: Exec) {
+	dependsOn 'docker-files'
+
+	executable 'docker-compose'
+	workingDir file("${buildDir}/docker")
+
+	args 'stop'
+}
+
+task 'docker-down'(type: Exec) {
+	dependsOn 'docker-files'
+
+	executable 'docker-compose'
+	workingDir file("${buildDir}/docker")
+
+	args 'down'
+}
+
+task startDB(type: Exec) {
+	executable 'docker'
+
+	args 'run', '--name', "${project.name}-db"
+	args '-d', '--rm'
+	args '-e', "POSTGRES_USER=$project.name"
+	args '-e', "POSTGRES_PASSWORD=$project.name"
+	args '-e', "POSTGRES_DB=$project.name"
+	args '-p', '15432:5432'
+	args 'postgres:11'
+}
+
+task stopDB(type: Exec) {
+	executable 'docker'
+
+	args 'stop', "${project.name}-db"
+}

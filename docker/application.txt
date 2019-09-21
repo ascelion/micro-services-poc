@@ -1,0 +1,17 @@
+FROM openjdk:8-jre
+
+ENV APP_NAME @application@
+ENV LOG_NAME $APP_NAME
+ENV LOG_PATH /var/log
+ENV APP_DATA /var/lib/$APP_NAME/data
+
+ENV JAVA_OPTS -DAPP_NAME=$APP_NAME -DLOG_PATH=$LOG_PATH -DLOG_NAME=$LOG_NAME -DdataImportLocation=$APP_DATA
+
+RUN mkdir -p $LOG_PATH
+RUN mkdir -p /usr/share/$APP_NAME
+
+ADD $APP_NAME-boot.tar /usr/share/$APP_NAME
+
+RUN ln -sf /usr/share/$APP_NAME/bin/$APP_NAME /usr/bin/$APP_NAME
+
+ENTRYPOINT [ "sh", "-c", "/usr/bin/$APP_NAME" ]

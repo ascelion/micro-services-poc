@@ -1,0 +1,38 @@
+version: "3.1"
+
+services:
+  @application@-data:
+    build:
+      context: .
+      dockerfile: populate.txt
+    image: ascelion/poc/@application@-data:latest
+    volumes:
+      - @application@-data:/var/lib/@application@/data:ro
+
+  @application@-db:
+    build:
+      context: .
+      dockerfile: database.txt
+    image: ascelion/poc/@application@-db:latest
+    volumes:
+      - @application@-db:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "15432:5432"
+
+  @application@:
+    build:
+      context: .
+      dockerfile: application.txt
+    image: ascelion/poc/@application@:latest
+    ports:
+      - "18080:8080"
+    volumes:
+      - @application@-data:/var/lib/@application@/data:ro
+    links:
+      - "@application@-db:db"
+
+volumes:
+  @application@-db:
+  @application@-data:

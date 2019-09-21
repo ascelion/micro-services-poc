@@ -1,3 +1,0 @@
-FROM postgres:11
-
-COPY docker/products-db.sql /docker-entrypoint-initdb.d/
