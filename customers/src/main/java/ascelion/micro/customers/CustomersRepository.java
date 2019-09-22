@@ -1,11 +1,10 @@
 package ascelion.micro.customers;
 
-import javax.enterprise.context.ApplicationScoped;
+import java.util.UUID;
 
-import org.apache.deltaspike.data.api.EntityRepository;
-import org.apache.deltaspike.data.api.Repository;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-@Repository(forEntity = Customer.class)
-@ApplicationScoped
-public interface CustomersRepository extends EntityRepository<Customer, Long> {
+@Repository
+public interface CustomersRepository extends JpaRepository<Customer, UUID> {
 }

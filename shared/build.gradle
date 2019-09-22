@@ -4,13 +4,21 @@ dependencies {
 	api 'io.swagger:swagger-annotations'
 	api 'org.apache.commons:commons-lang3'
 
+	implementation 'ascelion.flywaydb:flywaydb-ext-util5'
+	implementation 'org.springframework.boot:spring-boot-autoconfigure'
+	implementation 'org.springframework.data:spring-data-jpa'
+
+	implementation "io.springfox:springfox-swagger2:$swaggerVersion"
+	implementation "io.springfox:springfox-swagger-ui:$swaggerVersion"
+	implementation "io.springfox:springfox-bean-validators:$swaggerVersion"
+
+	api "org.springframework.security:spring-security-jwt:$jwtVersion"
+	api "org.springframework.security.oauth:spring-security-oauth2:$springBootOAuth2Version"
+
 	api 'org.slf4j:slf4j-api'
 
 	compileOnly 'jakarta.persistence:jakarta.persistence-api'
 	compileOnly 'jakarta.servlet:jakarta.servlet-api'
-	compileOnly 'jakarta.validation:jakarta.validation-api'
-
-	compileOnly 'jakarta.persistence:jakarta.persistence-api'
 	compileOnly 'jakarta.validation:jakarta.validation-api'
 
 	compileOnly 'org.springframework:spring-web'

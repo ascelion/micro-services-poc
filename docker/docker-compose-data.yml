@@ -5,7 +5,7 @@ services:
     build:
       context: .
       dockerfile: populate.txt
-    image: ascelion/poc/@application@-data:latest
+    image: @repository@@application@-data:latest
     networks:
       - @application@
     volumes:
@@ -15,11 +15,13 @@ services:
     build:
       context: .
       dockerfile: database.txt
-    image: ascelion/poc/@application@-db:latest
+    image: @repository@@application@-db:latest
     volumes:
       - @application@-db:/var/lib/postgresql/data/
     environment:
-      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=@application@
+      - POSTGRES_PASSWORD=@application@
+      - POSTGRES_DB=@application@
     networks:
       - @application@
 #    ports:
@@ -29,7 +31,7 @@ services:
     build:
       context: .
       dockerfile: application.txt
-    image: ascelion/poc/@application@:latest
+    image: @repository@@application@:latest
     networks:
       - @application@
     ports:

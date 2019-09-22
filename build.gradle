@@ -19,6 +19,10 @@ task clean {
 }
 
 allprojects {
+	ext {
+		set( 'isRelease', !rootProject.version.endsWith( '-SNAPSHOT' ) )
+	}
+
 	repositories {
 		mavenLocal()
 		jcenter()
@@ -40,15 +44,16 @@ allprojects {
 }
 
 subprojects { sub ->
-	apply plugin: 'java'
-	apply from: rootProject.file('lombok.gradle')
-	apply from: rootProject.file('tests.gradle')
-
 	group = rootProject.group
 	version = rootProject.version
 
+	apply plugin: 'java'
+
 	sourceCompatibility = '1.8'
 	targetCompatibility = '1.8'
+
+	apply from: rootProject.file('lombok.gradle')
+	apply from: rootProject.file('tests.gradle')
 
 	tasks.withType( AbstractArchiveTask ) {
 		// strip version from archive name
@@ -66,11 +71,10 @@ subprojects { sub ->
 		plugins.withId( 'org.springframework.boot' ) {
 			distZip.enabled = false
 			distTar.enabled = false
+			tasks.all { if( it.name == 'bootDistZip' ) it.enabled = false }
 		}
 
-		afterEvaluate {
-			sub.apply from: rootProject.file( 'docker.gradle' )
-		}
+		sub.apply from: rootProject.file( 'docker.gradle' )
 	}
 	plugins.withId( 'org.springframework.boot' ) {
 		bootRun {
@@ -90,24 +94,26 @@ subprojects { sub ->
 		}
 	}
 
-	tasks.withType( Jar ) {
-		manifest {
-			attributes(
-				'Built-By'       : System.properties['user.name'],
-				'Build-Timestamp': new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(new Date()),
-				'Build-Branch'   : scmVersion.scmPosition.branch,
-				'Build-Commit'   : scmVersion.scmPosition.revision,
-				'Build-Revision' : "${scmVersion.version}-${scmVersion.scmPosition.shortRevision}",
-				'Created-By'     : "Gradle ${gradle.gradleVersion}",
-				'Build-Jdk'      : "${System.properties['java.version']} (${System.properties['java.vendor']} ${System.properties['java.vm.version']})",
-				'Build-OS'       : "${System.properties['os.name']} ${System.properties['os.arch']} ${System.properties['os.version']}"
-			)
+	if( isRelease ) {
+		tasks.withType( Jar ) {
+			manifest {
+				attributes(
+					'Built-By'       : System.properties['user.name'],
+					'Build-Timestamp': new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(new Date()),
+					'Build-Branch'   : scmVersion.scmPosition.branch,
+					'Build-Commit'   : scmVersion.scmPosition.revision,
+					'Build-Revision' : "${scmVersion.version}-${scmVersion.scmPosition.shortRevision}",
+					'Created-By'     : "Gradle ${gradle.gradleVersion}",
+					'Build-Jdk'      : "${System.properties['java.version']} (${System.properties['java.vendor']} ${System.properties['java.vm.version']})",
+					'Build-OS'       : "${System.properties['os.name']} ${System.properties['os.arch']} ${System.properties['os.version']}"
+				)
+			}
 		}
 	}
 
 	dependencies {
 		implementation platform( "org.springframework.boot:spring-boot-dependencies:$springBootVersion" )
-		implementation platform( 'ascelion.flywaydb:flywaydb-ext:0.1.4' )
+		implementation platform( 'ascelion.flywaydb:flywaydb-ext:0.1.5' )
 
 		constraints {
 			implementation 'jakarta.enterprise:jakarta.enterprise.cdi-api:2.0.2'
@@ -120,6 +126,10 @@ subprojects { sub ->
 
 			implementation 'io.swagger:swagger-annotations:1.5.23'
 		}
+
+		runtimeOnly 'org.postgresql:postgresql'
+
+		testRuntimeOnly 'com.h2database:h2'
 	}
 
 	eclipse.project.name = "${project.group}.${rootProject.name}${path.replace(':', '-')}"

@@ -3,16 +3,23 @@ database:
   host: db
   port: 5432
 
-spring.datasource:
-  username: products
-  password: products
-  url: jdbc:postgresql://${database.host}:${database.port}/products
+security:
+  signKey: 0123456789
 
-spring.jpa.properties.hibernate:
-  temp.use_jdbc_metadata_defaults: false
-  format_sql: true
+spring:
+  datasource:
+    username: ${APP_NAME}
+    password: ${APP_NAME}
+    url: jdbc:postgresql://${database.host}:${database.port}/${APP_NAME}
 
-spring.flyway:
-  locations:
-    - classpath:db
-    - filesystem:${dataImportLocation}
+  flyway:
+    check-location: false
+    locations:
+      - classpath:db
+      - filesystem:${dataImportLocation:data}
+
+  jpa:
+    properties:
+      hibernate:
+        temp:
+          use_jdbc_metadata_defaults: false

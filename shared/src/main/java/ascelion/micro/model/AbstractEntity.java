@@ -1,10 +1,11 @@
 package ascelion.micro.model;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
+import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.PrePersist;
@@ -15,21 +16,19 @@ import ascelion.micro.validation.OnUpdate;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @MappedSuperclass
-@EqualsAndHashCode(of = "id") // Prefer identity equality
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public abstract class AbstractEntity {
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE)
-	@Column(name = "ID", nullable = false, updatable = false, unique = true)
+	@GeneratedValue
+	@Column(name = "ID", nullable = false, insertable = false, updatable = false, unique = true)
 	@NotNull(groups = OnUpdate.class)
-	private Long id;
+	private UUID id;
 	@Column(name = "CREATED_AT", nullable = false, updatable = false)
 	@NotNull
 	private LocalDateTime createdAt;
@@ -45,5 +44,27 @@ public abstract class AbstractEntity {
 	@PreUpdate
 	private void touch() {
 		this.updatedAt = LocalDateTime.now();
+	}
+
+	@Override
+	public final int hashCode() {
+		return Objects.hash(this.id);
+	}
+
+	@Override
+	public final boolean equals(Object obj) {
+		if (obj == this) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+
+		final AbstractEntity that = (AbstractEntity) obj;
+
+		return Objects.equals(this.id, that.id);
 	}
 }

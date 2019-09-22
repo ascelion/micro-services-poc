@@ -2,6 +2,7 @@ package ascelion.micro.products;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -23,14 +24,14 @@ import lombok.Setter;
 @NoArgsConstructor
 public class Product extends AbstractEntity {
 	static class Builder {
-		private Long id;
+		private UUID id;
 		private LocalDateTime createdAt;
 		private LocalDateTime updatedAt;
 		private String name;
 		private String description;
 		private BigDecimal price;
 
-		Builder id(Long id) {
+		Builder id(UUID id) {
 			this.id = id;
 
 			return this;
@@ -88,7 +89,7 @@ public class Product extends AbstractEntity {
 	@Column(scale = 2)
 	private BigDecimal price;
 
-	Product(Long id, LocalDateTime createdAt, LocalDateTime updatedAt, String name, String description, BigDecimal price) {
+	Product(UUID id, LocalDateTime createdAt, LocalDateTime updatedAt, String name, String description, BigDecimal price) {
 		super(id, createdAt, updatedAt);
 
 		this.name = name;

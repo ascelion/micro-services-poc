@@ -1,0 +1,22 @@
+
+database:
+  host: db
+  port: 5432
+
+spring:
+  datasource:
+    username: ${APP_NAME}
+    password: ${APP_NAME}
+    url: jdbc:postgresql://${database.host}:${database.port}/${APP_NAME}
+
+  flyway:
+    check-location: false
+    locations:
+      - classpath:db
+      - filesystem:${dataImportLocation:data}
+
+  jpa:
+    properties:
+      hibernate:
+        temp:
+          use_jdbc_metadata_defaults: false

@@ -1,40 +1,65 @@
 import org.apache.tools.ant.filters.*
 
-def dockerFile = file('data').exists() ? 'docker-compose-data.yml' : 'docker-compose.yml'
+def dockerFile = file( 'data' ).exists() ? 'docker-compose-data.yml' : 'docker-compose.yml'
+def dockerBase = file( "${buildDir}/distributions" )
+def dockerName = 'poc'
 
-def httpPort = Integer.toString( portBase + 80 )
-def jdbcPort = Integer.toString( portBase + 54 )
+def httpPort = Integer.toString( portBase + 8080 )
+def jdbcPort = Integer.toString( portBase + 5432 )
 
 task 'docker-files'(type: Copy) {
-	into file("${buildDir}/docker")
+	into dockerBase
 
 	from( rootProject.file('docker') ) {
-		filter ReplaceTokens, tokens: [application: project.name, httpPort: httpPort, jdbcPort: jdbcPort]
+		filter ReplaceTokens, tokens: [
+			application: project.name,
+			httpPort: httpPort,
+			jdbcPort: jdbcPort,
+			repository: 'localhost:5000/poc/'
+			]
 	}
 	from( file('data') ) {
 		into 'data'
 	}
-	from( file("$buildDir/distributions") ) {
-		include '*.tar'
-	}
 }
 
-task 'docker-up'(type: Exec) {
+task 'docker-build'(type: Exec) {
 	dependsOn 'docker-files'
 	dependsOn 'assemble'
 
-	executable 'docker-compose'
-	workingDir file("${buildDir}/docker")
+	def touch = file( "${dockerBase}/${project.name}.touch")
 
-	args '-f', dockerFile
-	args 'up', '--build', '-d'
+	doLast {
+		ant.touch( file: touch )
+	}
+
+	inputs.files fileTree( dockerBase ) {
+		exclude '*.touch'
+	}
+	outputs.files touch
+
+	executable 'docker-compose'
+	workingDir dockerBase
+
+	args '-f', dockerFile, '-p', dockerName
+	args 'build'
+}
+
+task 'docker-up'(type: Exec) {
+	dependsOn 'docker-build'
+
+	executable 'docker-compose'
+	workingDir dockerBase
+
+	args '-f', dockerFile, '-p', dockerName
+	args 'up', '-d'
 }
 
 task 'docker-stop'(type: Exec) {
 	dependsOn 'docker-files'
 
 	executable 'docker-compose'
-	workingDir file("${buildDir}/docker")
+	workingDir dockerBase
 
 	args '-f', dockerFile
 	args 'stop'
@@ -44,10 +69,12 @@ task 'docker-down'(type: Exec) {
 	dependsOn 'docker-files'
 
 	executable 'docker-compose'
-	workingDir file("${buildDir}/docker")
+	workingDir dockerBase
 
-	args '-f', dockerFile
-	args 'down'
+	ignoreExitValue true
+
+	args '-f', dockerFile, '-p', dockerName
+	args 'down', '--remove-orphans'
 }
 
 bootRun {
@@ -63,11 +90,13 @@ task startDB(type: Exec) {
 	args '-e', "POSTGRES_PASSWORD=$project.name"
 	args '-e', "POSTGRES_DB=$project.name"
 	args '-p', "${jdbcPort}:5432"
-	args 'postgres:11'
+	args 'postgres:11.5'
 }
 
 task stopDB(type: Exec) {
 	executable 'docker'
+
+	ignoreExitValue true
 
 	args 'stop', "${project.name}-db"
 }

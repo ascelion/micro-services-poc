@@ -1,9 +1,18 @@
 
 database:
   host: localhost
+  port: 15433
+
+server:
+  port: 18081
 
 spring:
   jackson:
-    serialization.indent_output: true
+    serialization:
+      indent_output: true
+
   jpa:
-    properties.hibernate.show_sql: true
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true

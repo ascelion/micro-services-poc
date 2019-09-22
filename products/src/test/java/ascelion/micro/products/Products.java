@@ -2,10 +2,12 @@ package ascelion.micro.products;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.stream.LongStream;
+import java.util.Map;
+import java.util.UUID;
+import java.util.function.UnaryOperator;
+import java.util.stream.IntStream;
 
-import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -16,19 +18,19 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Products {
 
-	static public List<Product> generate(int count) {
-		return LongStream.range(1L, count + 1L)
+	static public Map<UUID, Product> generate(int count) {
+		return IntStream.range(1, count + 1)
 				.mapToObj(Products::generateOne)
-				.collect(toList());
+				.collect(toMap(Product::getId, UnaryOperator.identity()));
 	}
 
-	static public Product generateOne(long id) {
+	static public Product generateOne(int id) {
 		return generateOne(id, true);
 	}
 
-	static public Product generateOne(long id, boolean setId) {
+	static public Product generateOne(int id, boolean genId) {
 		return Product.builder()
-				.id(setId ? id : null)
+				.id(genId ? UUID.randomUUID() : null)
 				.createdAt(LocalDateTime.now())
 				.updatedAt(LocalDateTime.now())
 				.name("Product " + id)

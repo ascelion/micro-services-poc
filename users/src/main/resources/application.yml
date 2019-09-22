@@ -1,0 +1,49 @@
+
+database:
+  host: db
+  port: 5432
+
+security:
+  signKey: 0123456789
+  clients:
+    poc_products:
+      secret: $2a$10$1UOX9WkG0j7sT.fkdRw2reC9ayQczxc.Auob.oBpTx74M7jdlAgH6
+      grantTypes:
+        - password
+        - authorization_code
+        - refresh_token
+        - client_credentials
+      scopes:
+        - read
+        - write
+      info:
+        prop1: value
+        prop2: 42
+    poc_customers:
+      secret: $2a$10$kBtY33zfwPdE5e9yg9Gt8e.ZZqOsWym06jwsdfTAYoatM46y3ctKy
+      grantTypes:
+        - password
+        - authorization_code
+        - refresh_token
+        - client_credentials
+      scopes:
+        - read
+        - write
+
+spring:
+  datasource:
+    username: ${APP_NAME}
+    password: ${APP_NAME}
+    url: jdbc:postgresql://${database.host}:${database.port}/${APP_NAME}
+
+  flyway:
+    check-location: false
+    locations:
+      - classpath:db
+      - filesystem:${dataImportLocation:data}
+
+  jpa:
+    properties:
+      hibernate:
+        temp:
+          use_jdbc_metadata_defaults: false
