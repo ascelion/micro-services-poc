@@ -18,6 +18,8 @@ task testReport(type: TestReport) {
 tasks.withType(Test) {
 	ignoreFailures = gradle.startParameter.continueOnFailure
 
+	systemProperty 'spring.profiles.active', name
+
 	testLogging.showStandardStreams = true
  	testLogging.exceptionFormat = 'full'
 

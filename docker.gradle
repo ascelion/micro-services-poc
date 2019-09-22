@@ -1,20 +1,23 @@
 import org.apache.tools.ant.filters.*
 
-afterEvaluate {
-	task 'docker-files'(type: Copy) {
-		into file("${buildDir}/docker")
-	
-		from( rootProject.file('docker') ) {
-			filter ReplaceTokens, tokens: [application: project.name, port: project.ext.port]
-		}
-		from( file('data') ) {
-			into 'data'
-		}
-		from( file("$buildDir/distributions") )
+def dockerFile = file('data').exists() ? 'docker-compose-data.yml' : 'docker-compose.yml'
+
+def httpPort = Integer.toString( portBase + 80 )
+def jdbcPort = Integer.toString( portBase + 54 )
+
+task 'docker-files'(type: Copy) {
+	into file("${buildDir}/docker")
+
+	from( rootProject.file('docker') ) {
+		filter ReplaceTokens, tokens: [application: project.name, httpPort: httpPort, jdbcPort: jdbcPort]
+	}
+	from( file('data') ) {
+		into 'data'
+	}
+	from( file("$buildDir/distributions") ) {
+		include '*.tar'
 	}
 }
-
-def dockerFile = file('data').exists() ? 'docker-compose-data.yml' : 'docker-compose.yml'
 
 task 'docker-up'(type: Exec) {
 	dependsOn 'docker-files'
@@ -47,6 +50,10 @@ task 'docker-down'(type: Exec) {
 	args 'down'
 }
 
+bootRun {
+	systemProperty "database.port", jdbcPort
+}
+
 task startDB(type: Exec) {
 	executable 'docker'
 
@@ -55,7 +62,7 @@ task startDB(type: Exec) {
 	args '-e', "POSTGRES_USER=$project.name"
 	args '-e', "POSTGRES_PASSWORD=$project.name"
 	args '-e', "POSTGRES_DB=$project.name"
-	args '-p', '15432:5432'
+	args '-p', "${jdbcPort}:5432"
 	args 'postgres:11'
 }
 

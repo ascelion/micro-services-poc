@@ -13,7 +13,7 @@ services:
     networks:
       - @application@
 #    ports:
-#      - "15432:5432"
+#      - "@jdbcPort@:5432"
 
   @application@:
     build:
@@ -23,7 +23,7 @@ services:
     networks:
       - @application@
     ports:
-      - "@port@:8080"
+      - "@httpPort@:8080"
     links:
       - "@application@-db:db"
 

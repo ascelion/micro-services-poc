@@ -58,15 +58,36 @@ subprojects { sub ->
 	plugins.withType( ApplicationPlugin ) {
 		mainClassName = 'ascelion.micro.Main'
 	}
-
 	plugins.withType( DistributionPlugin ) {
 		distributions.all {
 			contents.into '/'
 		}
-	}
 
-	plugins.withType( DistributionPlugin ) {
-		sub.apply from: rootProject.file( 'docker.gradle' )
+		plugins.withId( 'org.springframework.boot' ) {
+			distZip.enabled = false
+			distTar.enabled = false
+		}
+
+		afterEvaluate {
+			sub.apply from: rootProject.file( 'docker.gradle' )
+		}
+	}
+	plugins.withId( 'org.springframework.boot' ) {
+		bootRun {
+			systemProperty "spring.profiles.active", 'dev'
+			systemProperty "APP_NAME", name
+			systemProperty "LOG_PATH", buildDir
+			systemProperty "dataImportLocation", rootProject.file( 'data' )
+		}
+		task localRun {
+			doFirst {
+				bootRun.configure {
+					systemProperty "database.port", '5432'
+				}
+			}
+
+			finalizedBy bootRun
+		}
 	}
 
 	tasks.withType( Jar ) {
@@ -86,12 +107,7 @@ subprojects { sub ->
 
 	dependencies {
 		implementation platform( "org.springframework.boot:spring-boot-dependencies:$springBootVersion" )
-
-		implementation platform( 'org.glassfish.jersey:jersey-bom:2.29.1' )
-	//	implementation platform( 'org.jboss.weld:weld-core-bom:3.1.2.Final' )
-
-		implementation platform( 'org.apache.deltaspike.distribution:distributions-bom:1.9.1' )
-		implementation platform( 'ascelion.flywaydb:flywaydb-ext:0.1.4-SNAPSHOT' )
+		implementation platform( 'ascelion.flywaydb:flywaydb-ext:0.1.4' )
 
 		constraints {
 			implementation 'jakarta.enterprise:jakarta.enterprise.cdi-api:2.0.2'

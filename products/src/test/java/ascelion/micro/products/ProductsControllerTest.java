@@ -78,7 +78,7 @@ public class ProductsControllerTest {
 
 	@Test
 	@WithUser
-	public void getAll() throws Exception {
+	public void getEntities() throws Exception {
 		final MockHttpServletRequestBuilder req = get("/products")
 				.accept(APPLICATION_JSON);
 
@@ -90,7 +90,7 @@ public class ProductsControllerTest {
 	}
 
 	@Test
-	public void getAllAnonymous() throws Exception {
+	public void getEntitiesAnonymous() throws Exception {
 		final MockHttpServletRequestBuilder req = get("/products")
 				.accept(APPLICATION_JSON);
 
@@ -100,7 +100,7 @@ public class ProductsControllerTest {
 
 	@Test
 	@WithUser
-	public void getAllInvalid() throws Exception {
+	public void getEntitiesInvalid() throws Exception {
 		final MockHttpServletRequestBuilder req = get("/products")
 				.param("page", "0")
 				.param("size", "5")
@@ -114,7 +114,7 @@ public class ProductsControllerTest {
 
 	@Test
 	@WithUser
-	public void getOne() throws Exception {
+	public void getEntity() throws Exception {
 		final int id = this.products.get(this.products.size() / 2).getId().intValue();
 		final MockHttpServletRequestBuilder req = get("/products/" + id)
 				.accept(APPLICATION_JSON);
@@ -127,7 +127,7 @@ public class ProductsControllerTest {
 
 	@Test
 	@WithUser
-	public void getNotFound() throws Exception {
+	public void getEntityNotFound() throws Exception {
 		final int id = this.products.size() * 2;
 		final MockHttpServletRequestBuilder req = get("/products/" + id)
 				.accept(APPLICATION_JSON);
@@ -140,7 +140,7 @@ public class ProductsControllerTest {
 
 	@Test
 	@WithAdmin
-	public void create() throws Exception {
+	public void createEntity() throws Exception {
 		final ProductRequest dto = new ProductRequest("add name", "add description", BigDecimal.ONE);
 		final MockHttpServletRequestBuilder req = post("/products")
 				.contentType(APPLICATION_JSON)
@@ -158,7 +158,7 @@ public class ProductsControllerTest {
 
 	@Test
 	@WithAdmin
-	public void createInvalid() throws Exception {
+	public void createEntityInvalid() throws Exception {
 		final ProductRequest dto = new ProductRequest(null, null, null);
 		final MockHttpServletRequestBuilder req = post("/products")
 				.contentType(APPLICATION_JSON)
@@ -172,7 +172,7 @@ public class ProductsControllerTest {
 	}
 
 	@Test
-	public void createAnonymous() throws Exception {
+	public void createEntityAsAnonymous() throws Exception {
 		final MockHttpServletRequestBuilder req = post("/products")
 				.contentType(APPLICATION_JSON);
 
@@ -182,7 +182,7 @@ public class ProductsControllerTest {
 
 	@Test
 	@WithUser
-	public void createAsUser() throws Exception {
+	public void createEntityAsUser() throws Exception {
 		final ProductRequest dto = new ProductRequest("add name", "add description", BigDecimal.ONE);
 		final MockHttpServletRequestBuilder req = post("/products")
 				.contentType(APPLICATION_JSON)
@@ -195,7 +195,7 @@ public class ProductsControllerTest {
 
 	@Test
 	@WithAdmin
-	public void updateProduct() throws Exception {
+	public void updateEntity() throws Exception {
 		final int id = this.products.get(this.products.size() / 2).getId().intValue();
 		final ProductRequest dto = new ProductRequest("new name", "new description", BigDecimal.ONE);
 
@@ -215,7 +215,7 @@ public class ProductsControllerTest {
 
 	@Test
 	@WithAdmin
-	public void updateInvalid() throws Exception {
+	public void updateEntityInvalid() throws Exception {
 		final int id = this.products.get(this.products.size() / 2).getId().intValue();
 		final ProductRequest dto = new ProductRequest(null, null, null);
 
@@ -232,7 +232,7 @@ public class ProductsControllerTest {
 
 	@Test
 	@WithAdmin
-	public void updateNotFound() throws Exception {
+	public void updateEntityNotFound() throws Exception {
 		final int id = this.products.size() * 2;
 		final ProductRequest dto = new ProductRequest("new name", "new description", BigDecimal.ONE);
 		final MockHttpServletRequestBuilder req = put("/products/" + id)
@@ -247,7 +247,7 @@ public class ProductsControllerTest {
 	}
 
 	@Test
-	public void updateAnonymous() throws Exception {
+	public void updateEntityAsAnonymous() throws Exception {
 		final MockHttpServletRequestBuilder req = put("/products/314")
 				.contentType(APPLICATION_JSON);
 
@@ -257,7 +257,7 @@ public class ProductsControllerTest {
 
 	@Test
 	@WithUser
-	public void updateAsUser() throws Exception {
+	public void updateEntityAsUser() throws Exception {
 		final int id = this.products.get(this.products.size() / 2).getId().intValue();
 		final ProductRequest dto = new ProductRequest("new name", "new description", BigDecimal.ONE);
 		final MockHttpServletRequestBuilder req = put("/products/" + id)
@@ -271,7 +271,7 @@ public class ProductsControllerTest {
 
 	@Test
 	@WithAdmin
-	public void patchProduct() throws Exception {
+	public void patchEntity() throws Exception {
 		final int id = this.products.get(this.products.size() / 2).getId().intValue();
 		final ProductRequest dto = new ProductRequest("new name", "new description", BigDecimal.ONE);
 		final MockHttpServletRequestBuilder req = patch("/products/" + id)
@@ -290,7 +290,7 @@ public class ProductsControllerTest {
 
 	@Test
 	@WithAdmin
-	public void patchProductInvalid() throws Exception {
+	public void patchEntityInvalid() throws Exception {
 		final int id = this.products.get(this.products.size() / 2).getId().intValue();
 		final ProductRequest dto = new ProductRequest(null, null, null);
 		final MockHttpServletRequestBuilder req = patch("/products/" + id)
@@ -306,7 +306,7 @@ public class ProductsControllerTest {
 
 	@Test
 	@WithAdmin
-	public void patchProductNotFound() throws Exception {
+	public void patchEntityNotFound() throws Exception {
 		final int id = this.products.size() * 2;
 		final ProductRequest dto = new ProductRequest("new name", "new description", BigDecimal.ONE);
 		final MockHttpServletRequestBuilder req = patch("/products/" + id)
@@ -321,7 +321,7 @@ public class ProductsControllerTest {
 	}
 
 	@Test
-	public void patchProductAnonymous() throws Exception {
+	public void patchEntityAsAnonymous() throws Exception {
 		final MockHttpServletRequestBuilder req = patch("/products/314")
 				.contentType(APPLICATION_JSON);
 
@@ -331,7 +331,7 @@ public class ProductsControllerTest {
 
 	@Test
 	@WithUser
-	public void patchProductAsUser() throws Exception {
+	public void patchEntityAsUser() throws Exception {
 		final int id = this.products.get(this.products.size() / 2).getId().intValue();
 		final ProductRequest dto = new ProductRequest("new name", "new description", BigDecimal.ONE);
 		final MockHttpServletRequestBuilder req = patch("/products/" + id)

@@ -1,4 +1,4 @@
-package ascelion.micro.spring;
+package ascelion.micro.endpoint;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;

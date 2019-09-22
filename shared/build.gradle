@@ -1,7 +1,10 @@
+apply plugin: 'java-library'
 
 dependencies {
-	implementation 'org.apache.commons:commons-lang3'
-	implementation 'io.swagger:swagger-annotations'
+	api 'io.swagger:swagger-annotations'
+	api 'org.apache.commons:commons-lang3'
+
+	api 'org.slf4j:slf4j-api'
 
 	compileOnly 'jakarta.persistence:jakarta.persistence-api'
 	compileOnly 'jakarta.servlet:jakarta.servlet-api'
