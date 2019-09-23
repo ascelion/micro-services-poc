@@ -7,6 +7,22 @@ dependencies {
 	testImplementation 'org.hamcrest:hamcrest-library:1.3'
 }
 
+test {
+	exclude '**/*IT.*'
+}
+
+plugins.withId( 'org.springframework.boot' ) {
+	task itest( type: Test ) {
+		dependsOn 'startDB'
+		finalizedBy 'stopDB'
+
+		check.dependsOn it
+		mustRunAfter test
+	
+		include '**/*IT.*'
+	}
+}
+
 task testReport(type: TestReport) {
 	destinationDir = file("$buildDir/reports/tests")
 
@@ -19,6 +35,9 @@ tasks.withType(Test) {
 	ignoreFailures = gradle.startParameter.continueOnFailure
 
 	systemProperty 'spring.profiles.active', name
+	systemProperty 'APP_NAME', project.name
+	systemProperty 'LOG_PATH', project.buildDir
+	//systemProperty 'forceExecution', UUID.randomUUID().toString()
 
 	testLogging.showStandardStreams = true
  	testLogging.exceptionFormat = 'full'
@@ -27,7 +46,10 @@ tasks.withType(Test) {
 
 	check.dependsOn it
 	testReport.dependsOn it
-	jacocoTestReport.executionData it
+
+	doLast {
+		jacocoTestReport.executionData it
+	}
 }
 
 check.dependsOn testReport, jacocoTestReport

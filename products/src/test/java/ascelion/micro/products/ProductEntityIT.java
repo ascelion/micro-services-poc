@@ -14,14 +14,15 @@ import static org.junit.Assert.assertThat;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.annotation.Transactional;
 
 @RunWith(SpringRunner.class)
-@DataJpaTest
-@ActiveProfiles("test")
-public class ProductsTableTest {
+@ActiveProfiles({ "itest", "dev" })
+@SpringBootTest
+public class ProductEntityIT {
 	@Autowired
 	private EntityManager tem;
 
@@ -32,6 +33,7 @@ public class ProductsTableTest {
 	 * Simple test that validates the table creation.
 	 */
 	@Test
+	@Transactional
 	public void validate_table_mappings() {
 		final Product p1 = Products.generateOne(1, false);
 

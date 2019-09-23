@@ -1,4 +1,4 @@
-image: openjdk:8
+image: openjdk:8-alpine
 
 before_script:
   - export GRADLE_USER_HOME=`pwd`/.gradle
@@ -16,7 +16,7 @@ build:
 
 test:
   stage: test
-  script: ./gradlew check
+  script: ./gradlew -xitest check
   cache:
     key: "$CI_COMMIT_REF_NAME"
     policy: pull
