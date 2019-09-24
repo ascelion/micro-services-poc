@@ -1,6 +1,8 @@
 package ascelion.micro.tests;
 
 import ascelion.micro.config.ResourceServerConfig;
+import ascelion.micro.endpoint.EndpointHandlerMapping;
+import ascelion.micro.endpoint.ExceptionHandlers;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
@@ -10,7 +12,11 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.R
 import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
 
 @Configuration
-@Import(ResourceServerConfig.class)
+@Import({
+		EndpointHandlerMapping.class,
+		ExceptionHandlers.class,
+		ResourceServerConfig.class,
+})
 @RequiredArgsConstructor
 public class ResourceServerTestConfiguration extends ResourceServerConfigurerAdapter {
 	private final ResourceServerConfig configuration;

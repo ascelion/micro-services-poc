@@ -28,7 +28,7 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
 				.accessDeniedHandler(this::forbidden)
 			.and()
 				.authorizeRequests()
-				.antMatchers("/users")
+				.anyRequest()
 				.hasRole("ADMINS");
 		//@formatter:on
 	}

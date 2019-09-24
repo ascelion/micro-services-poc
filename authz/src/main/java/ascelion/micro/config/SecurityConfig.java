@@ -15,8 +15,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
-	private static final String ROLES_QUERY = "SELECT username, 'ROLE_' || rolename FROM authz_roles WHERE username = ?";
-	private static final String USERS_QUERY = "SELECT username, password, NOT disabled FROM authz_users WHERE username = ?";
+	private static final String USERS_QUERY = ""
+			+ "SELECT username, password, NOT disabled FROM authz_users"
+			+ " WHERE username = ?";
+	private static final String ROLES_QUERY = ""
+			+ "SELECT u.username, 'ROLE_' || r.rolename FROM authz_users u"
+			+ " JOIN authz_users_roles m ON u.id = m.user_id"
+			+ " JOIN authz_roles r on m.role_id = r.id"
+			+ " WHERE u.username = ?";
 
 	private final DataSource dataSource;
 	private final PasswordEncoder passwordEncoder;

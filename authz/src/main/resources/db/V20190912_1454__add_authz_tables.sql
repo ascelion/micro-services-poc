@@ -17,9 +17,18 @@ CREATE TABLE authz_roles
 	created_at TIMESTAMP NOT NULL DEFAULT now(),
 	updated_at TIMESTAMP NOT NULL DEFAULT now(),
 
-	username VARCHAR(50) NOT NULL,
 	rolename VARCHAR(50) NOT NULL,
 
-	PRIMARY KEY(id),
-	FOREIGN KEY(username) REFERENCES authz_users(username)
+	PRIMARY KEY(id)
+);
+
+CREATE TABLE authz_users_roles
+(
+	user_id UUID NOT NULL,
+	role_id UUID NOT NULL,
+
+	FOREIGN KEY(user_id) REFERENCES authz_users(id),
+	FOREIGN KEY(role_id) REFERENCES authz_roles(id),
+
+	PRIMARY KEY(user_id, role_id)
 );

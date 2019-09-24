@@ -1,10 +1,10 @@
 rootProject.name = 'micro-service'
 
+include ':authz'
 include ':customers'
 include ':products'
 include ':shared'
 include ':tests'
-include ':users'
 
 def renameChildren( ProjectDescriptor desc ) {
 	desc.children.each { child ->
