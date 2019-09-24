@@ -4,8 +4,9 @@ def dockerFile = file( 'data' ).exists() ? 'docker-compose-data.yml' : 'docker-c
 def dockerBase = file( "${buildDir}/distributions" )
 def dockerName = 'poc'
 
-def httpPort = Integer.toString( portBase + 8080 )
 def jdbcPort = Integer.toString( portBase + 5432 )
+def httpPort1 = Integer.toString( portBase + 8080 )
+def httpPort2 = Integer.toString( portBase + 8089 )
 
 task 'docker-files'(type: Copy) {
 	into dockerBase
@@ -13,9 +14,12 @@ task 'docker-files'(type: Copy) {
 	from( rootProject.file('docker') ) {
 		filter ReplaceTokens, tokens: [
 			application: project.name,
-			httpPort: httpPort,
+			APPLICATION: project.name.toUpperCase(),
 			jdbcPort: jdbcPort,
-			repository: 'localhost:5000/poc/'
+			httpPort1: httpPort1,
+			httpPort2: httpPort2,
+			repository: '',
+//			repository: 'localhost:5000/poc/',
 			]
 	}
 	from( file('data') ) {
@@ -46,7 +50,7 @@ task 'docker-build'(type: Exec) {
 }
 
 task 'docker-up'(type: Exec) {
-	dependsOn 'docker-build'
+	dependsOn 'docker-build', 'stopDB'
 
 	executable 'docker-compose'
 	workingDir dockerBase

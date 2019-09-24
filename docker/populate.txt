@@ -1,8 +1,6 @@
-FROM bash
+FROM bash AS bash
 
-ENV APP_NAME @application@
-ENV APP_DATA /var/lib/$APP_NAME/data
-
-ADD data $APP_DATA
-
-ENTRYPOINT true
+FROM scratch
+COPY --from=bash /bin/true /bin/true
+ADD data /var/lib/@application@/data
+ENTRYPOINT [ "true" ]

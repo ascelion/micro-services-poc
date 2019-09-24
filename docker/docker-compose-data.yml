@@ -6,6 +6,7 @@ services:
       context: .
       dockerfile: populate.txt
     image: @repository@@application@-data:latest
+    container_name: @application@-data
     networks:
       - @application@
     volumes:
@@ -16,6 +17,7 @@ services:
       context: .
       dockerfile: database.txt
     image: @repository@@application@-db:latest
+    container_name: @application@-db
     volumes:
       - @application@-db:/var/lib/postgresql/data/
     environment:
@@ -32,10 +34,17 @@ services:
       context: .
       dockerfile: application.txt
     image: @repository@@application@:latest
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 15s
+    depends_on:
+      - @application@-db
+      - @application@-data
     networks:
       - @application@
     ports:
-      - "@httpPort@:8080"
+      - "@httpPort1@-@httpPort2@:8080"
     volumes:
       - @application@-data:/var/lib/@application@/data:ro
     links:

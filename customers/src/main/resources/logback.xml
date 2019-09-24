@@ -23,8 +23,13 @@
 	<!-- avoid log pollution with silly warning related to empty examples -->
 	<logger name="io.swagger.models.parameters.AbstractSerializableParameter" level="ERROR" />
 
+<<<<<<< HEAD
 	<logger name="org.glassfish" level="ALL" />
 	<logger name="org.jboss.weld" level="INFO" />
+=======
+	<logger name="org.springframework" level="WARN" />
+	<!-- <logger name="org.springframework.security" level="ALL" /> -->
+>>>>>>> c825d31... Use port ranges for backend services
 
 	<logger name="ascelion" level="INFO" />
 

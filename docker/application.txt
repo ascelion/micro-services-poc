@@ -1,17 +1,19 @@
-FROM openjdk:8-jre
+FROM openjdk:8-alpine
 
-ENV APP_NAME @application@
-ENV LOG_NAME $APP_NAME
 ENV LOG_PATH /var/log
-ENV APP_DATA /var/lib/$APP_NAME/data
+ENV APP_DATA /var/lib/@application@/data
 
-ENV JAVA_OPTS -DAPP_NAME=$APP_NAME -DLOG_PATH=$LOG_PATH -DLOG_NAME=$LOG_NAME -DdataImportLocation=$APP_DATA
+ENV @APPLICATION@_OPTS $@APPLICATION@_OPTS -DAPP_NAME=@application@
+ENV @APPLICATION@_OPTS $@APPLICATION@_OPTS -DLOG_NAME=@application@
+ENV @APPLICATION@_OPTS $@APPLICATION@_OPTS -DLOG_PATH=$LOG_PATH
+ENV @APPLICATION@_OPTS $@APPLICATION@_OPTS -DdataImportLocation=$APP_DATA
+ENV @APPLICATION@_OPTS $@APPLICATION@_OPTS -Dspring.main.banner-mode=off
 
 RUN mkdir -p $LOG_PATH
-RUN mkdir -p /usr/share/$APP_NAME
+RUN mkdir -p /usr/share/@application@
 
-ADD $APP_NAME-boot.tar /usr/share/$APP_NAME
+ADD @application@-boot.tar /usr/share/@application@
 
-RUN ln -sf /usr/share/$APP_NAME/bin/$APP_NAME /usr/bin/$APP_NAME
+RUN ln -sf /usr/share/@application@/bin/@application@ /bin/run-@application@-service
 
-ENTRYPOINT [ "sh", "-c", "/usr/bin/$APP_NAME" ]
+ENTRYPOINT [ "/bin/run-@application@-service" ]

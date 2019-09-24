@@ -6,6 +6,7 @@ services:
       context: .
       dockerfile: database.txt
     image: @repository@@application@-db:latest
+    container_name: @application@-db
     volumes:
       - @application@-db:/var/lib/postgresql/data/
     environment:
@@ -22,10 +23,16 @@ services:
       context: .
       dockerfile: application.txt
     image: @repository@@application@:latest
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 15s
+    depends_on:
+      - @application@-db
     networks:
       - @application@
     ports:
-      - "@httpPort@:8080"
+      - "@httpPort1@-@httpPort2@:8080"
     links:
       - "@application@-db:db"
 

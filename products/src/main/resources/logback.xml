@@ -12,9 +12,9 @@
 	</appender>
 
 	<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-		<!-- <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
 			<level>INFO</level>
-		</filter> -->
+		</filter>
 		<encoder>
 			<pattern>%d{HH:mm:ss.SSS} %-5level [%logger{20}] %msg%n</pattern>
 		</encoder>
@@ -24,7 +24,7 @@
 	<logger name="io.swagger.models.parameters.AbstractSerializableParameter" level="ERROR" />
 
 	<logger name="org.springframework" level="WARN" />
-	<logger name="org.springframework.security" level="ALL" />
+	<!-- <logger name="org.springframework.security" level="ALL" /> -->
 
 	<logger name="ascelion" level="INFO" />
 

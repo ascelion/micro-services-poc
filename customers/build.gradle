@@ -1,5 +1,5 @@
 ext {
-	portBase = 10002
+	portBase = 10020
 }
 
 apply plugin: 'org.springframework.boot'
