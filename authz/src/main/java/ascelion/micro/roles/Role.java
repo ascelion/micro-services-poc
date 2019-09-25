@@ -4,7 +4,7 @@ import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.Table;
 
-import ascelion.micro.model.AbstractEntity;
+import ascelion.micro.shared.model.AbstractEntity;
 import ascelion.micro.users.PasswordEncode;
 
 import lombok.AllArgsConstructor;

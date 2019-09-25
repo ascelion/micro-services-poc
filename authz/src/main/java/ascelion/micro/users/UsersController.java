@@ -1,7 +1,7 @@
 package ascelion.micro.users;
 
-import ascelion.micro.endpoint.Endpoint;
-import ascelion.micro.endpoint.EntityEndpoint;
+import ascelion.micro.shared.endpoint.Endpoint;
+import ascelion.micro.shared.endpoint.EntityEndpoint;
 
 @Endpoint("users")
 public class UsersController extends EntityEndpoint<User, UserRequest> {

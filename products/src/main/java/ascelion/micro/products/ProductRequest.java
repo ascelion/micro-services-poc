@@ -7,9 +7,9 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import ascelion.micro.validation.OnCreate;
-import ascelion.micro.validation.OnPatch;
-import ascelion.micro.validation.OnUpdate;
+import ascelion.micro.shared.validation.OnCreate;
+import ascelion.micro.shared.validation.OnPatch;
+import ascelion.micro.shared.validation.OnUpdate;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;

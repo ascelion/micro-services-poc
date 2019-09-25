@@ -1,7 +1,7 @@
 FROM openjdk:8-alpine
 
 ENV LOG_PATH /var/log
-ENV APP_DATA /var/lib/@application@/data
+ENV APP_DATA /usr/share/@application@/prod-data
 
 ENV @APPLICATION@_OPTS $@APPLICATION@_OPTS -DAPP_NAME=@application@
 ENV @APPLICATION@_OPTS $@APPLICATION@_OPTS -DLOG_NAME=@application@

@@ -1,17 +1,30 @@
 import org.apache.tools.ant.filters.*
 
-def dockerFile = file( 'data' ).exists() ? 'docker-compose-data.yml' : 'docker-compose.yml'
-def dockerBase = file( "${buildDir}/distributions" )
+def dockerData = hasProperty( 'useDatabase' )
+def dockerFile = dockerData ? 'docker-compose-db.yml' : 'docker-compose.yml'
+def dockerDist = file( "${buildDir}/distributions" )
 def dockerName = 'poc'
 
 def jdbcPort = Integer.toString( portBase + 5432 )
+
 def httpPort1 = Integer.toString( portBase + 8080 )
 def httpPort2 = Integer.toString( portBase + 8089 )
 
 task 'docker-files'(type: Copy) {
-	into dockerBase
+	doFirst {
+		mkdir "${dockerDist}/data"
+	}
+
+	into dockerDist
 
 	from( rootProject.file('docker') ) {
+		if( dockerData ) {
+			exclude 'docker-compose.yml'
+		}
+		else {
+			exclude 'docker-compose-db.yml'
+		}
+
 		filter ReplaceTokens, tokens: [
 			application: project.name,
 			APPLICATION: project.name.toUpperCase(),
@@ -31,19 +44,19 @@ task 'docker-build'(type: Exec) {
 	dependsOn 'docker-files'
 	dependsOn 'assemble'
 
-	def touch = file( "${dockerBase}/${project.name}.touch")
+	def touch = file( "${dockerDist}/${project.name}.touch")
 
 	doLast {
 		ant.touch( file: touch )
 	}
 
-	inputs.files fileTree( dockerBase ) {
+	inputs.files fileTree( dockerDist ) {
 		exclude '*.touch'
 	}
 	outputs.files touch
 
 	executable 'docker-compose'
-	workingDir dockerBase
+	workingDir dockerDist
 
 	args '-f', dockerFile, '-p', dockerName
 	args 'build'
@@ -53,7 +66,7 @@ task 'docker-up'(type: Exec) {
 	dependsOn 'docker-build', 'stopDB'
 
 	executable 'docker-compose'
-	workingDir dockerBase
+	workingDir dockerDist
 
 	args '-f', dockerFile, '-p', dockerName
 	args 'up', '-d'
@@ -63,7 +76,7 @@ task 'docker-stop'(type: Exec) {
 	dependsOn 'docker-files'
 
 	executable 'docker-compose'
-	workingDir dockerBase
+	workingDir dockerDist
 
 	args '-f', dockerFile
 	args 'stop'
@@ -73,7 +86,7 @@ task 'docker-down'(type: Exec) {
 	dependsOn 'docker-files'
 
 	executable 'docker-compose'
-	workingDir dockerBase
+	workingDir dockerDist
 
 	ignoreExitValue true
 
@@ -86,9 +99,11 @@ bootRun {
 }
 
 task startDB(type: Exec) {
+	enabled = dockerData
+
 	executable 'docker'
 
-	args 'run', '--name', "${project.name}-db"
+	args 'run', '--name', "${project.name}-db-dev"
 	args '-d', '--rm'
 	args '-e', "POSTGRES_USER=$project.name"
 	args '-e', "POSTGRES_PASSWORD=$project.name"
@@ -98,9 +113,11 @@ task startDB(type: Exec) {
 }
 
 task stopDB(type: Exec) {
+	enabled = dockerData
+
 	executable 'docker'
 
 	ignoreExitValue true
 
-	args 'stop', "${project.name}-db"
+	args 'stop', "${project.name}-db-dev"
 }

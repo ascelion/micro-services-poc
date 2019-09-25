@@ -1,44 +1,19 @@
 package ascelion.micro.config;
 
-import java.io.IOException;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
 
 @EnableResourceServer
 @Configuration
-@Primary
+@RequiredArgsConstructor
 public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
-
 	@Override
 	public void configure(HttpSecurity http) throws Exception {
-		//@formatter:off
-		http
-			.exceptionHandling()
-				.authenticationEntryPoint(this::unauthorized)
-				.accessDeniedHandler(this::forbidden)
-			.and()
-				.authorizeRequests()
-				.anyRequest()
-				.hasRole("ADMINS");
-		//@formatter:on
+		http.authorizeRequests()
+				.antMatchers("/users").hasRole("ADMINS")
+				.antMatchers("/roles").hasRole("ADMINS");
 	}
-
-	private void unauthorized(HttpServletRequest req, HttpServletResponse rsp, AuthenticationException ex) throws IOException, ServletException {
-		rsp.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-	}
-
-	private void forbidden(HttpServletRequest req, HttpServletResponse rsp, AccessDeniedException ex) throws IOException, ServletException {
-		rsp.sendError(HttpServletResponse.SC_FORBIDDEN);
-	}
-
 }

@@ -1,0 +1,17 @@
+
+database:
+  host: localhost
+  port: 17432
+
+server:
+  port: 20080
+
+spring:
+  jackson:
+    serialization.indent_output: true
+
+  jpa:
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true

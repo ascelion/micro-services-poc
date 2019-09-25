@@ -1,6 +1,6 @@
 
 database:
-  host: db
+  host: ${APP_NAME}-db
   port: 5432
 
 security:
@@ -31,6 +31,9 @@ security:
         - write
 
 spring:
+  application:
+    name: ${APP_NAME}
+
   datasource:
     username: ${APP_NAME}
     password: ${APP_NAME}

@@ -1,23 +1,6 @@
 version: "3.1"
 
 services:
-  @application@-db:
-    build:
-      context: .
-      dockerfile: database.txt
-    image: @repository@@application@-db:latest
-    container_name: @application@-db
-    volumes:
-      - @application@-db:/var/lib/postgresql/data/
-    environment:
-      - POSTGRES_USER=@application@
-      - POSTGRES_PASSWORD=@application@
-      - POSTGRES_DB=@application@
-    networks:
-      - @application@
-#    ports:
-#      - "@jdbcPort@:5432"
-
   @application@:
     build:
       context: .
@@ -27,17 +10,10 @@ services:
       restart_policy:
         condition: on-failure
         delay: 15s
-    depends_on:
-      - @application@-db
     networks:
       - @application@
     ports:
       - "@httpPort1@-@httpPort2@:8080"
-    links:
-      - "@application@-db:db"
-
-volumes:
-  @application@-db:
 
 networks:
   @application@:

@@ -1,6 +1,16 @@
 
 apply plugin: 'jacoco'
 
+configurations {
+	test {
+		extendsFrom testImplementation
+	}
+}
+
+dependencies {
+	test sourceSets.test.output
+}
+
 dependencies {
 	testImplementation 'junit:junit:4.12'
 	testImplementation 'org.hamcrest:hamcrest-core:1.3'
@@ -24,7 +34,7 @@ plugins.withId( 'org.springframework.boot' ) {
 }
 
 task testReport(type: TestReport) {
-	destinationDir = file("$buildDir/reports/tests")
+	destinationDir = file("${rootProject.buildDir}/reports/tests")
 
 	tasks.withType(Test) {
 		reportOn it
@@ -52,4 +62,6 @@ tasks.withType(Test) {
 	}
 }
 
-check.dependsOn testReport, jacocoTestReport
+check.dependsOn testReport
+//check.dependsOn jacocoTestReport
+

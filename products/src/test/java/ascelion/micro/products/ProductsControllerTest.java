@@ -7,11 +7,11 @@ import java.util.UUID;
 
 import javax.sql.DataSource;
 
-import ascelion.micro.model.AbstractEntity;
-import ascelion.micro.tests.ResourceServerTestConfiguration;
+import ascelion.micro.shared.model.AbstractEntity;
+import ascelion.micro.shared.utils.Mappings;
+import ascelion.micro.tests.TestsResourceServerConfig;
 import ascelion.micro.tests.WithAdminsRole;
 import ascelion.micro.tests.WithUsersRole;
-import ascelion.micro.utils.Mappings;
 
 import static java.util.Optional.ofNullable;
 import static org.hamcrest.Matchers.equalTo;
@@ -43,7 +43,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(ProductsController.class)
-@Import(ResourceServerTestConfiguration.class)
+@Import(TestsResourceServerConfig.class)
 @ActiveProfiles("test")
 public class ProductsControllerTest {
 

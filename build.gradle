@@ -29,12 +29,12 @@ allprojects {
 	}
 
 	apply plugin: 'eclipse'
-	
+
 	task 'clean-ext'(type: Delete) {
 		delete 'bin', 'target', '*.log'
-	}
 
-	clean.dependsOn 'clean-ext'
+		clean.dependsOn it
+	}
 
 	cleanEclipse {
 		delete '.settings', '.classpath'
@@ -74,14 +74,16 @@ subprojects { sub ->
 			tasks.all { if( it.name == 'bootDistZip' ) it.enabled = false }
 		}
 
-		sub.apply from: rootProject.file( 'docker.gradle' )
+		if( sub.hasProperty( 'portBase' ) ) {
+			sub.apply from: rootProject.file( 'docker.gradle' )
+		}
 	}
 	plugins.withId( 'org.springframework.boot' ) {
 		bootRun {
 			systemProperty "spring.profiles.active", 'dev'
-			systemProperty "APP_NAME", name
+			systemProperty "APP_NAME", project.name
 			systemProperty "LOG_PATH", buildDir
-			systemProperty "dataImportLocation", rootProject.file( 'data' )
+			systemProperty "dataImportLocation", project.file( 'data' )
 		}
 		task localRun {
 			doFirst {

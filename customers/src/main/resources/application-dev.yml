@@ -1,15 +1,14 @@
 
 database:
   host: localhost
-  port: 15452
+  port: 16452
 
 server:
-  port: 18100
+  port: 19080
 
 spring:
   jackson:
-    serialization:
-      indent_output: true
+    serialization.indent_output: true
 
   jpa:
     properties:

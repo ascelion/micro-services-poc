@@ -6,7 +6,7 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import ascelion.micro.model.AbstractEntity;
+import ascelion.micro.shared.model.AbstractEntity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;

@@ -6,9 +6,9 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.groups.Default;
 
-import ascelion.micro.validation.OnCreate;
-import ascelion.micro.validation.OnPatch;
-import ascelion.micro.validation.OnUpdate;
+import ascelion.micro.shared.validation.OnCreate;
+import ascelion.micro.shared.validation.OnPatch;
+import ascelion.micro.shared.validation.OnUpdate;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;

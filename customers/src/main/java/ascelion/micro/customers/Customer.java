@@ -3,7 +3,7 @@ package ascelion.micro.customers;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 
-import ascelion.micro.model.AbstractEntity;
+import ascelion.micro.shared.model.AbstractEntity;
 
 @Entity(name = "customers")
 public class Customer extends AbstractEntity {

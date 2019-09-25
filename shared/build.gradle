@@ -4,9 +4,12 @@ dependencies {
 	api 'io.swagger:swagger-annotations'
 	api 'org.apache.commons:commons-lang3'
 
+	api 'org.springframework.boot:spring-boot-starter-web'
+//	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
 	implementation 'ascelion.flywaydb:flywaydb-ext-util5'
-	implementation 'org.springframework.boot:spring-boot-autoconfigure'
-	implementation 'org.springframework.data:spring-data-jpa'
+
+	compileOnly 'org.springframework.data:spring-data-jpa'
 
 	implementation "io.springfox:springfox-swagger2:$swaggerVersion"
 	implementation "io.springfox:springfox-swagger-ui:$swaggerVersion"
@@ -17,10 +20,10 @@ dependencies {
 
 	api 'org.slf4j:slf4j-api'
 
-	compileOnly 'jakarta.persistence:jakarta.persistence-api'
-	compileOnly 'jakarta.servlet:jakarta.servlet-api'
-	compileOnly 'jakarta.validation:jakarta.validation-api'
+	api 'jakarta.persistence:jakarta.persistence-api'
+	api 'jakarta.servlet:jakarta.servlet-api'
+	api 'jakarta.validation:jakarta.validation-api'
 
-	compileOnly 'org.springframework:spring-web'
-	compileOnly 'org.springframework:spring-context'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.security:spring-security-test'
 }
