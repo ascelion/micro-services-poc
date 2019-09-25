@@ -8,10 +8,10 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-@ConfigurationProperties(prefix = "security")
+@ConfigurationProperties(prefix = "oauth")
 @Getter
 @Setter
-public class SecurityProperties {
+public class OauthProperties {
 	@Getter
 	@Setter
 	static public class Details {
@@ -29,7 +29,6 @@ public class SecurityProperties {
 
 	}
 
-	private String signKey = "none";
 	private int strength = -1;
 
 	private Map<String, Details> clients = emptyMap();

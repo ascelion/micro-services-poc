@@ -13,7 +13,7 @@ public class SafePasswordEncoder implements PasswordEncoder {
 
 	private final PasswordEncoder delegate;
 
-	public SafePasswordEncoder(SecurityProperties config) {
+	public SafePasswordEncoder(OauthProperties config) {
 		this.delegate = new BCryptPasswordEncoder(config.getStrength());
 	}
 

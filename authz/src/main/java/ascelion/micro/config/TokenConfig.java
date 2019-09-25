@@ -1,24 +1,26 @@
 package ascelion.micro.config;
 
+import java.io.IOException;
+
+import ascelion.micro.shared.config.JwtProperties;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 
 @Configuration
-@EnableConfigurationProperties(SecurityProperties.class)
+@EnableConfigurationProperties(OauthProperties.class)
 @RequiredArgsConstructor
 public class TokenConfig {
-	private final SecurityProperties config;
+	private final JwtProperties jwt;
 
 	@Bean
-	@Primary
-	public JwtAccessTokenConverter primaryAccessTokenConverter() {
+	public JwtAccessTokenConverter accessTokenConverter() throws IOException {
 		final JwtAccessTokenConverter cvt = new JwtAccessTokenConverter();
 
-		cvt.setSigningKey(this.config.getSignKey());
+		this.jwt.configure(cvt);
 
 		return cvt;
 	}

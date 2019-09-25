@@ -8,7 +8,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import ascelion.micro.config.SecurityProperties.Details;
+import ascelion.micro.config.OauthProperties.Details;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -29,11 +29,11 @@ import org.springframework.security.oauth2.provider.token.TokenStore;
 
 @Configuration
 @EnableAuthorizationServer
-@EnableConfigurationProperties(SecurityProperties.class)
+@EnableConfigurationProperties(OauthProperties.class)
 @RequiredArgsConstructor
 public class AuthzServerConfig extends AuthorizationServerConfigurerAdapter {
 
-	private final SecurityProperties securityProperties;
+	private final OauthProperties securityProperties;
 	private final List<TokenEnhancer> tokenEnhancers;
 	private final TokenStore tokenStore;
 	private final AuthenticationManager authenticationManager;

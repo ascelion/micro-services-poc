@@ -1,8 +1,11 @@
 package ascelion.micro.shared.config;
 
+import java.io.IOException;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Value;
+import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
@@ -13,6 +16,8 @@ import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenCo
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 
 @Configuration
+@EnableConfigurationProperties(JwtProperties.class)
+@RequiredArgsConstructor
 public class SharedTokenConfig {
 
 	static class DetailsAccessTokenConverter extends DefaultAccessTokenConverter {
@@ -28,22 +33,11 @@ public class SharedTokenConfig {
 
 	}
 
-	@Value("${security.signKey:none}")
-	private String signKey;
+	private final JwtProperties jwt;
 
 	@Bean
 	public TokenStore tokenStore(JwtAccessTokenConverter accessTokenConverter) {
 		return new JwtTokenStore(accessTokenConverter);
-	}
-
-	@Bean
-	public JwtAccessTokenConverter accessTokenConverter() {
-		final JwtAccessTokenConverter accessTokenConverter = new JwtAccessTokenConverter();
-
-		accessTokenConverter.setAccessTokenConverter(new DetailsAccessTokenConverter());
-		accessTokenConverter.setSigningKey(this.signKey);
-
-		return accessTokenConverter;
 	}
 
 	@Bean
@@ -54,6 +48,17 @@ public class SharedTokenConfig {
 		tokenServices.setSupportRefreshToken(true);
 
 		return tokenServices;
+	}
+
+	@Bean
+	@ConditionalOnMissingBean
+	public JwtAccessTokenConverter accessTokenConverter() throws IOException {
+		final JwtAccessTokenConverter cvt = new JwtAccessTokenConverter();
+
+		this.jwt.configure(cvt);
+		cvt.setAccessTokenConverter(new DetailsAccessTokenConverter());
+
+		return cvt;
 	}
 
 }

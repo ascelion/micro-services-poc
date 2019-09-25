@@ -3,8 +3,9 @@ database:
   host: ${APP_NAME}-db
   port: 5432
 
-security:
-  signKey: 0123456789
+oauth:
+  jwt:
+    signKey: classpath:oauth.key
   clients:
     poc_products:
       secret: $2a$10$1UOX9WkG0j7sT.fkdRw2reC9ayQczxc.Auob.oBpTx74M7jdlAgH6
