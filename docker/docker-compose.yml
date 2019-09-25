@@ -11,9 +11,9 @@ services:
         condition: on-failure
         delay: 15s
     networks:
-      - @application@
+      - @network@
     ports:
       - "@httpPort1@-@httpPort2@:8080"
 
 networks:
-  @application@:
+  @network@:

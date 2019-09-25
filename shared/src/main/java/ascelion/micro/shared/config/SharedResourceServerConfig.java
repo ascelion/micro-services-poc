@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.access.AccessDeniedException;
@@ -22,6 +23,7 @@ import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 
 @EnableResourceServer
 @Configuration
+@ConditionalOnMissingBean(name = "resourceServerConfig")
 @RequiredArgsConstructor
 public class SharedResourceServerConfig extends ResourceServerConfigurerAdapter {
 

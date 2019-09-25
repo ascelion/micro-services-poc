@@ -115,6 +115,7 @@ subprojects { sub ->
 
 	dependencies {
 		implementation platform( "org.springframework.boot:spring-boot-dependencies:$springBootVersion" )
+		implementation platform( 'org.springframework.cloud:spring-cloud-dependencies:Greenwich.SR3' )
 		implementation platform( 'ascelion.flywaydb:flywaydb-ext:0.1.5' )
 
 		constraints {

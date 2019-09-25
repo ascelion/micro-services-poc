@@ -1,6 +1,0 @@
-FROM bash AS bash
-
-FROM scratch
-COPY --from=bash /bin/true /bin/true
-ADD data /var/lib/@application@/data
-ENTRYPOINT [ "true" ]

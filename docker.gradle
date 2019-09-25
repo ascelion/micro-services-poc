@@ -1,5 +1,6 @@
 import org.apache.tools.ant.filters.*
 
+def dockerSize = hasProperty( 'useInstance' ) ? useInstance : 10
 def dockerData = hasProperty( 'useDatabase' )
 def dockerFile = dockerData ? 'docker-compose-db.yml' : 'docker-compose.yml'
 def dockerDist = file( "${buildDir}/distributions" )
@@ -8,7 +9,7 @@ def dockerName = 'poc'
 def jdbcPort = Integer.toString( portBase + 5432 )
 
 def httpPort1 = Integer.toString( portBase + 8080 )
-def httpPort2 = Integer.toString( portBase + 8089 )
+def httpPort2 = Integer.toString( portBase + 8080 + dockerSize - 1 )
 
 task 'docker-files'(type: Copy) {
 	doFirst {
@@ -19,15 +20,19 @@ task 'docker-files'(type: Copy) {
 
 	from( rootProject.file('docker') ) {
 		if( dockerData ) {
-			exclude 'docker-compose.yml'
+			include 'docker-compose-db.yml'
+			include 'database.*'
 		}
 		else {
-			exclude 'docker-compose-db.yml'
+			include 'docker-compose.yml'
 		}
+
+		include 'application.txt'
 
 		filter ReplaceTokens, tokens: [
 			application: project.name,
 			APPLICATION: project.name.toUpperCase(),
+			network: rootProject.name,
 			jdbcPort: jdbcPort,
 			httpPort1: httpPort1,
 			httpPort2: httpPort2,
@@ -70,6 +75,12 @@ task 'docker-up'(type: Exec) {
 
 	args '-f', dockerFile, '-p', dockerName
 	args 'up', '-d'
+
+	if( dockerSize > 1 && project.hasProperty( 'scale' ) ) {
+		if( Integer.parseInt( scale ) <= dockerSize ) {
+			args '--scale', "${project.name}=$scale"
+		}
+	}
 }
 
 task 'docker-stop'(type: Exec) {
