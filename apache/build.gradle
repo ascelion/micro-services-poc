@@ -1,0 +1,45 @@
+
+task clean {
+	delete buildDir
+}
+task assemble {
+}
+
+task 'docker-build'(type: Exec) {
+	executable 'docker-compose'
+
+	args '-p', dockerName
+	args 'build'
+}
+
+task 'docker-up'(type: Exec) {
+	executable 'docker-compose'
+
+	args '-p', dockerName
+	args 'up', '-d'
+}
+
+task 'docker-down'(type: Exec) {
+	executable 'docker-compose'
+
+	ignoreExitValue true
+
+	args '-p', dockerName
+	args 'down', '--remove-orphans'
+}
+
+task 'docker-start'(type: Exec) {
+	executable 'docker-compose'
+
+	args '-p', dockerName
+	args 'start'
+}
+
+task 'docker-stop'(type: Exec) {
+	executable 'docker-compose'
+
+	ignoreExitValue true
+
+	args '-p', dockerName
+	args 'stop'
+}

@@ -4,7 +4,6 @@ def dockerSize = hasProperty( 'useInstance' ) ? useInstance : 10
 def dockerData = hasProperty( 'useDatabase' )
 def dockerFile = dockerData ? 'docker-compose-db.yml' : 'docker-compose.yml'
 def dockerDist = file( "${buildDir}/distributions" )
-def dockerName = 'poc'
 
 def jdbcPort = Integer.toString( portBase + 5432 )
 
@@ -88,6 +87,8 @@ task 'docker-stop'(type: Exec) {
 
 	executable 'docker-compose'
 	workingDir dockerDist
+
+	ignoreExitValue true
 
 	args '-f', dockerFile
 	args 'stop'

@@ -32,8 +32,8 @@ services:
       - @application@-db
     networks:
       - @network@
-    ports:
-      - "@httpPort1@-@httpPort2@:8080"
+#    ports:
+#      - "@httpPort1@-@httpPort2@:8080"
     volumes:
       - @application@-pd:/usr/share/@application@/prod-data:ro
     links:

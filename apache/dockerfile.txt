@@ -1,0 +1,23 @@
+FROM archlinux/base
+
+ARG SERVER_NAME
+
+ENV SERVER_NAME $SERVER_NAME
+RUN pacman -Syu --noconfirm
+RUN pacman -S apache --needed --noconfirm
+RUN pacman -S logrotate --needed --noconfirm
+#RUN pacman -S vim --needed --noconfirm
+RUN pacman -S iputils --needed --noconfirm
+RUN pacman -S psmisc --needed --noconfirm
+#RUN pacman -S bind-tools --needed --noconfirm
+#RUN pacman -S inetutils --needed --noconfirm
+
+RUN echo "Include host/*.conf" >>/etc/httpd/conf/httpd.conf
+RUN mkdir -p /etc/httpd/host
+
+COPY *.conf /etc/httpd/host
+COPY run-httpd /usr/bin
+RUN chmod +x /usr/bin/run-httpd
+
+ENTRYPOINT [ "/usr/bin/run-httpd" ]
+

@@ -1,5 +1,6 @@
 rootProject.name = 'micro-services'
 
+include ':apache'
 include ':authz'
 include ':customers'
 include ':eureka'
