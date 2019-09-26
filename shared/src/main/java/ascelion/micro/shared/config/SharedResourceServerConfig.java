@@ -7,6 +7,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import static ascelion.micro.shared.SecurityConstants.ROLE_ADMIN;
+import static ascelion.micro.shared.SecurityConstants.ROLE_USER;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Configuration;
@@ -52,13 +55,13 @@ public class SharedResourceServerConfig extends ResourceServerConfigurerAdapter 
 			.and()
 				.authorizeRequests()
 				.antMatchers("/error").permitAll()
-				.antMatchers(HttpMethod.GET, "/**").hasRole("USERS")
-				.antMatchers(HttpMethod.HEAD, "/**").hasRole("USERS")
-				.antMatchers(HttpMethod.OPTIONS, "/**").hasRole("USERS")
-				.antMatchers(HttpMethod.DELETE, "/**").hasRole("ADMINS")
-				.antMatchers(HttpMethod.PATCH, "/**").hasRole("ADMINS")
-				.antMatchers(HttpMethod.POST, "/**").hasRole("ADMINS")
-				.antMatchers(HttpMethod.PUT, "/**").hasRole("ADMINS")
+				.antMatchers(HttpMethod.GET, "/**").hasRole(ROLE_USER)
+				.antMatchers(HttpMethod.HEAD, "/**").hasRole(ROLE_USER)
+				.antMatchers(HttpMethod.OPTIONS, "/**").hasRole(ROLE_USER)
+				.antMatchers(HttpMethod.DELETE, "/**").hasRole(ROLE_ADMIN)
+				.antMatchers(HttpMethod.PATCH, "/**").hasRole(ROLE_ADMIN)
+				.antMatchers(HttpMethod.POST, "/**").hasRole(ROLE_ADMIN)
+				.antMatchers(HttpMethod.PUT, "/**").hasRole(ROLE_ADMIN)
 				.anyRequest().authenticated()
 			.and()
 				.csrf().disable()

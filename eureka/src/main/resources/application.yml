@@ -7,3 +7,4 @@ eureka:
 spring:
   application:
     name: ${APP_NAME}
+

@@ -10,6 +10,10 @@ import org.springframework.cloud.netflix.eureka.server.EnableEurekaServer;
 })
 @EnableEurekaServer
 public class Main {
+	static {
+		System.setProperty("server.servlet.context-path", "/cloud");
+	}
+
 	public static void main(String[] args) {
 		SpringApplication.run(Main.class, args);
 	}

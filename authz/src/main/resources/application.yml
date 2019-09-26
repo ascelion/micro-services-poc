@@ -7,8 +7,8 @@ oauth:
   jwt:
     signKey: classpath:oauth.key
   clients:
-    poc_products:
-      secret: $2a$10$1UOX9WkG0j7sT.fkdRw2reC9ayQczxc.Auob.oBpTx74M7jdlAgH6
+    poc:
+      secret: $2a$10$e9Dl5jmSyxQZoX15TkL5AOCeWOj.CQa3oWcjtX.kRQDfZtbrpfuga
       grantTypes:
         - password
         - authorization_code
@@ -20,8 +20,8 @@ oauth:
       info:
         prop1: value
         prop2: 42
-    poc_customers:
-      secret: $2a$10$kBtY33zfwPdE5e9yg9Gt8e.ZZqOsWym06jwsdfTAYoatM46y3ctKy
+    eureka:
+      secret: $2a$10$epNizivxoMaZAkg7JfYvMe9UvD2r0/2/NediAaTCROsiaISnvMfKC
       grantTypes:
         - password
         - authorization_code
@@ -30,6 +30,7 @@ oauth:
       scopes:
         - read
         - write
+        - eureka
 
 spring:
   application:

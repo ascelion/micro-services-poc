@@ -31,7 +31,7 @@ public class ExceptionHandlers {
 		final String str = path.toString();
 		final int dot = str.lastIndexOf('.');
 
-		return dot < 0 ? str : str.substring(dot+1);
+		return dot < 0 ? str : str.substring(dot + 1);
 	}
 
 	@Autowired
@@ -57,10 +57,10 @@ public class ExceptionHandlers {
 	@ExceptionHandler
 	public ResponseEntity<?> handleException(ConstraintViolationException ex) {
 		final Map<Path, String>[] messages = ex.getConstraintViolations().stream()
-		        .map(v -> singletonMap(nameOf(v.getPropertyPath()), v.getMessage()))
-		        .toArray(Map[]::new);
+				.map(v -> singletonMap(nameOf(v.getPropertyPath()), v.getMessage()))
+				.toArray(Map[]::new);
 
-		return exceptionResponse(BAD_REQUEST, (Object[]) messages);
+		return exceptionResponse(BAD_REQUEST, messages);
 	}
 
 	/**
@@ -69,13 +69,12 @@ public class ExceptionHandlers {
 	@ExceptionHandler
 	public ResponseEntity<?> handleException(MethodArgumentNotValidException ex) {
 		final Map<String, String>[] messages = ex.getBindingResult()
-		        .getFieldErrors().stream()
-		        .map(e -> singletonMap(e.getField(), e.getDefaultMessage()))
-		        .toArray(Map[]::new);
+				.getFieldErrors().stream()
+				.map(e -> singletonMap(e.getField(), e.getDefaultMessage()))
+				.toArray(Map[]::new);
 
-		return exceptionResponse(BAD_REQUEST, (Object[]) messages);
+		return exceptionResponse(BAD_REQUEST, messages);
 	}
-
 
 	/**
 	 * Generic response status handler.
@@ -85,17 +84,17 @@ public class ExceptionHandlers {
 		return exceptionResponse(ex.getStatus(), ex.getReason());
 	}
 
-	private ResponseEntity<?> exceptionResponse(HttpStatus status, Object... messages) {
+	private ResponseEntity<?> exceptionResponse(HttpStatus status, Object messages) {
 		final Map<String, Object> values = new HashMap<>();
 
 		values.put("timestamp", LocalDateTime.now());
 		values.put("messages", messages);
 		values.put("path", this.request.getRequestURI());
 		ofNullable(this.request.getQueryString())
-		        .ifPresent(s -> values.put("query", s));
+				.ifPresent(s -> values.put("query", s));
 
 		return ResponseEntity
-		        .status(status)
-		        .body(values);
+				.status(status)
+				.body(values);
 	}
 }
