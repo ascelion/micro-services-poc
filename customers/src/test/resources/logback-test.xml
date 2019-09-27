@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration debug="false">
 	<property name="LOG_PATH" value="${LOG_PATH:-${user.dir}/build}" />
-	<property name="LOG_NAME" value="${LOG_NAME:-products}" />
+	<property name="LOG_NAME" value="${LOG_NAME:-orders}" />
 	<property name="LOG_FILE" value="${LOG_NAME}.log" />
 
 	<appender name="FILE" class="ch.qos.logback.core.FileAppender">
@@ -20,8 +20,8 @@
 	<!-- avoid log pollution with silly warning related to empty examples -->
 	<logger name="io.swagger.models.parameters.AbstractSerializableParameter" level="ERROR" />
 
-	<logger name="org.springframework" level="WARN" />
-	<!-- <logger name="org.springframework.security" level="ALL" /> -->
+	<logger name="org.springframework" level="INFO" />
+	<logger name="org.springframework.security" level="ALL" />
 	<!-- <logger name="org.springframework.security.access.prepost.PrePostAnnotationSecurityMetadataSource" level="INFO" /> -->
 
 	<logger name="ascelion" level="INFO" />

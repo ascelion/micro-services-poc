@@ -25,7 +25,7 @@ task 'docker-down'(type: Exec) {
 	ignoreExitValue true
 
 	args '-p', dockerName
-	args 'down', '--remove-orphans'
+	args 'down'
 }
 
 task 'docker-start'(type: Exec) {

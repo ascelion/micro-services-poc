@@ -5,6 +5,10 @@ import java.util.Optional;
 import javax.persistence.EntityManager;
 import javax.persistence.FlushModeType;
 
+import ascelion.micro.config.OauthProperties;
+import ascelion.micro.config.SafePasswordEncoder;
+import ascelion.micro.tests.JpaEntityIT;
+
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
@@ -15,15 +19,18 @@ import static org.junit.Assert.assertThat;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Import;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 @RunWith(SpringRunner.class)
-@ActiveProfiles({ "itest", "dev" })
-@SpringBootTest
+@JpaEntityIT
+@Import({
+		SafePasswordEncoder.class,
+})
+@EnableConfigurationProperties(OauthProperties.class)
 public class UserEntityIT {
 	@Autowired
 	private EntityManager tem;

@@ -1,7 +1,7 @@
 
 database:
   host: localhost
-  port: 16452
+  port: 16432
 
 server:
   port: 19080

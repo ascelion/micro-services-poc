@@ -1,8 +1,6 @@
 package ascelion.micro.products;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -13,6 +11,9 @@ import javax.validation.constraints.Size;
 
 import ascelion.micro.shared.model.AbstractEntity;
 
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -22,60 +23,9 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class Product extends AbstractEntity {
-	static class Builder {
-		private UUID id;
-		private LocalDateTime createdAt;
-		private LocalDateTime updatedAt;
-		private String name;
-		private String description;
-		private BigDecimal price;
-
-		Builder id(UUID id) {
-			this.id = id;
-
-			return this;
-		}
-
-		Builder createdAt(LocalDateTime createdAt) {
-			this.createdAt = createdAt;
-
-			return this;
-		}
-
-		Builder updatedAt(LocalDateTime updatedAt) {
-			this.updatedAt = updatedAt;
-
-			return this;
-		}
-
-		Builder name(String name) {
-			this.name = name;
-
-			return this;
-		}
-
-		Builder description(String description) {
-			this.description = description;
-
-			return this;
-		}
-
-		Builder price(BigDecimal price) {
-			this.price = price;
-
-			return this;
-		}
-
-		Product build() {
-			return new Product(this.id, this.createdAt, this.updatedAt, this.name, this.description, this.price);
-		}
-	}
-
-	static Builder builder() {
-		return new Builder();
-	}
-
+@AllArgsConstructor(access = AccessLevel.PACKAGE)
+@Builder(access = AccessLevel.PACKAGE, builderClassName = "Builder")
+public class Product extends AbstractEntity<Product> {
 	@NotNull
 	@Size(min = 1, max = 250, message = "{product.invalid.name}")
 	private String name;
@@ -89,11 +39,8 @@ public class Product extends AbstractEntity {
 	@Column(scale = 2)
 	private BigDecimal price;
 
-	Product(UUID id, LocalDateTime createdAt, LocalDateTime updatedAt, String name, String description, BigDecimal price) {
-		super(id, createdAt, updatedAt);
-
-		this.name = name;
-		this.description = description;
-		this.price = price;
-	}
+	@NotNull
+	@Min(value = 0, message = "{product.invalid.stock}")
+	@Column(scale = 2)
+	private BigDecimal stock;
 }

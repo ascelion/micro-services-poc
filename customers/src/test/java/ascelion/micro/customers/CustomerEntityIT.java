@@ -1,13 +1,13 @@
-package ascelion.micro.products;
+package ascelion.micro.customers;
 
 import java.util.Optional;
 
 import javax.persistence.EntityManager;
+import javax.persistence.FlushModeType;
 
 import ascelion.micro.tests.JpaEntityIT;
 
 import static ascelion.micro.tests.RandomUtils.randomAscii;
-import static ascelion.micro.tests.RandomUtils.randomDecimal;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
@@ -22,12 +22,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 @RunWith(SpringRunner.class)
 @JpaEntityIT
-public class ProductEntityIT {
+public class CustomerEntityIT {
 	@Autowired
 	private EntityManager tem;
 
 	@Autowired
-	private ProductsRepository repo;
+	private CustomersRepository repo;
 
 	/**
 	 * Simple test that validates the table creation.
@@ -35,26 +35,28 @@ public class ProductEntityIT {
 	@Test
 	@Transactional
 	public void validate_table_mappings() {
-		final Product p1 = Product.builder()
-				.name(randomAscii(10, 20))
-				.description(randomAscii(10, 20))
-				.price(randomDecimal(0, 100))
-				.stock(randomDecimal(0, 100))
+		final Customer c1 = Customer.builder()
+				.firstName(randomAscii(10, 20))
+				.lastName(randomAscii(10, 20))
 				.build();
 
-		this.tem.persist(p1);
+		this.tem.setFlushMode(FlushModeType.AUTO);
+
+		this.tem.persist(c1);
 		this.tem.flush();
-		this.tem.detach(p1);
+		this.tem.detach(c1);
 
-		assertThat(p1.getId(), notNullValue());
+		assertThat(c1.getId(), notNullValue());
 
-		final Optional<Product> p2o = this.repo.findById(p1.getId());
+		final Optional<Customer> c2o = this.repo.findById(c1.getId());
 
-		assertThat(p2o.isPresent(), is(true));
+		assertThat(c2o.isPresent(), is(true));
 
-		final Product p2 = p2o.get();
+		final Customer c2 = c2o.get();
 
-		assertThat(p2, not(sameInstance(p1)));
-		assertThat(p2.beq(p1), is(true));
+		assertThat(c2, not(sameInstance(c1)));
+
+		assertThat(c2.getId(), notNullValue());
+		assertThat(c2.beq(c1), is(true));
 	}
 }

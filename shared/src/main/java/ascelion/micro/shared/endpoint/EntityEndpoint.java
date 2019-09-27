@@ -7,7 +7,6 @@ import javax.validation.constraints.NotNull;
 import javax.validation.groups.Default;
 
 import ascelion.micro.shared.model.AbstractEntity;
-import ascelion.micro.shared.utils.Mappings;
 import ascelion.micro.shared.validation.OnCreate;
 import ascelion.micro.shared.validation.OnPatch;
 import ascelion.micro.shared.validation.OnUpdate;
@@ -17,7 +16,6 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import lombok.SneakyThrows;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
@@ -29,7 +27,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.server.ResponseStatusException;
 
-public abstract class EntityEndpoint<T extends AbstractEntity, U> extends ViewEntityEndpoint<T> {
+public abstract class EntityEndpoint<T extends AbstractEntity<T>, U> extends ViewEntityEndpoint<T> {
 	private final Class<T> type = (Class<T>) resolveTypeArguments(getClass(), EntityEndpoint.class)[0];
 
 	public EntityEndpoint(JpaRepository<T, UUID> repo) {
@@ -47,7 +45,7 @@ public abstract class EntityEndpoint<T extends AbstractEntity, U> extends ViewEn
 	        @NotNull @Valid U request ) {
 	//@formatter:on
 
-		return this.repo.save(Mappings.copyProperties(request, this::newInstance, false));
+		return this.repo.save(this.bbm.copy(request, this.type, true));
 	}
 
 	@ApiOperation("Update an existing entity")
@@ -66,7 +64,7 @@ public abstract class EntityEndpoint<T extends AbstractEntity, U> extends ViewEn
 	//@formatter:on
 
 		return this.repo.findById(id)
-				.map(ent -> Mappings.copyProperties(request, ent, false))
+				.map(ent -> this.bbm.copy(request, ent, true))
 				.map(this.repo::save)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No such entity"));
 	}
@@ -87,13 +85,8 @@ public abstract class EntityEndpoint<T extends AbstractEntity, U> extends ViewEn
 	//@formatter:on
 
 		return this.repo.findById(id)
-				.map(ent -> Mappings.copyProperties(patch, ent, true))
+				.map(ent -> this.bbm.copy(patch, ent, false))
 				.map(this.repo::save)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No such entity"));
-	}
-
-	@SneakyThrows
-	private T newInstance() {
-		return this.type.newInstance();
 	}
 }

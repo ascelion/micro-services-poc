@@ -7,6 +7,7 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 import ascelion.micro.shared.model.AbstractEntity;
+import ascelion.micro.shared.utils.BeanToBeanMapper;
 
 import static java.util.Optional.ofNullable;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -14,6 +15,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -24,8 +26,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
 
 @RequiredArgsConstructor
-public abstract class ViewEntityEndpoint<T extends AbstractEntity> {
+public abstract class ViewEntityEndpoint<T extends AbstractEntity<T>> {
 	protected final JpaRepository<T, UUID> repo;
+
+	@Autowired
+	protected BeanToBeanMapper bbm;
 
 	@ApiOperation("Get all entities")
 	@GetMapping(produces = APPLICATION_JSON_VALUE)

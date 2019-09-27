@@ -19,6 +19,6 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @EntityListeners(PasswordEncode.class)
-public class Role extends AbstractEntity {
+public class Role extends AbstractEntity<Role> {
 	private String rolename;
 }

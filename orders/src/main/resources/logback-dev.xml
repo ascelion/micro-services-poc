@@ -4,7 +4,9 @@
 
 	<logger name="org.springframework" level="INFO" />
 	<logger name="org.springframework.security" level="ALL" />
-	<logger name="org.springframework.actuate" level="ALL" />
+	<logger name="org.springframework.actuate" level="INFO" />
+
+	<logger name="ma.glasnost.orika" level="DEBUG" />
 
 	<logger name="ascelion" level="ALL" />
 

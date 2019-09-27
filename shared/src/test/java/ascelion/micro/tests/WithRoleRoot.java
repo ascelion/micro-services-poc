@@ -3,7 +3,9 @@ package ascelion.micro.tests;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
+import ascelion.micro.shared.SecurityConstants;
+
 @Retention(RetentionPolicy.RUNTIME)
-@WithRole("USERS")
-public @interface WithUsersRole {
+@WithRole(SecurityConstants.ROLE_ROOT)
+public @interface WithRoleRoot {
 }

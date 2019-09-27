@@ -1,25 +1,31 @@
 package ascelion.micro.products;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
 import javax.sql.DataSource;
 
 import ascelion.micro.shared.model.AbstractEntity;
-import ascelion.micro.shared.utils.Mappings;
+import ascelion.micro.shared.utils.BeanToBeanMapper;
 import ascelion.micro.tests.TestsResourceServerConfig;
-import ascelion.micro.tests.WithAdminsRole;
-import ascelion.micro.tests.WithUsersRole;
+import ascelion.micro.tests.WithRoleAdmin;
+import ascelion.micro.tests.WithRoleUser;
 
+import static ascelion.micro.tests.RandomUtils.randomAscii;
+import static ascelion.micro.tests.RandomUtils.randomDecimal;
 import static java.util.Optional.ofNullable;
+import static java.util.UUID.randomUUID;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.security.util.FieldUtils.setProtectedFieldValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -56,10 +62,27 @@ public class ProductsControllerTest {
 	@MockBean
 	private DataSource ds;
 
-	private final Map<UUID, Product> products = Products.generate(7);
+	private final Map<UUID, Product> products = new HashMap<>();
+	private final BeanToBeanMapper bbm = new BeanToBeanMapper();
 
 	@Before
 	public void setUp() {
+		for (int k = 0; k < 10; k++) {
+			final LocalDateTime t = LocalDateTime.now();
+			final Product p = Product.builder()
+					.name(randomAscii(10, 20))
+					.description(randomAscii(10, 20))
+					.price(randomDecimal(0, 100))
+					.stock(randomDecimal(0, 100))
+					.build();
+
+			setProtectedFieldValue("id", p, randomUUID());
+			setProtectedFieldValue("createdAt", p, t);
+			setProtectedFieldValue("updatedAt", p, t);
+
+			this.products.put(p.getId(), p);
+		}
+
 		when(this.repo.findAll())
 				.then(ivc -> {
 					return new ArrayList<>(this.products.values());
@@ -73,9 +96,9 @@ public class ProductsControllerTest {
 					final Product p = ivc.getArgument(0);
 
 					if (p.getId() == null) {
-						final Product newP = Products.generateOne(0);
+						final Product newP = this.bbm.copy(p, Product.class, false);
 
-						Mappings.copyProperties(p, newP, false);
+						setProtectedFieldValue("id", newP, randomUUID());
 
 						this.products.put(newP.getId(), newP);
 
@@ -89,7 +112,7 @@ public class ProductsControllerTest {
 	}
 
 	@Test
-	@WithUsersRole
+	@WithRoleUser
 	public void getEntities() throws Exception {
 		final MockHttpServletRequestBuilder req = get("/products")
 				.accept(APPLICATION_JSON);
@@ -111,7 +134,7 @@ public class ProductsControllerTest {
 	}
 
 	@Test
-	@WithUsersRole
+	@WithRoleUser
 	public void getEntitiesInvalid() throws Exception {
 		final MockHttpServletRequestBuilder req = get("/products")
 				.param("page", "0")
@@ -125,7 +148,7 @@ public class ProductsControllerTest {
 	}
 
 	@Test
-	@WithUsersRole
+	@WithRoleUser
 	public void getEntity() throws Exception {
 		final UUID id = this.products.values().stream().skip(this.products.size() / 2).findFirst().map(AbstractEntity::getId).get();
 		final MockHttpServletRequestBuilder req = get("/products/{id}", id)
@@ -138,7 +161,7 @@ public class ProductsControllerTest {
 	}
 
 	@Test
-	@WithUsersRole
+	@WithRoleUser
 	public void getEntityNotFound() throws Exception {
 		final UUID id = UUID.randomUUID();
 		final MockHttpServletRequestBuilder req = get("/products/{id}", id)
@@ -151,7 +174,7 @@ public class ProductsControllerTest {
 	}
 
 	@Test
-	@WithAdminsRole
+	@WithRoleAdmin
 	public void createEntity() throws Exception {
 		final ProductRequest dto = new ProductRequest("add name", "add description", BigDecimal.ONE);
 		final MockHttpServletRequestBuilder req = post("/products")
@@ -169,7 +192,7 @@ public class ProductsControllerTest {
 	}
 
 	@Test
-	@WithAdminsRole
+	@WithRoleAdmin
 	public void createEntityInvalid() throws Exception {
 		final ProductRequest dto = new ProductRequest(null, null, null);
 		final MockHttpServletRequestBuilder req = post("/products")
@@ -193,7 +216,7 @@ public class ProductsControllerTest {
 	}
 
 	@Test
-	@WithUsersRole
+	@WithRoleUser
 	public void createEntityAsUser() throws Exception {
 		final ProductRequest dto = new ProductRequest("add name", "add description", BigDecimal.ONE);
 		final MockHttpServletRequestBuilder req = post("/products")
@@ -206,7 +229,7 @@ public class ProductsControllerTest {
 	}
 
 	@Test
-	@WithAdminsRole
+	@WithRoleAdmin
 	public void updateEntity() throws Exception {
 		final ProductRequest dto = new ProductRequest("new name", "new description", BigDecimal.ONE);
 
@@ -226,7 +249,7 @@ public class ProductsControllerTest {
 	}
 
 	@Test
-	@WithAdminsRole
+	@WithRoleAdmin
 	public void updateEntityInvalid() throws Exception {
 		final ProductRequest dto = new ProductRequest(null, null, null);
 
@@ -243,7 +266,7 @@ public class ProductsControllerTest {
 	}
 
 	@Test
-	@WithAdminsRole
+	@WithRoleAdmin
 	public void updateEntityNotFound() throws Exception {
 		final ProductRequest dto = new ProductRequest("new name", "new description", BigDecimal.ONE);
 
@@ -270,7 +293,7 @@ public class ProductsControllerTest {
 	}
 
 	@Test
-	@WithUsersRole
+	@WithRoleUser
 	public void updateEntityAsUser() throws Exception {
 		final ProductRequest dto = new ProductRequest("new name", "new description", BigDecimal.ONE);
 
@@ -285,7 +308,7 @@ public class ProductsControllerTest {
 	}
 
 	@Test
-	@WithAdminsRole
+	@WithRoleAdmin
 	public void patchEntity() throws Exception {
 		final Product ent = this.products.values().stream().skip(this.products.size() / 2).findFirst().get();
 		final ProductRequest dto = new ProductRequest(null, "new description", null);
@@ -301,11 +324,11 @@ public class ProductsControllerTest {
 				.andExpect(jsonPath("$.id", equalTo(ent.getId().toString())))
 				.andExpect(jsonPath("$.name", equalTo(ent.getName())))
 				.andExpect(jsonPath("$.description", equalTo(dto.getDescription())))
-				.andExpect(jsonPath("$.price", equalTo(ent.getPrice().intValue())));
+				.andExpect(jsonPath("$.price", equalTo(ent.getPrice().doubleValue())));
 	}
 
 	@Test
-	@WithAdminsRole
+	@WithRoleAdmin
 	public void patchEntityEmpty() throws Exception {
 		final ProductRequest dto = new ProductRequest(null, null, null);
 
@@ -322,7 +345,7 @@ public class ProductsControllerTest {
 	}
 
 	@Test
-	@WithAdminsRole
+	@WithRoleAdmin
 	public void patchEntityNotFound() throws Exception {
 		final ProductRequest dto = new ProductRequest("new name", "new description", BigDecimal.ONE);
 
@@ -349,7 +372,7 @@ public class ProductsControllerTest {
 	}
 
 	@Test
-	@WithUsersRole
+	@WithRoleUser
 	public void patchEntityAsUser() throws Exception {
 		final ProductRequest dto = new ProductRequest("new name", "new description", BigDecimal.ONE);
 

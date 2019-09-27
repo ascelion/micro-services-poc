@@ -22,7 +22,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @NoArgsConstructor
 @AllArgsConstructor
 @EntityListeners(PasswordEncode.class)
-public class User extends AbstractEntity {
+public class User extends AbstractEntity<User> {
 	@NotNull
 	@Size(min = 6)
 	private String username;
