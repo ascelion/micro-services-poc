@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "c0c27be6-74cc-400c-8b28-f2bf27040295",
+		"_postman_id": "2ad3fa54-e905-4d5b-8898-0ed044d6114c",
 		"name": "POC_AUTHZ",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -15,8 +15,8 @@
 						"exec": [
 							"var data = pm.response.json();",
 							"",
-							"pm.globals.set('poc_access_token', data.poc_access_token);",
-							"pm.globals.set('poc_refresh_token', data.poc_refresh_token);",
+							"pm.globals.set('poc_access_token', data.access_token);",
+							"pm.globals.set('poc_refresh_token', data.refresh_token);",
 							""
 						],
 						"type": "text/javascript"
@@ -100,8 +100,8 @@
 						"exec": [
 							"var data = pm.response.json();",
 							"",
-							"pm.globals.set('poc_access_token', data.poc_access_token);",
-							"pm.globals.set('poc_refresh_token', data.poc_refresh_token);",
+							"pm.globals.set('poc_access_token', data.access_token);",
+							"pm.globals.set('poc_refresh_token', data.refresh_token);",
 							""
 						],
 						"type": "text/javascript"
@@ -185,8 +185,8 @@
 						"exec": [
 							"var data = pm.response.json();",
 							"",
-							"pm.globals.set('poc_access_token', data.poc_access_token);",
-							"pm.globals.set('poc_refresh_token', data.poc_refresh_token);",
+							"pm.globals.set('poc_access_token', data.access_token);",
+							"pm.globals.set('poc_refresh_token', data.refresh_token);",
 							""
 						],
 						"type": "text/javascript"

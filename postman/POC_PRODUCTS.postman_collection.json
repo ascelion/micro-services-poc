@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "9ad6300d-1dcd-449e-b4d8-9be32d99d401",
+		"_postman_id": "0904d8a8-6f6d-464f-8f8e-0485fce84606",
 		"name": "POC_PRODUCTS",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -52,13 +52,13 @@
 					"raw": ""
 				},
 				"url": {
-					"raw": "{{productsURL}}/products/{{product_id_0}}",
+					"raw": "{{productsURL}}/products/{{product[0].id}}",
 					"host": [
 						"{{productsURL}}"
 					],
 					"path": [
 						"products",
-						"{{product_id_0}}"
+						"{{product[0].id}}"
 					]
 				}
 			},

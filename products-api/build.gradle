@@ -1,0 +1,8 @@
+apply plugin: 'java-library'
+
+dependencies {
+	api project( ':shared-api' )
+
+	implementation 'com.fasterxml.jackson.core:jackson-annotations'
+	implementation 'org.springframework.cloud:spring-cloud-openfeign-core'
+}

@@ -1,6 +1,7 @@
 ext {
 	portBase = 13000
-	useDatabase = true
+	hasDatabase = true
+	scalable = true
 }
 
 apply plugin: 'org.springframework.boot'
@@ -8,6 +9,7 @@ apply plugin: 'application'
 
 dependencies {
 	implementation project( ':shared' )
+	implementation project( ':products-api' )
 
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'

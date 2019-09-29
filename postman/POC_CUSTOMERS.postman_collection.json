@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "9ad6300d-1dcd-449e-b4d8-9be32d99d401",
+		"_postman_id": "a88db3fb-51b9-42e5-a0f7-84e10f6ab588",
 		"name": "POC_CUSTOMERS",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -59,62 +59,6 @@
 					"path": [
 						"customers",
 						"{{customer_id_0}}"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Create PET",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"name": "Content-Type",
-						"type": "text",
-						"value": "application/json"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\"name\":\"Polyethylene Terephthalate\", \"description\": \"Description of PET\", \"price\": 31.4 }"
-				},
-				"url": {
-					"raw": "{{customersURL}}/customers",
-					"host": [
-						"{{customersURL}}"
-					],
-					"path": [
-						"customers"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Create PETG",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"name": "Content-Type",
-						"type": "text",
-						"value": "application/json"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\"name\":\"Polyethylene Terephthalate Glycol\", \"description\": \"Description of PETG\", \"price\": 51.4 }"
-				},
-				"url": {
-					"raw": "{{customersURL}}/customers",
-					"host": [
-						"{{customersURL}}"
-					],
-					"path": [
-						"customers"
 					]
 				}
 			},

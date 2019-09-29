@@ -16,8 +16,8 @@ services:
       - POSTGRES_DB=@application@
     networks:
       - @network@
-#    ports:
-#      - "@jdbcPort@:5432"
+    ports:
+      - "@jdbcPort@:5432"
 
   @application@:
     build:

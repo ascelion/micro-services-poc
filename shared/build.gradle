@@ -1,8 +1,7 @@
 apply plugin: 'java-library'
 
 dependencies {
-	api 'io.swagger:swagger-annotations'
-	api 'org.apache.commons:commons-lang3'
+	api project( ':shared-api' )
 
 	api 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
@@ -18,6 +17,7 @@ dependencies {
 	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
 
 	implementation 'ma.glasnost.orika:orika-core'
+	implementation 'ma.glasnost.orika:orika-eclipse-tools'
 
 	api "org.springframework.security:spring-security-jwt:$jwtVersion"
 	api "org.springframework.security.oauth:spring-security-oauth2:$springBootOAuth2Version"
@@ -30,7 +30,6 @@ dependencies {
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
-	testImplementation 'ma.glasnost.orika:orika-eclipse-tools'
 	testImplementation 'org.apache.commons:commons-lang3'
 
 	testCompileOnly 'org.springframework.data:spring-data-jpa'

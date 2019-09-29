@@ -1,8 +1,6 @@
 package ascelion.micro.orders;
 
-import java.util.UUID;
+import ascelion.micro.shared.model.EntityRepository;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-
-public interface OrdersRepository extends JpaRepository<Order, UUID> {
+public interface OrdersRepository extends EntityRepository<Order> {
 }

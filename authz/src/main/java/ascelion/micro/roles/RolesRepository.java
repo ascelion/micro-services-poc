@@ -1,10 +1,9 @@
 package ascelion.micro.roles;
 
-import java.util.UUID;
+import ascelion.micro.shared.model.EntityRepository;
 
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface RolesRepository extends JpaRepository<Role, UUID> {
+public interface RolesRepository extends EntityRepository<Role> {
 }

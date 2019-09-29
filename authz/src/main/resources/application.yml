@@ -17,6 +17,7 @@ oauth:
       scopes:
         - read
         - write
+      accessTokenValidity: 86400
       info:
         prop1: value
         prop2: 42

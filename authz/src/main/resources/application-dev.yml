@@ -6,6 +6,8 @@ database:
 server:
   port: 18080
 
+oauth.clients.poc.accessTokenValidity: 86400
+
 spring:
   jackson:
     serialization.indent_output: true

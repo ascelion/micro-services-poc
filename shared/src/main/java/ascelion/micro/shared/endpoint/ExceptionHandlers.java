@@ -1,9 +1,11 @@
 package ascelion.micro.shared.endpoint;
 
+import java.net.SocketException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.persistence.EntityNotFoundException;
 import javax.persistence.RollbackException;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.ConstraintViolationException;
@@ -11,8 +13,11 @@ import javax.validation.Path;
 
 import static java.util.Collections.singletonMap;
 import static java.util.Optional.ofNullable;
+import static org.springframework.http.HttpStatus.BAD_GATEWAY;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 
+import com.netflix.client.ClientException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -51,6 +56,16 @@ public class ExceptionHandlers {
 		throw ex;
 	}
 
+	@ExceptionHandler
+	public ResponseEntity<?> handleException(ClientException ex) {
+		return exceptionResponse(BAD_GATEWAY, ex.getErrorMessage());
+	}
+
+	@ExceptionHandler
+	public ResponseEntity<?> handleException(SocketException ex) {
+		return exceptionResponse(BAD_GATEWAY, ex.getMessage());
+	}
+
 	/**
 	 * Constraint violations go to 400.
 	 */
@@ -74,6 +89,11 @@ public class ExceptionHandlers {
 				.toArray(Map[]::new);
 
 		return exceptionResponse(BAD_REQUEST, (Object[]) messages);
+	}
+
+	@ExceptionHandler
+	public ResponseEntity<?> handleException(EntityNotFoundException ex) {
+		return exceptionResponse(NOT_FOUND, ex.getMessage());
 	}
 
 	/**

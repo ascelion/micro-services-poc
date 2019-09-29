@@ -1,10 +1,10 @@
 package ascelion.micro.tests;
 
+import ascelion.micro.mapper.BeanToBeanMapper;
 import ascelion.micro.shared.config.SharedResourceServerConfig;
 import ascelion.micro.shared.config.SharedTokenConfig;
 import ascelion.micro.shared.endpoint.EndpointHandlerMapping;
 import ascelion.micro.shared.endpoint.ExceptionHandlers;
-import ascelion.micro.shared.utils.BeanToBeanMapper;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.test.context.TestConfiguration;

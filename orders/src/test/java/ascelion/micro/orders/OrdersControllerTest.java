@@ -7,7 +7,7 @@ import java.util.UUID;
 
 import javax.sql.DataSource;
 
-import ascelion.micro.shared.utils.BeanToBeanMapper;
+import ascelion.micro.mapper.BeanToBeanMapper;
 import ascelion.micro.tests.TestsResourceServerConfig;
 import ascelion.micro.tests.WithRoleAdmin;
 
@@ -49,13 +49,14 @@ public class OrdersControllerTest {
 	private MockMvc mvc;
 	@Autowired
 	private ObjectMapper om;
+	@Autowired
+	private BeanToBeanMapper bbm;
 	@MockBean
 	private OrdersRepository repo;
 	@MockBean
 	private DataSource ds;
 
 	private final Map<UUID, Order> orders = new HashMap<>();
-	private final BeanToBeanMapper bbm = new BeanToBeanMapper();
 
 	@Before
 	public void setUp() {
@@ -72,7 +73,7 @@ public class OrdersControllerTest {
 					final Order o = ivc.getArgument(0);
 
 					if (o.getId() == null) {
-						final Order newO = this.bbm.copy(o, Order.class, false);
+						final Order newO = this.bbm.create(Order.class, o);
 
 						setProtectedFieldValue("id", newO, randomUUID());
 

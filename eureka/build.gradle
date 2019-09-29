@@ -1,5 +1,4 @@
 ext {
-	useInstance = 1
 	portBase = 40000
 }
 
@@ -7,7 +6,5 @@ apply plugin: 'org.springframework.boot'
 apply plugin: 'application'
 
 dependencies {
-	implementation project( ':shared' )
-
 	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-server'
 }

@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "9ad6300d-1dcd-449e-b4d8-9be32d99d401",
+		"_postman_id": "0b022db0-b4d0-4b5d-b201-29dcf25442ea",
 		"name": "POC_ORDERS",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -65,7 +65,7 @@
 			"response": []
 		},
 		{
-			"name": "Create PET",
+			"name": "Create Order",
 			"request": {
 				"method": "POST",
 				"header": [
@@ -78,63 +78,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\"name\":\"Polyethylene Terephthalate\", \"description\": \"Description of PET\", \"price\": 31.4 }"
-				},
-				"url": {
-					"raw": "{{ordersURL}}/orders",
-					"host": [
-						"{{ordersURL}}"
-					],
-					"path": [
-						"orders"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Create PETG",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"name": "Content-Type",
-						"type": "text",
-						"value": "application/json"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\"name\":\"Polyethylene Terephthalate Glycol\", \"description\": \"Description of PETG\", \"price\": 51.4 }"
-				},
-				"url": {
-					"raw": "{{ordersURL}}/orders",
-					"host": [
-						"{{ordersURL}}"
-					],
-					"path": [
-						"orders"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Create Nylon",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"name": "Content-Type",
-						"value": "application/json",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\"name\":\"Polyamide\", \"description\": \"A.K.A. Nylon\", \"price\": 51.4 }"
+					"raw": "{ \"productId\": \"{{product_id_0}}\" }"
 				},
 				"url": {
 					"raw": "{{ordersURL}}/orders",

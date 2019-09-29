@@ -1,6 +1,6 @@
 ext {
 	portBase = 12000
-	useDatabase = true
+	hasDatabase = true
 }
 
 apply plugin: 'org.springframework.boot'

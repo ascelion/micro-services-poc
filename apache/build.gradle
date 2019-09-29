@@ -1,6 +1,7 @@
 
 task clean {
 	delete buildDir
+	delete file( '.built' )
 }
 task assemble {
 }
@@ -8,11 +9,20 @@ task assemble {
 task 'docker-build'(type: Exec) {
 	executable 'docker-compose'
 
+	inputs.files 'apache.conf', 'run-httpd', 'dockerfile.txt', 'docker-compose.yml'
+	outputs.file '.built'
+
+	doLast {
+		ant.touch( file: '.built' )
+	}
+
 	args '-p', dockerName
 	args 'build'
 }
 
 task 'docker-up'(type: Exec) {
+	dependsOn 'docker-build'
+
 	executable 'docker-compose'
 
 	args '-p', dockerName
