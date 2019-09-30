@@ -108,10 +108,12 @@ public class BasketsControllerTest {
 
 		this.repo.save(ent);
 
+		final String bdy = this.om.writeValueAsString(asList(i1, i2));
+
 		final MockHttpServletRequestBuilder req = post("/baskets/{id}", ent.getId())
 				.contentType(APPLICATION_JSON)
 				.accept(APPLICATION_JSON)
-				.content(this.om.writeValueAsString(asList(i1, i2)));
+				.content(bdy);
 
 		this.mvc.perform(req)
 				.andExpect(status().isCreated())

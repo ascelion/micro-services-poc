@@ -13,7 +13,7 @@ services:
     networks:
       - @network@
     ports:
-      - "@httpPort1@-@httpPort2@:8080"
+     - "@httpPort1@-@httpPort2@:8080"
 
 networks:
   @network@:

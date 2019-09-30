@@ -20,10 +20,12 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
 @MappedSuperclass
 @Getter
+@Setter // this is temporary
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public abstract class AbstractEntity<E extends AbstractEntity<E>> {

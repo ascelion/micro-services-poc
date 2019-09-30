@@ -24,6 +24,7 @@
 	<logger name="org.springframework.security" level="INFO" />
 	<!-- <logger name="org.springframework.security.access.prepost.PrePostAnnotationSecurityMetadataSource" level="INFO" /> -->
 
+	<logger name="ma.glasnost.orika" level="INFO" />
 	<logger name="ascelion" level="INFO" />
 
 	<root level="INFO">

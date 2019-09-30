@@ -15,7 +15,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Inherited
 @Repeatable(BBMap.Repeatable.class)
 public @interface BBMap {
-
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.TYPE)
 	@Inherited

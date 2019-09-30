@@ -16,7 +16,6 @@ import ascelion.micro.shared.endpoint.ViewEntityEndpointBase;
 import ascelion.micro.shared.validation.OnCreate;
 
 import static ascelion.micro.shared.utils.LogUtils.loggerForThisClass;
-import static java.util.Arrays.stream;
 import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED_VALUE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -71,19 +70,13 @@ public class BasketsController extends ViewEntityEndpointBase<Basket, BasketsRep
 	@Transactional
 	public Basket addItems(@PathVariable("basketId") UUID basketId, @RequestBody @NotNull @Valid @Size(min = 1) BasketItemRequest[] requests) {
 		final Basket basket = this.repo.getById(basketId);
-		BasketItem[] items = stream(requests)
-				.map(item -> this.bbm.create(BasketItem.class, item))
-				.toArray(BasketItem[]::new);
+		BasketItem[] items = this.bbm.createArray(BasketItem.class, requests);
 
 		basket.addItems(items);
 
-		final ReservationRequest[] reservations = basket.getItems().stream()
-				.map(item -> this.bbm.create(ReservationRequest.class, basket, item))
-				.toArray(ReservationRequest[]::new);
+		final ReservationRequest[] reservations = this.bbm.createArray(ReservationRequest.class, basket.getItems());
 
-		items = stream(this.client.reserve(reservations))
-				.map(res -> this.bbm.create(BasketItem.class, res))
-				.toArray(BasketItem[]::new);
+		items = this.bbm.createArray(BasketItem.class, this.client.reserve(reservations));
 
 		basket.setItems(items);
 

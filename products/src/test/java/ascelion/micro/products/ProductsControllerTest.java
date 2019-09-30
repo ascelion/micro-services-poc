@@ -77,11 +77,13 @@ public class ProductsControllerTest {
 		final MockHttpServletRequestBuilder req = get("/products")
 				.accept(APPLICATION_JSON);
 
+		final Product first = this.products.values().iterator().next();
+
 		this.mvc.perform(req)
 				.andExpect(status().isOk())
 				.andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
 				.andExpect(jsonPath("$", hasSize(this.products.size())))
-				.andExpect(jsonPath("$[0].id", equalTo(this.products.values().iterator().next().getId().toString())));
+				.andExpect(jsonPath("$[0].id", equalTo(first.getId().toString())));
 	}
 
 	@Test

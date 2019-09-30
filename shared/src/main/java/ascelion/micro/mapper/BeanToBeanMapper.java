@@ -4,23 +4,21 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
+import ascelion.micro.shared.utils.AnnotationBuilder;
+
 import static ascelion.micro.shared.utils.LogUtils.loggerForThisClass;
-import static java.lang.String.format;
 import static java.util.Arrays.stream;
-import static java.util.Collections.newSetFromMap;
 import static java.util.stream.Collectors.toList;
-import static org.springframework.core.annotation.AnnotationUtils.synthesizeAnnotation;
 
 import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.ToString;
 import ma.glasnost.orika.MapperFacade;
 import ma.glasnost.orika.MapperFactory;
@@ -35,16 +33,20 @@ import ma.glasnost.orika.metadata.MapperKey;
 import ma.glasnost.orika.metadata.Type;
 import ma.glasnost.orika.metadata.TypeFactory;
 import org.slf4j.Logger;
+import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationContext;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.stereotype.Component;
 
 @Component
 @Lazy
 @RequiredArgsConstructor
-public class BeanToBeanMapper implements InitializingBean {
+public class BeanToBeanMapper implements InitializingBean, BeanClassLoaderAware {
 
 	static private final Logger L = loggerForThisClass();
 
@@ -57,12 +59,11 @@ public class BeanToBeanMapper implements InitializingBean {
 		final boolean mapNulls;
 	}
 
-	private final Set<Class<?>> components = newSetFromMap(new IdentityHashMap<>());
-	private final Map<Key, MapperFacade> mappers = new HashMap<>();
-	private final ApplicationContext acx;
+	private final Map<Key, MapperFacade> mappers = new ConcurrentHashMap<>();
 
 	@Value("${orika.sources:false}")
 	private boolean sources;
+	private ClassLoader cld;
 
 	public <T> T[] createArray(Class<T> target, Object[] sources) {
 		return createArray(target, stream(sources));
@@ -115,16 +116,6 @@ public class BeanToBeanMapper implements InitializingBean {
 		return copy(false, target, sources);
 	}
 
-	@Override
-	public void afterPropertiesSet() throws Exception {
-		for (final Object confs : this.acx.getBeansWithAnnotation(BBMap.class).values()) {
-			for (final BBMap a : confs.getClass().getAnnotationsByType(BBMap.class)) {
-				initMapperFromComponent(a, confs.getClass(), true);
-				initMapperFromComponent(a, confs.getClass(), false);
-			}
-		}
-	}
-
 	private <T> T copy(boolean mapNulls, @NonNull T target, @NonNull Object... sources) {
 		for (final Object source : sources) {
 			final MapperFacade m = mapper(source.getClass(), target.getClass(), mapNulls);
@@ -135,88 +126,137 @@ public class BeanToBeanMapper implements InitializingBean {
 		return target;
 	}
 
-	private void initMapperFromComponent(BBMap a, Class<?> type, boolean mapNulls) {
-		if (a.to() == Void.class || a.from() == Void.class) {
-			throw new RuntimeException(format("%s: at least one of the @BBMap.to() and @BBMap.from() must be filled in", type));
-		}
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		final ClassPathScanningCandidateComponentProvider cps = new ClassPathScanningCandidateComponentProvider(false);
 
-		initMapper(a, mapNulls, type);
+		cps.addIncludeFilter(new AnnotationTypeFilter(BBMap.class));
+		cps.findCandidateComponents("ascelion")
+				.forEach(this::initMapperFromBean);
 	}
 
-	private void initMapperFromType(BBMap a, Class<?> type, boolean mapNulls) {
-		final Map<String, Object> map = new HashMap<>();
-
-		if (a.to() != Void.class && a.from() != Void.class) {
-			throw new RuntimeException(format("%s: only one of the @BBMap.to() and @BBMap.from() must be filled in", type));
-		}
-
-		final Class<?> from = a.from() == Void.class ? type : a.from();
-		final Class<?> to = a.to() == Void.class ? type : a.to();
-
-		map.put("from", from);
-		map.put("to", to);
-		map.put("fields", a.fields());
-		map.put("excludes", a.excludes());
-		map.put("reversed", a.bidi());
-
-		a = synthesizeAnnotation(map, BBMap.class, null);
-
-		initMapper(a, mapNulls, type);
+	@Override
+	public void setBeanClassLoader(ClassLoader cld) {
+		this.cld = cld;
 	}
 
-	private void initMapper(BBMap a, boolean mapNulls, Class<?> component) {
-		if (this.components.add(component)) {
-			doInitMapper(a, mapNulls, component);
+	@SneakyThrows
+	private void initMapperFromBean(BeanDefinition def) {
+		final Class<?> type = this.cld.loadClass(def.getBeanClassName());
+
+		if (AnnotationUtils.findAnnotation(type, Component.class) != null) {
+			initMapperFromComponent(type);
+		} else {
+			initMapperFromType(type);
 		}
 	}
 
-	private void doInitMapper(BBMap a, boolean mapNulls, Class<?> component) {
-		initOneWayMapper(a, mapNulls, component);
+	private void initMapperFromComponent(Class<?> type) {
+		for (final BBMap map : type.getAnnotationsByType(BBMap.class)) {
+			final Class<?> typeA = map.from();
+			final Class<?> typeB = map.to();
 
-		if (a.from() != a.to() && a.bidi()) {
-			final Map<String, Object> map = new HashMap<>();
+			if (typeA == Void.class || typeB == Void.class) {
+				throw new RuntimeException("Both @BBMap.from() and @BBMap.to() must be specified at component " + type.getName());
+			}
+			if (typeA == typeB) {
+				throw new RuntimeException("Cannot use the same type for @BBMap.from() and @BBMap.to() at component " + type.getName());
+			}
 
-			map.put("from", a.to());
-			map.put("to", a.from());
+			initMapper(new Key(typeA, typeB, true), map, type);
+			initMapper(new Key(typeA, typeB, false), map, type);
+		}
+	}
 
-			final BBField[] fields = stream(a.fields())
+	private void initMapperFromType(Class<?> type) {
+		for (BBMap map : type.getAnnotationsByType(BBMap.class)) {
+			final Class<?> typeA = map.from();
+			final Class<?> typeB = map.to();
+
+			if (typeA != Void.class && typeB != Void.class) {
+				throw new RuntimeException("Only one of @BBMap.from() or @BBMap.to() must be specified at type " + type.getName());
+			}
+			if (typeA == typeB) {
+				throw new RuntimeException("Cannot use the same type for @BBMap.from() and @BBMap.to() at component " + type.getName());
+			}
+
+			final AnnotationBuilder<BBMap> bld = AnnotationBuilder.create(map);
+
+			if (typeA == type) {
+				throw new RuntimeException("@BBMap.from() is the same as the declaring type " + type.getName());
+			} else {
+				bld.with("from", typeA == Void.class ? type : typeA);
+			}
+			if (typeB == type) {
+				throw new RuntimeException("@BBMap.to() is the same as the declaring type " + type.getName());
+			} else {
+				bld.with("to", typeB == Void.class ? type : typeB);
+			}
+
+			map = bld.build();
+
+			initMapper(new Key(map.from(), map.to(), true), map, type);
+			initMapper(new Key(map.from(), map.to(), false), map, type);
+		}
+
+		final BBMap map = AnnotationBuilder.create(BBMap.class)
+				.with("from", type)
+				.with("to", type)
+				.build();
+
+		initMapper(new Key(type, type, true), map, type);
+		initMapper(new Key(type, type, false), map, type);
+	}
+
+	//
+	private void initMapper(Key key, BBMap map, Class<?> source) {
+		initOneWayMapper(key, map, source);
+
+		if (key.typeA != key.typeB && map.bidi()) {
+			final AnnotationBuilder<BBMap> bld = AnnotationBuilder.create(BBMap.class)
+					.with("from", key.typeB)
+					.with("to", key.typeA)
+					.with("excludes", map.excludes());
+
+			final BBField[] fields = stream(map.fields())
 					.map(f -> {
-						final Map<String, Object> m = new HashMap<>();
-
-						m.put("from", f.to().isEmpty() ? f.from() : f.to());
-						m.put("to", f.from());
-						m.put("hintFrom", f.hintTo());
-						m.put("hintTo", f.hintFrom());
-
-						return synthesizeAnnotation(m, BBField.class, null);
+						return AnnotationBuilder.create(BBField.class)
+								.with("from", f.to().isEmpty() ? f.from() : f.to())
+								.with("to", f.from())
+								.with("hintFrom", f.hintTo())
+								.with("hintTo", f.hintFrom())
+								.build();
 					})
 					.toArray(BBField[]::new);
+//
+			bld.with("fields", fields);
 
-			map.put("fields", fields);
-			map.put("excludes", a.excludes());
+			map = bld.build();
 
-			a = synthesizeAnnotation(map, BBMap.class, null);
+			key = new Key(map.from(), map.to(), key.mapNulls);
 
-			initOneWayMapper(a, mapNulls, component);
+			initOneWayMapper(key, map, source);
 		}
 	}
 
-	private void initOneWayMapper(BBMap a, boolean mapNulls, Class<?> component) {
-		final Key key = new Key(a.from(), a.to(), mapNulls);
-
+	private void initOneWayMapper(Key key, BBMap map, Class<?> source) {
 		if (this.mappers.containsKey(key)) {
-			throw new RuntimeException();
+			throw new RuntimeException("Already found " + key);
 		}
 
-		final Type<?> typeA = TypeFactory.valueOf(a.from());
-		final Type<?> typeB = TypeFactory.valueOf(a.to());
+		this.mappers.put(key, createOneWayMapper(key, map, source));
+	}
 
-		L.trace("{}: adding mapping {} nulls from {} to {}", component.getName(), mapNulls ? "with" : "without", a.from().getName(), a.to().getName());
+	private MapperFacade createOneWayMapper(Key key, BBMap map, Class<?> source) {
+		final Type<?> typeA = TypeFactory.valueOf(key.typeA);
+		final Type<?> typeB = TypeFactory.valueOf(key.typeB);
 
-		final MapperFactory mf = buildFactory(true);
+		L.trace("{}: adding mapping {} nulls from {} to {}", source.getName(), key.mapNulls ? "with" : "without", key.typeA.getName(), key.typeB.getName());
+
+		final MapperFactory mf = buildFactory(key.mapNulls);
 		final ClassMapBuilder<?, ?> cmb = mf.classMap(typeA, typeB);
 
-		for (final BBField f : a.fields()) {
+		for (final BBField f : map.fields()) {
 			String to = f.to();
 
 			if (to.isEmpty()) {
@@ -226,6 +266,7 @@ public class BeanToBeanMapper implements InitializingBean {
 			final FieldMapBuilder<?, ?> fmb = cmb.fieldMap(f.from(), to);
 
 			L.trace("\tincluded from {} to {}", f.from(), to);
+
 			if (f.hintFrom() != Void.class) {
 				fmb.aElementType(f.hintFrom());
 			}
@@ -236,7 +277,7 @@ public class BeanToBeanMapper implements InitializingBean {
 			fmb.add();
 		}
 
-		for (final String x : a.excludes()) {
+		for (final String x : map.excludes()) {
 			L.trace("\texcluded {}", x);
 
 			cmb.exclude(x);
@@ -254,47 +295,24 @@ public class BeanToBeanMapper implements InitializingBean {
 			});
 		}
 
-		final MapperFacade bmf = mf.getMapperFacade();
-
-		this.mappers.put(key, bmf);
+		return mf.getMapperFacade();
 	}
 
 	private <T> MapperFacade mapper(Class<?> source, Class<?> target, boolean mapNulls) {
 		final Key key = new Key(source, target, mapNulls);
-		MapperFacade bmf = this.mappers.get(key);
 
-		if (bmf != null) {
-			return bmf;
-		}
-
-		synchronized (this.mappers) {
-			bmf = this.mappers.get(key);
-
-			if (bmf == null) {
-				initMapper(key);
+		return this.mappers.compute(key, (k, v) -> {
+			if (v != null) {
+				return v;
 			}
 
-			return this.mappers.get(key);
-		}
-	}
+			final BBMap map = AnnotationBuilder.create(BBMap.class)
+					.with("from", source)
+					.with("to", target)
+					.build();
 
-	private void initMapper(Key key) {
-		for (final BBMap a : key.typeA.getAnnotationsByType(BBMap.class)) {
-			initMapperFromType(a, key.typeA, true);
-			initMapperFromType(a, key.typeA, false);
-		}
-		if (key.typeA != key.typeB) {
-			for (final BBMap a : key.typeB.getAnnotationsByType(BBMap.class)) {
-				initMapperFromType(a, key.typeB, true);
-				initMapperFromType(a, key.typeB, false);
-			}
-		}
-
-		final MapperFacade bmf = this.mappers.get(key);
-
-		if (bmf == null) {
-			this.mappers.put(key, buildMapper(key));
-		}
+			return createOneWayMapper(key, map, source);
+		});
 	}
 
 	private MapperFactory buildFactory(boolean mapNulls) {
@@ -309,11 +327,7 @@ public class BeanToBeanMapper implements InitializingBean {
 		return bld.build();
 	}
 
-	private MapperFacade buildMapper(Key key) {
-		return buildFactory(key.mapNulls).getMapperFacade();
-	}
-
-	public <T, A, B> ConstructorMapping<T> resolve(ClassMap<A, B> classMap, Type<T> sourceType) {
+	private <T, A, B> ConstructorMapping<T> resolve(ClassMap<A, B> classMap, Type<T> sourceType) {
 		final boolean aToB = classMap.getBType().equals(sourceType);
 		final Type<?> targetClass = aToB ? classMap.getBType() : classMap.getAType();
 

@@ -53,25 +53,16 @@ public final class MockUtils {
 				});
 		when(repo.save(any()))
 				.then(ivc -> {
-					final T old = ivc.getArgument(0);
+					final T ent = ivc.getArgument(0);
 					final LocalDateTime now = LocalDateTime.now();
-					final T ent;
 
-					if (old.getId() == null) {
-						ent = bbm.create(type, old);
-
+					if (ent.getId() == null) {
 						setProtectedFieldValue("id", ent, randomUUID());
 						setProtectedFieldValue("createdAt", ent, now);
 
 						entities.put(ent.getId(), ent);
-					} else {
-						ent = entities.get(old.getId());
-
-						if (ent == null) {
-							throw new EntityNotFoundException("Cannot find entity with id " + old.getId());
-						} else {
-							bbm.copyWithNulls(ent, old);
-						}
+					} else if (!entities.containsKey(ent.getId())) {
+						throw new EntityNotFoundException("Cannot find entity with id " + ent.getId());
 					}
 
 					setProtectedFieldValue("updatedAt", ent, now);
