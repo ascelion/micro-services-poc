@@ -92,18 +92,6 @@ task 'docker-up'(type: Exec) {
 	}
 }
 
-task 'docker-stop'(type: Exec) {
-	dependsOn 'docker-files'
-
-	executable 'docker-compose'
-	workingDir dockerDist
-
-	ignoreExitValue true
-
-	args '-f', dockerFile
-	args 'stop'
-}
-
 task 'docker-down'(type: Exec) {
 	dependsOn 'docker-files'
 
@@ -114,6 +102,30 @@ task 'docker-down'(type: Exec) {
 
 	args '-f', dockerFile, '-p', dockerName
 	args 'down'
+}
+
+task 'docker-start'(type: Exec) {
+	dependsOn 'docker-files'
+
+	executable 'docker-compose'
+	workingDir dockerDist
+
+	ignoreExitValue true
+
+	args '-f', dockerFile, '-p', dockerName
+	args 'start'
+}
+
+task 'docker-stop'(type: Exec) {
+	dependsOn 'docker-files'
+
+	executable 'docker-compose'
+	workingDir dockerDist
+
+	ignoreExitValue true
+
+	args '-f', dockerFile, '-p', dockerName
+	args 'stop'
 }
 
 bootRun {

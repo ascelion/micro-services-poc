@@ -3,6 +3,9 @@ database:
   host: ${APP_NAME}-db
   port: 5432
 
+reservation:
+  availability: 1
+
 security:
   signKey: 0123456789
 
@@ -26,3 +29,5 @@ spring:
       hibernate:
         temp:
           use_jdbc_metadata_defaults: false
+  rabbitmq:
+    host: rabbit

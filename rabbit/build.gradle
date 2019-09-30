@@ -1,0 +1,55 @@
+
+task clean {
+	delete buildDir
+	delete file( '.built' )
+}
+task assemble {
+}
+
+task 'docker-build'(type: Exec) {
+	executable 'docker-compose'
+
+	inputs.files 'docker-compose.yml'
+	outputs.file '.built'
+
+	doLast {
+		ant.touch( file: '.built' )
+	}
+
+	args '-p', dockerName
+	args 'build'
+}
+
+task 'docker-up'(type: Exec) {
+	dependsOn 'docker-build'
+
+	executable 'docker-compose'
+
+	args '-p', dockerName
+	args 'up', '-d'
+}
+
+task 'docker-down'(type: Exec) {
+	executable 'docker-compose'
+
+	ignoreExitValue true
+
+	args '-p', dockerName
+	args 'down'
+}
+
+task 'docker-start'(type: Exec) {
+	executable 'docker-compose'
+
+	args '-p', dockerName
+	args 'start'
+}
+
+task 'docker-stop'(type: Exec) {
+	executable 'docker-compose'
+
+	ignoreExitValue true
+
+	args '-p', dockerName
+	args 'stop'
+}

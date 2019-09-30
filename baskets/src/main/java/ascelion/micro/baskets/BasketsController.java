@@ -35,17 +35,19 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.server.ResponseStatusException;
 
 @Endpoint("baskets")
-public class BasketsController extends ViewEntityEndpointBase<Basket, BasketsRepository> {
+public class BasketsController extends ViewEntityEndpointBase<Basket, BasketsRepo> {
 	static private final Logger L = loggerForThisClass();
 
 	@Autowired
 	@Lazy
 	private ReservationsApi client;
 
-	public BasketsController(BasketsRepository repo) {
+	@Autowired
+	private BasketItemsRepo itmRepo;
+
+	public BasketsController(BasketsRepo repo) {
 		super(repo);
 	}
 
@@ -93,8 +95,7 @@ public class BasketsController extends ViewEntityEndpointBase<Basket, BasketsRep
 	@Transactional
 	public Basket udateItem(@PathVariable("itemId") UUID itemId,
 			@RequestParam(name = "quantity", required = true) @NotNull @Min(0) BigDecimal quantity) {
-		final Basket basket = this.repo.getByItemId(itemId);
-		final BasketItem item = basket.getItem(itemId).get();
+		final BasketItem item = this.itmRepo.getById(itemId);
 
 		item.setQuantity(quantity);
 
@@ -102,16 +103,14 @@ public class BasketsController extends ViewEntityEndpointBase<Basket, BasketsRep
 
 		item.setQuantity(reservations[0].getQuantity());
 
-		return this.repo.save(basket);
+		return this.repo.save(item.getBasket());
 	}
 
 	@ApiOperation("Remove an item from the basket")
 	@DeleteMapping(path = "{itemId}", produces = APPLICATION_JSON_VALUE)
 	@Transactional
 	public Basket deleteItem(@PathVariable("itemId") UUID itemId) {
-		final Basket basket = this.repo.findByItemId(itemId)
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "no such item: " + itemId));
-		final BasketItem item = basket.getItem(itemId).get();
+		final BasketItem item = this.itmRepo.getById(itemId);
 
 		try {
 			this.client.finalize(ReservationsApi.Finalize.DISCARD, this.bbm.create(ReservationRequest.class, item));
@@ -119,8 +118,8 @@ public class BasketsController extends ViewEntityEndpointBase<Basket, BasketsRep
 			L.error("Could not discard reservation for {}", itemId, e);
 		}
 
-		basket.delItem(itemId);
+		item.getBasket().delItem(itemId);
 
-		return this.repo.save(basket);
+		return this.repo.save(item.getBasket());
 	}
 }

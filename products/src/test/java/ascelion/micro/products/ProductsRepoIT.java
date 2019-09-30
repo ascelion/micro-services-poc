@@ -24,14 +24,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 @RunWith(SpringRunner.class)
 @JpaEntityIT
-public class ProductsEntityIT {
+public class ProductsRepoIT {
 
 	static public Product newProduct() {
 		return Product.builder()
 				.name(randomAscii(10, 20))
 				.description(randomAscii(10, 20))
-				.price(randomDecimal(0, 100))
-				.stock(randomDecimal(0, 100))
+				.price(randomDecimal(100, 200))
+				.stock(randomDecimal(100, 200))
 				.build();
 	}
 

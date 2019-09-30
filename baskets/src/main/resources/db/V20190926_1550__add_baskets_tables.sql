@@ -19,6 +19,7 @@ CREATE TABLE basket_items
 	basket_id UUID NOT NULL,
 	product_id UUID NOT NULL,
 	quantity DECIMAL(9, 2) NOT NULL,
+	expired BOOLEAN NOT NULL DEFAULT FALSE,
 	ord SMALLINT NOT NULL,
 
 	FOREIGN KEY(basket_id) REFERENCES baskets(id),

@@ -3,6 +3,9 @@ database:
   host: localhost
   port: 18432
 
+reservation:
+  availability: 1
+
 server:
   port: 21080
 
@@ -15,3 +18,5 @@ spring:
       hibernate:
         show_sql: true
         format_sql: true
+  rabbitmq:
+    host: localhost

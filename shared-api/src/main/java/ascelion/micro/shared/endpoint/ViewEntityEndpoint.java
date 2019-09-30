@@ -21,6 +21,10 @@ public interface ViewEntityEndpoint<T extends AbstractEntity<T>> {
 	@GetMapping(produces = APPLICATION_JSON_VALUE)
 	List<T> getEntities(
 	//@formatter:off
+	        @ApiParam("Optional parameter to sort entities")
+	        @RequestParam(name = "sort", required = false)
+	        String[] properties,
+
 	        @ApiParam("Optional parameter to get a specific page of entities")
 	        @RequestParam(name = "page", required = false)
 	        @Min(0) Integer page,

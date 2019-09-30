@@ -10,7 +10,6 @@ import java.util.UUID;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
@@ -44,8 +43,6 @@ import org.apache.commons.lang3.builder.EqualsExclude;
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder(access = AccessLevel.PACKAGE)
-@NamedQuery(name = "Basket.findByItemId",
-		query = "SELECT b FROM Basket b JOIN b.items i WHERE i.id = ?1")
 @BBMap(to = ReservationRequest.class, bidi = false, fields = {
 		@BBField(from = "id", to = "ownerId")
 })

@@ -25,12 +25,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 @RunWith(SpringRunner.class)
 @JpaEntityIT
-public class BasketEntityIT {
+public class BasketsRepoIT {
 	@Autowired
 	private EntityManager tem;
 
 	@Autowired
-	private BasketsRepository repo;
+	private BasketsRepo repo;
+
+	@Autowired
+	private BasketItemsRepo itmRepo;
 
 	@Before
 	public void setUp() {
@@ -74,9 +77,14 @@ public class BasketEntityIT {
 		assertThat(o2.getId(), notNullValue());
 		assertThat(o2.beq(o1), is(true));
 
-		final Optional<Basket> i2o = this.repo.findByItemId(i1.getId());
+		final Optional<BasketItem> i1o = this.itmRepo.findById(i1.getId());
 
-		assertThat(o2o.isPresent(), is(true));
-		assertThat(o2.beq(i2o.get()), is(true));
+		assertThat(i1o.isPresent(), is(true));
+		assertThat(i1.beq(i1o.get()), is(true));
+
+		final Optional<BasketItem> i2o = this.itmRepo.findByProductId(o1.getId(), i2.getProductId());
+
+		assertThat(i2o.isPresent(), is(true));
+		assertThat(i2.beq(i2o.get()), is(true));
 	}
 }

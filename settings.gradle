@@ -9,6 +9,7 @@ include ':gateway'
 include ':orders'
 include ':products'
 include ':products-api'
+include ':rabbit'
 include ':shared'
 include ':shared-api'
 

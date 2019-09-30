@@ -7,31 +7,29 @@ import ascelion.micro.mapper.BBMap;
 import ascelion.micro.mapper.BeanToBeanMapper;
 import ascelion.micro.products.Product;
 import ascelion.micro.products.ProductsRepository;
-import ascelion.micro.reservations.ReservationRequest;
-import ascelion.micro.reservations.ReservationsApi;
-import ascelion.micro.reservations.ReservationsApi.Finalize;
 import ascelion.micro.shared.endpoint.Endpoint;
+import ascelion.micro.shared.endpoint.ViewEntityEndpointBase;
 
 import static java.util.Arrays.stream;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 @Endpoint("reservations")
 @BBMap(from = Reservation.class, to = ReservationRequest.class, bidi = false, fields = {
 		@BBField(from = "product.id", to = "productId"),
 })
-@RequiredArgsConstructor
-public class ReservationsController implements ReservationsApi {
+public class ReservationsController extends ViewEntityEndpointBase<Reservation, ReservationsRepository> implements ReservationsApi {
 
 	private final ProductsRepository prdRepo;
-	private final ReservationsRepository resRepo;
 
 	@Autowired
 	private BeanToBeanMapper bbm;
+
+	public ReservationsController(ReservationsRepository repo, ProductsRepository prdRepo) {
+		super(repo);
+		this.prdRepo = prdRepo;
+	}
 
 	@Override
 	@Transactional
@@ -45,8 +43,7 @@ public class ReservationsController implements ReservationsApi {
 	@Transactional
 	public void finalize(Finalize op, ReservationRequest... reservations) {
 		for (final ReservationRequest req : reservations) {
-			final Reservation s = this.resRepo.findByProductIdAndOwnerId(req.getProductId(), req.getOwnerId())
-					.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "no such reservation: " + req.getProductId()));
+			final Reservation s = this.repo.getByProductIdAndOwnerId(req.getProductId(), req.getOwnerId());
 			final Product p = s.getProduct();
 
 			switch (op) {
@@ -57,7 +54,7 @@ public class ReservationsController implements ReservationsApi {
 
 				this.prdRepo.save(p);
 			case DISCARD:
-				this.resRepo.delete(s);
+				this.repo.delete(s);
 			}
 		}
 	}
@@ -72,7 +69,7 @@ public class ReservationsController implements ReservationsApi {
 		}
 
 		if (q.compareTo(BigDecimal.ZERO) > 0) {
-			Reservation s = this.resRepo.findByProductIdAndOwnerId(req.getProductId(), req.getOwnerId())
+			Reservation s = this.repo.findByProductIdAndOwnerId(req.getProductId(), req.getOwnerId())
 					.orElse(null);
 
 			if (s == null) {
@@ -83,7 +80,7 @@ public class ReservationsController implements ReservationsApi {
 						.build();
 			}
 
-			this.resRepo.save(s);
+			this.repo.save(s);
 
 			return this.bbm.create(ReservationRequest.class, req, s);
 		}

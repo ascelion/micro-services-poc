@@ -1,6 +1,5 @@
 package ascelion.micro.baskets;
 
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -10,20 +9,18 @@ import javax.sql.DataSource;
 import ascelion.micro.mapper.BeanToBeanMapper;
 import ascelion.micro.reservations.ReservationRequest;
 import ascelion.micro.reservations.ReservationsApi;
+import ascelion.micro.tests.MockUtils;
 import ascelion.micro.tests.TestsResourceServerConfig;
 import ascelion.micro.tests.WithRoleAdmin;
 
 import static ascelion.micro.tests.RandomUtils.randomDecimal;
 import static java.util.Arrays.asList;
-import static java.util.Optional.ofNullable;
 import static java.util.UUID.randomUUID;
-import static java.util.stream.Collectors.toList;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.security.util.FieldUtils.setProtectedFieldValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -56,7 +53,9 @@ public class BasketsControllerTest {
 	@Autowired
 	private BeanToBeanMapper bbm;
 	@MockBean(answer = Answers.CALLS_REAL_METHODS)
-	private BasketsRepository repo;
+	private BasketsRepo repo;
+	@MockBean(answer = Answers.CALLS_REAL_METHODS)
+	private BasketItemsRepo itmRepo;
 	@MockBean
 	private ReservationsApi resApi;
 	@MockBean
@@ -66,48 +65,22 @@ public class BasketsControllerTest {
 
 	@Before
 	public void setUp() {
-		when(this.resApi.reserve(any()))
-				.then(ivc -> {
-					final Object[] arg = ivc.getArguments();
-					final ReservationRequest[] ret = new ReservationRequest[arg.length];
+		MockUtils.mockRepository(this.bbm, this.repo, this.baskets,
+				() -> Basket.builder()
+						.customerId(randomUUID())
+						.build());
 
-					System.arraycopy(arg, 0, ret, 0, ret.length);
-
-					return ret;
-				});
-		when(this.repo.findAll())
-				.then(ivc -> {
-					return this.baskets.values()
-							.stream()
-							.map(e -> this.bbm.create(Basket.class, e))
-							.collect(toList());
-				});
-		when(this.repo.findByItemId(any()))
+		when(this.itmRepo.findById(any()))
 				.then(ivc -> {
 					return this.baskets.values().stream()
-							.filter(b -> {
-								return b.getItems().stream().anyMatch(i -> i.getId().equals(ivc.getArgument(0)));
-							})
+							.flatMap(b -> b.getItems().stream())
+							.filter(i -> i.getId().equals(ivc.getArgument(0)))
 							.findAny();
 				});
-		when(this.repo.findById(any()))
+
+		when(this.resApi.reserve(any()))
 				.then(ivc -> {
-					return ofNullable(this.baskets.get(ivc.getArgument(0)))
-							.map(e -> this.bbm.create(Basket.class, e));
-				});
-		when(this.repo.save(any()))
-				.then(ivc -> {
-					final Basket o = ivc.getArgument(0);
-
-					if (o.getId() == null) {
-						setProtectedFieldValue("id", o, randomUUID());
-						setProtectedFieldValue("createdAt", o, LocalDateTime.now());
-						setProtectedFieldValue("updatedAt", o, LocalDateTime.now());
-					}
-
-					this.baskets.put(o.getId(), o);
-
-					return o;
+					return this.bbm.createArray(ReservationRequest.class, ivc.getArguments());
 				});
 	}
 

@@ -1,22 +1,26 @@
 package ascelion.micro.mapper;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import static ascelion.micro.shared.utils.LogUtils.loggerForThisClass;
 import static java.lang.String.format;
 import static java.util.Arrays.stream;
 import static java.util.Collections.newSetFromMap;
+import static java.util.stream.Collectors.toList;
 import static org.springframework.core.annotation.AnnotationUtils.synthesizeAnnotation;
 
 import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.ToString;
 import ma.glasnost.orika.MapperFacade;
 import ma.glasnost.orika.MapperFactory;
@@ -60,7 +64,34 @@ public class BeanToBeanMapper implements InitializingBean {
 	@Value("${orika.sources:false}")
 	private boolean sources;
 
-	@SneakyThrows
+	public <T> T[] createArray(Class<T> target, Object[] sources) {
+		return createArray(target, stream(sources));
+	}
+
+	public <T> T[] createArray(Class<T> target, Collection<?> sources) {
+		return createArray(target, sources.stream());
+	}
+
+	public <T> T[] createArray(Class<T> target, Stream<?> sources) {
+		return sources
+				.map(source -> create(target, source))
+				.toArray(n -> (T[]) Array.newInstance(target, n));
+	}
+
+	public <T> List<T> createList(Class<T> target, Object[] sources) {
+		return createList(target, stream(sources));
+	}
+
+	public <T> List<T> createList(Class<T> target, Collection<?> sources) {
+		return createList(target, sources.stream());
+	}
+
+	public <T> List<T> createList(Class<T> target, Stream<?> sources) {
+		return sources
+				.map(source -> create(target, source))
+				.collect(toList());
+	}
+
 	public <T> T create(@NonNull Class<T> target, @NonNull Object... sources) {
 		T instance = null;
 

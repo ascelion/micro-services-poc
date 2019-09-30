@@ -26,16 +26,18 @@ import lombok.Setter;
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
 @Builder(access = AccessLevel.PACKAGE)
 public class BasketItem extends AbstractEntity<BasketItem> {
+	@ManyToOne(optional = false)
+	@JsonIgnore
+	@Setter(AccessLevel.PACKAGE)
+	private Basket basket;
+
 	@NonNull
 	private UUID productId;
 	@NonNull
 	@Builder.Default
 	private BigDecimal quantity = BigDecimal.ZERO;
 
-	@ManyToOne(optional = false)
-	@JsonIgnore
-	@Setter(AccessLevel.PACKAGE)
-	private Basket basket;
+	private boolean expired;
 
 	@Getter(AccessLevel.NONE)
 	@Setter(AccessLevel.NONE)

@@ -4,13 +4,8 @@ ARG SERVER_NAME
 
 ENV SERVER_NAME $SERVER_NAME
 RUN pacman -Syu --noconfirm
-RUN pacman -S apache --needed --noconfirm
-RUN pacman -S logrotate --needed --noconfirm
-#RUN pacman -S vim --needed --noconfirm
-RUN pacman -S iputils --needed --noconfirm
-RUN pacman -S psmisc --needed --noconfirm
-#RUN pacman -S bind-tools --needed --noconfirm
-#RUN pacman -S inetutils --needed --noconfirm
+RUN pacman -S apache logrotate --needed --noconfirm
+#RUN pacman -S vim iputils psmisc bind-tools inetutils --needed --noconfirm
 
 RUN echo "Include host/*.conf" >>/etc/httpd/conf/httpd.conf
 RUN mkdir -p /etc/httpd/host

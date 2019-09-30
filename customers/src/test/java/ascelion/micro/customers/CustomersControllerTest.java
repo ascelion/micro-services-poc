@@ -1,6 +1,5 @@
 package ascelion.micro.customers;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -8,17 +7,15 @@ import java.util.UUID;
 import javax.sql.DataSource;
 
 import ascelion.micro.mapper.BeanToBeanMapper;
+import ascelion.micro.tests.MockUtils;
 import ascelion.micro.tests.TestsResourceServerConfig;
 import ascelion.micro.tests.WithRoleAdmin;
 
-import static java.util.Optional.ofNullable;
+import static ascelion.micro.tests.RandomUtils.randomAscii;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.security.util.FieldUtils.setProtectedFieldValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -62,32 +59,11 @@ public class CustomersControllerTest {
 
 	@Before
 	public void setUp() {
-		when(this.repo.findAll())
-				.then(ivc -> {
-					return new ArrayList<>(this.customers.values());
-				});
-		when(this.repo.findById(any()))
-				.then(ivc -> {
-					return ofNullable(this.customers.get(ivc.getArgument(0)));
-				});
-		when(this.repo.save(any()))
-				.then(ivc -> {
-					final Customer o = ivc.getArgument(0);
-
-					if (o.getId() == null) {
-						final Customer newO = this.bbm.create(Customer.class, o);
-
-						setProtectedFieldValue("id", newO, randomUUID());
-
-						this.customers.put(newO.getId(), newO);
-
-						return newO;
-					} else {
-						this.customers.put(o.getId(), o);
-
-						return o;
-					}
-				});
+		MockUtils.mockRepository(this.bbm, this.repo, this.customers,
+				() -> Customer.builder()
+						.firstName(randomAscii(10, 20))
+						.lastName(randomAscii(10, 20))
+						.build());
 	}
 
 	@Test

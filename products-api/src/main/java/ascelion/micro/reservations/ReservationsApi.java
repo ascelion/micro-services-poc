@@ -1,5 +1,8 @@
 package ascelion.micro.reservations;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import org.springframework.cloud.openfeign.FeignClient;
@@ -16,8 +19,8 @@ public interface ReservationsApi {
 	}
 
 	@PutMapping(consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-	ReservationRequest[] reserve(@RequestBody ReservationRequest... reservations);
+	ReservationRequest[] reserve(@RequestBody @NotNull @Valid ReservationRequest... reservations);
 
 	@DeleteMapping(path = "{op}", consumes = APPLICATION_JSON_VALUE)
-	void finalize(@PathVariable("op") Finalize op, @RequestBody ReservationRequest... reservations);
+	void finalize(@PathVariable("op") Finalize op, @RequestBody @NotNull @Valid ReservationRequest... reservations);
 }

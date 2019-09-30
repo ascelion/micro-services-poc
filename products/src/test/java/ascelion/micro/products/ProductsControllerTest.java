@@ -1,7 +1,5 @@
 package ascelion.micro.products;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -10,21 +8,17 @@ import javax.sql.DataSource;
 
 import ascelion.micro.mapper.BeanToBeanMapper;
 import ascelion.micro.shared.model.AbstractEntity;
+import ascelion.micro.tests.MockUtils;
 import ascelion.micro.tests.TestsResourceServerConfig;
 import ascelion.micro.tests.WithRoleAdmin;
 import ascelion.micro.tests.WithRoleUser;
 
 import static ascelion.micro.tests.RandomUtils.randomAscii;
 import static ascelion.micro.tests.RandomUtils.randomDecimal;
-import static java.util.Optional.ofNullable;
-import static java.util.UUID.randomUUID;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.security.util.FieldUtils.setProtectedFieldValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -59,57 +53,22 @@ public class ProductsControllerTest {
 	private ObjectMapper om;
 	@Autowired
 	private BeanToBeanMapper bbm;
-	@MockBean(answer = Answers.CALLS_REAL_METHODS)
-	private ProductsRepository repo;
 	@MockBean
 	private DataSource ds;
+	@MockBean(answer = Answers.CALLS_REAL_METHODS)
+	private ProductsRepository repo;
 
 	private final Map<UUID, Product> products = new HashMap<>();
 
 	@Before
 	public void setUp() {
-		for (int k = 0; k < 10; k++) {
-			final LocalDateTime t = LocalDateTime.now();
-			final Product p = Product.builder()
-					.name(randomAscii(10, 20))
-					.description(randomAscii(10, 20))
-					.price(randomDecimal(0, 100))
-					.stock(randomDecimal(0, 100))
-					.build();
-
-			setProtectedFieldValue("id", p, randomUUID());
-			setProtectedFieldValue("createdAt", p, t);
-			setProtectedFieldValue("updatedAt", p, t);
-
-			this.products.put(p.getId(), p);
-		}
-
-		when(this.repo.findAll())
-				.then(ivc -> {
-					return new ArrayList<>(this.products.values());
-				});
-		when(this.repo.findById(any()))
-				.then(ivc -> {
-					return ofNullable(this.products.get(ivc.getArgument(0)));
-				});
-		when(this.repo.save(any()))
-				.then(ivc -> {
-					final Product p = ivc.getArgument(0);
-
-					if (p.getId() == null) {
-						final Product newP = this.bbm.create(Product.class, p);
-
-						setProtectedFieldValue("id", newP, randomUUID());
-
-						this.products.put(newP.getId(), newP);
-
-						return newP;
-					} else {
-						this.products.put(p.getId(), p);
-
-						return p;
-					}
-				});
+		MockUtils.mockRepository(this.bbm, this.repo, this.products,
+				() -> Product.builder()
+						.name(randomAscii(10, 20))
+						.description(randomAscii(10, 20))
+						.price(randomDecimal(0, 100))
+						.stock(randomDecimal(0, 100))
+						.build());
 	}
 
 	@Test
