@@ -12,8 +12,8 @@ services:
         delay: 15s
     networks:
       - @network@
-#    ports:
-#      - "@httpPort1@-@httpPort2@:8080"
+    ports:
+      - "@httpPort1@-@httpPort2@:8080"
 
 networks:
   @network@:

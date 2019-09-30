@@ -4,11 +4,13 @@ eureka:
     registerWithEureka: false
     fetchRegistry: false
     serviceUrl:
-      defaultZone: ${EUREKA_URI:http://localhost:48080/cloud/eureka}
+      defaultZone: ${EUREKA_URI:http://localhost:48080/services/eureka/}
+#  instance:
+#    preferIpAddress: true
 
-server:
-  servlet:
-    context-path: /cloud
+#server:
+#  servlet:
+#    context-path: /services
 
 spring:
   application:

@@ -1,8 +1,16 @@
 import org.apache.tools.ant.filters.*
 
-def maxScale = 10
+final def maxScale = 10
 
-def dockerScale = hasProperty( 'scalable' ) && scalable
+def dockerScale
+
+if( hasProperty( 'scale' ) && hasProperty( 'scalable' ) && scalable ) {
+	dockerScale = Math.min( maxScale, Integer.parseInt( scale ) )
+}
+else {
+	dockerScale = 1
+}
+
 def dockerData = hasProperty( 'hasDatabase' ) && hasDatabase
 def dockerFile = dockerData ? 'docker-compose-db.yml' : 'docker-compose.yml'
 def dockerDist = file( "${buildDir}/distributions" )
@@ -10,7 +18,7 @@ def dockerDist = file( "${buildDir}/distributions" )
 def jdbcPort = Integer.toString( portBase + 5432 )
 
 def httpPort1 = Integer.toString( portBase + 8080 )
-def httpPort2 = Integer.toString( portBase + 8080 + maxScale - 1 )
+def httpPort2 = Integer.toString( portBase + 8080 + dockerScale - 1 )
 
 task 'docker-files'(type: Copy) {
 	doFirst {
@@ -77,7 +85,7 @@ task 'docker-up'(type: Exec) {
 	args '-f', dockerFile, '-p', dockerName
 	args 'up', '-d'
 
-	if( dockerScale && project.hasProperty( 'scale' ) ) {
+	if( dockerScale > 1 && project.hasProperty( 'scale' ) ) {
 		if( Integer.parseInt( scale ) <= maxScale ) {
 			args '--scale', "${project.name}=$scale"
 		}

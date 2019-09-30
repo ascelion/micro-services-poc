@@ -29,6 +29,8 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
 				.authenticationEntryPoint(this::unauthorized)
 			.and()
 				.authorizeRequests()
+				.antMatchers("/error/**").permitAll()
+				.antMatchers("/actuator/**").permitAll()
 				.anyRequest().hasRole(ROLE_ROOT)
 			.and()
 				.csrf().disable()
