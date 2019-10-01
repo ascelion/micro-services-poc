@@ -16,9 +16,11 @@ import static java.util.Optional.ofNullable;
 import static org.springframework.http.HttpStatus.BAD_GATEWAY;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 import com.netflix.client.ClientException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -38,6 +40,9 @@ public class ExceptionHandlers {
 
 		return dot < 0 ? str : str.substring(dot + 1);
 	}
+
+	@Value("${spring.application.name}")
+	private String appName;
 
 	@Autowired
 	private HttpServletRequest request;
@@ -107,6 +112,7 @@ public class ExceptionHandlers {
 	private ResponseEntity<?> exceptionResponse(HttpStatus status, Object... messages) {
 		final Map<String, Object> values = new HashMap<>();
 
+		values.put("source", this.appName);
 		values.put("timestamp", LocalDateTime.now());
 		values.put("messages", messages);
 		values.put("path", this.request.getRequestURI());
@@ -115,6 +121,7 @@ public class ExceptionHandlers {
 
 		return ResponseEntity
 				.status(status)
+				.contentType(APPLICATION_JSON)
 				.body(values);
 	}
 }

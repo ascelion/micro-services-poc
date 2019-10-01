@@ -23,7 +23,7 @@ public class UserClientConfig {
 	@Bean
 	RequestInterceptor feignAuthzHeader() {
 		return template -> {
-			template.header(HttpHeaders.AUTHORIZATION, UserClientConfig.this.request.getHeader(HttpHeaders.AUTHORIZATION));
+			template.header(HttpHeaders.AUTHORIZATION, this.request.getHeader(HttpHeaders.AUTHORIZATION));
 		};
 	}
 }

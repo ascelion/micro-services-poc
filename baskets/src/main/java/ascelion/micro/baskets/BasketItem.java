@@ -7,6 +7,9 @@ import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import ascelion.micro.mapper.BBField;
+import ascelion.micro.mapper.BBMap;
+import ascelion.micro.reservations.ReservationRequest;
 import ascelion.micro.shared.model.AbstractEntity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -25,6 +28,9 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
 @Builder(access = AccessLevel.PACKAGE)
+@BBMap(to = ReservationRequest.class, bidi = false, fields = {
+		@BBField(from = "basket.id", to = "ownerId")
+})
 public class BasketItem extends AbstractEntity<BasketItem> {
 	@ManyToOne(optional = false)
 	@JsonIgnore

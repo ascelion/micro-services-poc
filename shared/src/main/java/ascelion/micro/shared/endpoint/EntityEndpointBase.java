@@ -7,14 +7,11 @@ import ascelion.micro.shared.model.EntityRepository;
 
 import static org.springframework.core.GenericTypeResolver.resolveTypeArguments;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
-
 public abstract class EntityEndpointBase<T extends AbstractEntity<T>, R extends EntityRepository<T>, U>
 		extends ViewEntityEndpointBase<T, R>
 		implements EntityEndpoint<T, U> {
 
-	private final Class<T> type = (Class<T>) resolveTypeArguments(getClass(), EntityEndpointBase.class)[0];
+	private final Class<T> type = (Class<T>) resolveTypeArguments(getClass(), EntityEndpoint.class)[0];
 
 	public EntityEndpointBase(R repo) {
 		super(repo);
@@ -27,17 +24,19 @@ public abstract class EntityEndpointBase<T extends AbstractEntity<T>, R extends 
 
 	@Override
 	public T updateEntity(UUID id, U request) {
-		return this.repo.findById(id)
-				.map(ent -> this.bbm.copyWithNulls(ent, request))
-				.map(this.repo::save)
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No such entity"));
+		final T ent = this.repo.getById(id);
+
+		this.bbm.copyWithNulls(ent, request);
+
+		return this.repo.save(ent);
 	}
 
 	@Override
-	public T patchEntity(UUID id, U patch) {
-		return this.repo.findById(id)
-				.map(ent -> this.bbm.copyWithoutNulls(ent, patch))
-				.map(this.repo::save)
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No such entity"));
+	public T patchEntity(UUID id, U request) {
+		final T ent = this.repo.getById(id);
+
+		this.bbm.copyWithoutNulls(ent, request);
+
+		return this.repo.save(ent);
 	}
 }

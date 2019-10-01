@@ -10,9 +10,9 @@ services:
         delay: 5s
     networks:
       - micro-services
-#    ports:
-#      - 5672:5672
-#      - 15672:15672
+    ports:
+      - 5672:5672
+      - 15672:15672
 
 networks:
   micro-services:

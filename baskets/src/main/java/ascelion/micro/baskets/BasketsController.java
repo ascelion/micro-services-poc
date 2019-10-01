@@ -19,6 +19,7 @@ import static ascelion.micro.shared.utils.LogUtils.loggerForThisClass;
 import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED_VALUE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
+import feign.FeignException;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.slf4j.Logger;
@@ -74,11 +75,17 @@ public class BasketsController extends ViewEntityEndpointBase<Basket, BasketsRep
 
 		basket.addItems(items);
 
-		final ReservationRequest[] reservations = this.bbm.createArray(ReservationRequest.class, basket.getItems());
+		final ReservationRequest[] reservations = this.client.reserve(
+				this.bbm.createArray(ReservationRequest.class, basket.getItems()));
 
-		items = this.bbm.createArray(BasketItem.class, this.client.reserve(reservations));
+		items = this.bbm.createArray(BasketItem.class, reservations);
 
-		basket.setItems(items);
+		for (int k = 0; k < reservations.length; k++) {
+			final BasketItem item = basket.getItems().get(k);
+
+			item.setExpired(false);
+			item.setQuantity(reservations[k].getQuantity());
+		}
 
 		return this.repo.save(basket);
 	}
@@ -92,7 +99,8 @@ public class BasketsController extends ViewEntityEndpointBase<Basket, BasketsRep
 
 		item.setQuantity(quantity);
 
-		final ReservationRequest[] reservations = this.client.reserve(this.bbm.create(ReservationRequest.class, item));
+		final ReservationRequest[] reservations = this.client.reserve(
+				this.bbm.create(ReservationRequest.class, item));
 
 		item.setQuantity(reservations[0].getQuantity());
 
@@ -106,9 +114,12 @@ public class BasketsController extends ViewEntityEndpointBase<Basket, BasketsRep
 		final BasketItem item = this.itmRepo.getById(itemId);
 
 		try {
-			this.client.finalize(ReservationsApi.Finalize.DISCARD, this.bbm.create(ReservationRequest.class, item));
-		} catch (final Exception e) {
-			L.error("Could not discard reservation for {}", itemId, e);
+			this.client.finalize(ReservationsApi.Finalize.DISCARD,
+					this.bbm.create(ReservationRequest.class, item));
+		} catch (final FeignException e) {
+			if (e.status() != HttpStatus.NOT_FOUND.value()) {
+				throw e;
+			}
 		}
 
 		item.getBasket().delItem(itemId);

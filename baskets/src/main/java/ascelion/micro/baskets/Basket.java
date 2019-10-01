@@ -15,9 +15,6 @@ import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
-import ascelion.micro.mapper.BBField;
-import ascelion.micro.mapper.BBMap;
-import ascelion.micro.reservations.ReservationRequest;
 import ascelion.micro.shared.model.AbstractEntity;
 
 import static java.util.Arrays.asList;
@@ -43,9 +40,6 @@ import org.apache.commons.lang3.builder.EqualsExclude;
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder(access = AccessLevel.PACKAGE)
-@BBMap(to = ReservationRequest.class, bidi = false, fields = {
-		@BBField(from = "id", to = "ownerId")
-})
 public class Basket extends AbstractEntity<Basket> {
 	@NotNull
 	private UUID customerId;
@@ -58,14 +52,6 @@ public class Basket extends AbstractEntity<Basket> {
 
 	public List<BasketItem> getItems() {
 		return this.items != null ? unmodifiableList(this.items) : emptyList();
-	}
-
-	public Basket setItems(@NonNull BasketItem... items) {
-		if (this.items != null) {
-			this.items.clear();
-		}
-
-		return addItems(items);
 	}
 
 	public Basket addItems(@NonNull BasketItem... items) {

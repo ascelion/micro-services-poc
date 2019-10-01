@@ -17,10 +17,9 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString
 public class ReservationExpired implements Serializable {
-	static public final String QUEUE_NAME = "RESERVATION_EXPIRED";
-
 	@NotNull
 	private UUID productId;
 	@NotNull
 	private UUID ownerId;
+	public static final String QUEUE_NAME = "RESERVATION_EXPIRED";
 }

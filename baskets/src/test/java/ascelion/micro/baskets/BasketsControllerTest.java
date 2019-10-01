@@ -16,8 +16,10 @@ import ascelion.micro.tests.WithRoleAdmin;
 import static ascelion.micro.tests.RandomUtils.randomDecimal;
 import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -62,6 +64,7 @@ public class BasketsControllerTest {
 	private DataSource ds;
 
 	private final Map<UUID, Basket> baskets = new HashMap<>();
+	private ReservationRequest[] reservations;
 
 	@Before
 	public void setUp() {
@@ -80,7 +83,7 @@ public class BasketsControllerTest {
 
 		when(this.resApi.reserve(any()))
 				.then(ivc -> {
-					return this.bbm.createArray(ReservationRequest.class, ivc.getArguments());
+					return this.reservations = this.bbm.createArray(ReservationRequest.class, ivc.getArguments());
 				});
 	}
 
@@ -108,17 +111,26 @@ public class BasketsControllerTest {
 
 		this.repo.save(ent);
 
-		final String bdy = this.om.writeValueAsString(asList(i1, i2));
-
 		final MockHttpServletRequestBuilder req = post("/baskets/{id}", ent.getId())
 				.contentType(APPLICATION_JSON)
 				.accept(APPLICATION_JSON)
-				.content(bdy);
+				.content(this.om.writeValueAsString(asList(i1, i2)));
 
 		this.mvc.perform(req)
 				.andExpect(status().isCreated())
 				.andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
 				.andExpect(jsonPath("$.id", notNullValue()))
 				.andExpect(jsonPath("$.items", hasSize(2)));
+
+		assertThat(this.reservations, notNullValue());
+		assertThat(asList(this.reservations), hasSize(2));
+
+		assertThat(this.reservations[0].getOwnerId(), equalTo(ent.getId()));
+		assertThat(this.reservations[0].getProductId(), equalTo(i1.getProductId()));
+		assertThat(this.reservations[0].getQuantity(), equalTo(i1.getQuantity()));
+
+		assertThat(this.reservations[1].getOwnerId(), equalTo(ent.getId()));
+		assertThat(this.reservations[1].getProductId(), equalTo(i2.getProductId()));
+		assertThat(this.reservations[1].getQuantity(), equalTo(i2.getQuantity()));
 	}
 }

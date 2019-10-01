@@ -14,7 +14,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface ReservationsRepository extends EntityRepository<Reservation> {
 
-	@Query("SELECT r FROM Reservation r WHERE r.createdAt < :tm")
+	@Query("SELECT r FROM Reservation r WHERE r.updatedAt < :tm")
 	List<Reservation> findOlderThan(@Param("tm") LocalDateTime tm);
 
 	default Reservation getByProductIdAndOwnerId(UUID productId, UUID ownerId) {
