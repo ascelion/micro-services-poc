@@ -1,0 +1,213 @@
+{
+	"info": {
+		"_postman_id": "1c1a62df-0417-4fb7-b6b2-db2fd08b5ca0",
+		"name": "POC_CHECKOUT",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get All",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "cf350735-237a-4de9-8098-a1ad50d72f12",
+						"exec": [
+							"var data = pm.response.json();",
+							"",
+							"for( var i = 0; i < data.length; i++ ) {",
+							"    pm.globals.set('order_id_' + i, data[i].id);",
+							"}",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{checkoutURL}}/checkout",
+					"host": [
+						"{{checkoutURL}}"
+					],
+					"path": [
+						"checkout"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get One",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{checkoutURL}}/checkout/{{order_id_0}}",
+					"host": [
+						"{{checkoutURL}}"
+					],
+					"path": [
+						"checkout",
+						"{{order_id_0}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Checkout",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "159d6a78-0c23-4910-8775-a115436f669e",
+						"exec": [
+							"var data = pm.response.text();",
+							"",
+							"pm.globals.set('checkout_id_0', data);",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{checkoutURL}}/checkout/{{basket_id_0}}",
+					"host": [
+						"{{checkoutURL}}"
+					],
+					"path": [
+						"checkout",
+						"{{basket_id_0}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Shipping OK",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{checkoutURL}}/checkout/{{checkout_id_0}}/OK",
+					"host": [
+						"{{checkoutURL}}"
+					],
+					"path": [
+						"checkout",
+						"{{checkout_id_0}}",
+						"OK"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Shipping NOK",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{checkoutURL}}/checkout/{{checkout_id_0}}/NOK",
+					"host": [
+						"{{checkoutURL}}"
+					],
+					"path": [
+						"checkout",
+						"{{checkout_id_0}}",
+						"NOK"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{poc_access_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "226ba4b9-d2a6-414b-8f46-0b9228e290e0",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "648b4aa1-ac5f-436b-a9ef-9a1ab4ad38c8",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"id": "d3a81eb6-1561-4dbf-93cf-ae811f4a11fd",
+			"key": "checkoutURL",
+			"value": "http://localhost:1080",
+			"type": "string"
+		}
+	]
+}

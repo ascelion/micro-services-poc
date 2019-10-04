@@ -130,8 +130,14 @@ subprojects {
 
 				implementation 'ma.glasnost.orika:orika-core:1.5.4'
 				implementation 'ma.glasnost.orika:orika-eclipse-tools:1.5.4'
-	
+
+				implementation "org.camunda.bpm.springboot:camunda-bpm-spring-boot-starter-rest:$camundaVersion"
+				implementation "org.camunda.bpm.springboot:camunda-bpm-spring-boot-starter-webapp:$camundaVersion"
+				implementation "org.camunda.bpm.springboot:camunda-bpm-spring-boot-starter-test:$camundaVersion"
+
 				implementation 'org.apache.commons:commons-lang3:3.9'
+				implementation 'org.apache.commons:commons-text:1.8'
+
 				implementation 'io.swagger:swagger-annotations:1.5.23'
 			}
 	

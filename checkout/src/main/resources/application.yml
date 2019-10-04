@@ -1,0 +1,50 @@
+
+database:
+  host: ${APP_NAME}-db
+  port: 5432
+
+eureka:
+  client:
+    service-url:
+      default-zone: ${EUREKA_URI:http://localhost:8761/eureka}
+  instance:
+    prefer-ip-address: false
+
+camunda:
+  bpm:
+    database:
+      schema-update: true
+    admin-user:
+      id: admin
+      password: admin
+    webapp:
+      index-redirect-enabled: false
+    jpa:
+      enabled: false
+    history-level: FULL
+
+spring:
+  application:
+    name: ${APP_NAME}
+
+  datasource:
+    username: ${APP_NAME}
+    password: ${APP_NAME}
+    url: jdbc:postgresql://${database.host}:${database.port}/${APP_NAME}
+
+  rabbitmq:
+    host: rabbit
+
+  cloud:
+    stream:
+      bindings:
+        checkout-input:
+          destination: checkout
+          group: ${spring.application.name}
+        checkout-output:
+          destination: checkout
+        payment-input:
+          destination: payment
+          group: ${spring.application.name}
+        payment-output:
+          destination: payment

@@ -1,0 +1,14 @@
+
+database:
+  host: localhost
+  port: 17432
+
+server:
+  port: 20080
+
+spring:
+  jackson:
+    serialization.indent_output: true
+
+  rabbitmq:
+    host: localhost

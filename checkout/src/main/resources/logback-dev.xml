@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<included>
+	<property name="LOG_LEVEL" value="ALL" />
+
+	<logger name="org.springframework" level="INFO" />
+	<logger name="org.springframework.security" level="INFO" />
+	<logger name="org.springframework.actuate" level="INFO" />
+
+	<logger name="org.camunda.bpm.engine.bpmn.behavior" level="ALL" />
+	<logger name="org.camunda.bpm.engine.spring" level="ALL" />
+
+	<logger name="ascelion" level="ALL" />
+
+</included>

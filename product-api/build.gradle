@@ -1,0 +1,8 @@
+apply plugin: 'java-library'
+
+dependencies {
+	implementation project( ':shared-api' )
+
+	implementation 'org.springframework.amqp:spring-amqp'
+	implementation 'org.springframework.cloud:spring-cloud-openfeign-core'
+}

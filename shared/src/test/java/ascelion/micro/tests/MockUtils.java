@@ -9,7 +9,7 @@ import javax.persistence.EntityNotFoundException;
 
 import ascelion.micro.mapper.BeanToBeanMapper;
 import ascelion.micro.shared.model.AbstractEntity;
-import ascelion.micro.shared.model.EntityRepository;
+import ascelion.micro.shared.model.EntityRepo;
 
 import static java.util.Optional.ofNullable;
 import static java.util.UUID.randomUUID;
@@ -26,8 +26,8 @@ import org.springframework.data.domain.Sort;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class MockUtils {
 
-	static public <T extends AbstractEntity<T>> void mockRepository(BeanToBeanMapper bbm, EntityRepository<T> repo, Map<UUID, T> entities, Supplier<T> sup) {
-		final Class<T> type = (Class<T>) resolveTypeArguments(repo.getClass(), EntityRepository.class)[0];
+	static public <T extends AbstractEntity<T>> void mockRepository(BeanToBeanMapper bbm, EntityRepo<T> repo, Map<UUID, T> entities, Supplier<T> sup) {
+		final Class<T> type = (Class<T>) resolveTypeArguments(repo.getClass(), EntityRepo.class)[0];
 
 		for (int k = 0; k < 10; k++) {
 			final LocalDateTime now = LocalDateTime.now();

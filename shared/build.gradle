@@ -2,15 +2,20 @@ apply plugin: 'java-library'
 
 dependencies {
 	api project( ':shared-api' )
+	api project( ':mapper' )
 
 	api 'org.springframework.boot:spring-boot-starter-web'
+
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
-	implementation 'ascelion.flywaydb:flywaydb-ext-util5'
+	compileOnly 'ascelion.flywaydb:flywaydb-ext-util5'
 
 	compileOnly 'org.springframework.data:spring-data-jpa'
 	compileOnly 'org.springframework.boot:spring-boot-starter-amqp'
 	compileOnly 'org.springframework.cloud:spring-cloud-openfeign-core'
+
+	compileOnly 'org.springframework:spring-messaging'
+
 	compileOnly 'io.github.openfeign:feign-core'
 
 	implementation "io.springfox:springfox-swagger2:$swaggerVersion"
@@ -18,9 +23,6 @@ dependencies {
 	implementation "io.springfox:springfox-bean-validators:$swaggerVersion"
 
 	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
-
-	implementation 'ma.glasnost.orika:orika-core'
-	implementation 'ma.glasnost.orika:orika-eclipse-tools'
 
 	api "org.springframework.security:spring-security-jwt:$jwtVersion"
 	api "org.springframework.security.oauth:spring-security-oauth2:$springBootOAuth2Version"

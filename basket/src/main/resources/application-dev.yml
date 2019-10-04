@@ -1,0 +1,19 @@
+
+database:
+  host: localhost
+  port: 19432
+
+server:
+  port: 22080
+
+spring:
+  jackson:
+    serialization.indent_output: true
+
+  jpa:
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true
+  rabbitmq:
+    host: localhost

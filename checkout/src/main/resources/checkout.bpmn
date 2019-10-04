@@ -1,0 +1,459 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_1izdkyz" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.3.4">
+  <bpmn:process id="checkout" isExecutable="true">
+    <bpmn:startEvent id="StartCheckout">
+      <bpmn:outgoing>ToRetrieveBasket</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:parallelGateway id="PrepareCheckoutFork">
+      <bpmn:incoming>FromBasketReceived</bpmn:incoming>
+      <bpmn:outgoing>ToLockReservations</bpmn:outgoing>
+      <bpmn:outgoing>ToRetrieveCustomer</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:sequenceFlow id="ToLockReservations" sourceRef="PrepareCheckoutFork" targetRef="LockReservations" />
+    <bpmn:parallelGateway id="PrepareCheckoutJoin">
+      <bpmn:incoming>FromCustomerReceived</bpmn:incoming>
+      <bpmn:incoming>FromLockReservation</bpmn:incoming>
+      <bpmn:outgoing>ToStartPayment</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:sequenceFlow id="ToStartPayment" sourceRef="PrepareCheckoutJoin" targetRef="StartPayment" />
+    <bpmn:sequenceFlow id="ToReceivePayment" sourceRef="StartPayment" targetRef="ReceivePayment" />
+    <bpmn:receiveTask id="ReceivePayment" name="Receive Payment" messageRef="Message_03d3v2n">
+      <bpmn:incoming>ToReceivePayment</bpmn:incoming>
+      <bpmn:outgoing>FromReceivePayment</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:boundaryEvent id="ReceivePaymentTimeout" attachedToRef="ReceivePayment">
+      <bpmn:outgoing>SequenceFlow_0fyj6jg</bpmn:outgoing>
+      <bpmn:timerEventDefinition>
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">P10M</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:boundaryEvent>
+    <bpmn:boundaryEvent id="IntermediateThrowEvent_15epnmd" attachedToRef="ReceivePayment">
+      <bpmn:compensateEventDefinition />
+    </bpmn:boundaryEvent>
+    <bpmn:sequenceFlow id="FromReceivePayment" sourceRef="ReceivePayment" targetRef="ReceivePaymentFork" />
+    <bpmn:parallelGateway id="ReceivePaymentFork">
+      <bpmn:incoming>FromReceivePayment</bpmn:incoming>
+      <bpmn:outgoing>ToSendInvoice</bpmn:outgoing>
+      <bpmn:outgoing>ToShipItems</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow_0uf4leg</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:sequenceFlow id="ToSendInvoice" sourceRef="ReceivePaymentFork" targetRef="SendInvoice" />
+    <bpmn:sequenceFlow id="ToShipItems" sourceRef="ReceivePaymentFork" targetRef="ShipItems" />
+    <bpmn:parallelGateway id="ReceivePaymentJoin">
+      <bpmn:incoming>FromSendInvoice</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow_0j83sgn</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow_01scivz</bpmn:incoming>
+      <bpmn:outgoing>ToEnd</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:sequenceFlow id="FromSendInvoice" sourceRef="SendInvoice" targetRef="ReceivePaymentJoin" />
+    <bpmn:endEvent id="EndEvents">
+      <bpmn:incoming>ToEnd</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow_1wci3s0</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow_00czaau</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow_014hny9</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow_075ya5a</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="ToEnd" sourceRef="ReceivePaymentJoin" targetRef="EndEvents" />
+    <bpmn:receiveTask id="ShippingEnded" name="Shipping Ended" messageRef="Message_1u2y4dl">
+      <bpmn:incoming>ToShippingComplete</bpmn:incoming>
+      <bpmn:outgoing>FromShippingComplete</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:sequenceFlow id="FromShippingComplete" sourceRef="ShippingEnded" targetRef="ShippingCompleteFork" />
+    <bpmn:intermediateThrowEvent id="RefundPaymentComp" name="Refund Payment">
+      <bpmn:incoming>SequenceFlow_1ie05a4</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_083dss4</bpmn:outgoing>
+      <bpmn:compensateEventDefinition activityRef="ReceivePayment" />
+    </bpmn:intermediateThrowEvent>
+    <bpmn:receiveTask id="BasketReceived" name="Basket Received" messageRef="Message_0bu4z8g">
+      <bpmn:extensionElements>
+        <camunda:executionListener delegateExpression="#{basketVerify}" event="end" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>ToBasketReceived</bpmn:incoming>
+      <bpmn:outgoing>FromBasketReceived</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:sequenceFlow id="FromBasketReceived" sourceRef="BasketReceived" targetRef="PrepareCheckoutFork" />
+    <bpmn:serviceTask id="RefundPayment" name="Refund Payment" isForCompensation="true" camunda:delegateExpression="#{refundPayment}" />
+    <bpmn:exclusiveGateway id="ShippingCompleteFork" default="ShippingCompleteOK">
+      <bpmn:incoming>FromShippingComplete</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_1ie05a4</bpmn:outgoing>
+      <bpmn:outgoing>ShippingCompleteOK</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="StartPayment" name="Start Payment" camunda:delegateExpression="#{startPayment}">
+      <bpmn:incoming>ToStartPayment</bpmn:incoming>
+      <bpmn:outgoing>ToReceivePayment</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="SendInvoice" name="Send Invoice" camunda:delegateExpression="#{sendInvoice}">
+      <bpmn:incoming>ToSendInvoice</bpmn:incoming>
+      <bpmn:outgoing>FromSendInvoice</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ShipItems" name="Ship Items" camunda:delegateExpression="#{shipItems}">
+      <bpmn:incoming>ToShipItems</bpmn:incoming>
+      <bpmn:outgoing>ToShippingComplete</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="ToShippingComplete" sourceRef="ShipItems" targetRef="ShippingEnded" />
+    <bpmn:sequenceFlow id="SequenceFlow_1ie05a4" sourceRef="ShippingCompleteFork" targetRef="RefundPaymentComp">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">#{shipItemsResponse != 'OK'}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="SequenceFlow_083dss4" sourceRef="RefundPaymentComp" targetRef="ReturnItemsComp" />
+    <bpmn:intermediateThrowEvent id="ReturnItemsComp" name="Return Items">
+      <bpmn:incoming>SequenceFlow_083dss4</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_1sz0ag6</bpmn:outgoing>
+      <bpmn:compensateEventDefinition />
+    </bpmn:intermediateThrowEvent>
+    <bpmn:boundaryEvent id="ReservationsLockedComp" attachedToRef="LockReservations">
+      <bpmn:compensateEventDefinition />
+    </bpmn:boundaryEvent>
+    <bpmn:serviceTask id="ReturnItems" name="Return Items" isForCompensation="true" camunda:delegateExpression="#{updateReservations}">
+      <bpmn:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="operation">DISCARD</camunda:inputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="SequenceFlow_0fyj6jg" sourceRef="ReceivePaymentTimeout" targetRef="PaymentTimeoutComp" />
+    <bpmn:intermediateThrowEvent id="PaymentTimeoutComp" name="Discard Reservations">
+      <bpmn:incoming>SequenceFlow_0fyj6jg</bpmn:incoming>
+      <bpmn:compensateEventDefinition activityRef="LockReservations" />
+    </bpmn:intermediateThrowEvent>
+    <bpmn:serviceTask id="LockReservations" name="Lock Reservations" camunda:delegateExpression="#{updateReservations}">
+      <bpmn:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="operation">LOCK</camunda:inputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+      <bpmn:incoming>ToLockReservations</bpmn:incoming>
+      <bpmn:outgoing>FromLockReservation</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="FromLockReservation" sourceRef="LockReservations" targetRef="PrepareCheckoutJoin" />
+    <bpmn:sequenceFlow id="ToBasketReceived" sourceRef="RetrieveBasket" targetRef="BasketReceived" />
+    <bpmn:sequenceFlow id="ToRetrieveBasket" sourceRef="StartCheckout" targetRef="RetrieveBasket" />
+    <bpmn:serviceTask id="RetrieveBasket" name="Retrieve Basket" camunda:delegateExpression="#{retrieveBasket}">
+      <bpmn:incoming>ToRetrieveBasket</bpmn:incoming>
+      <bpmn:outgoing>ToBasketReceived</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="FromCustomerReceived" sourceRef="CustomerReceived" targetRef="PrepareCheckoutJoin" />
+    <bpmn:receiveTask id="CustomerReceived" name="Customer Received" messageRef="Message_1lr5xrx">
+      <bpmn:extensionElements>
+        <camunda:executionListener delegateExpression="#{customerVerify}" event="end" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>ToCustomerReceived</bpmn:incoming>
+      <bpmn:outgoing>FromCustomerReceived</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:sequenceFlow id="ToCustomerReceived" sourceRef="RetrieveCustomer" targetRef="CustomerReceived" />
+    <bpmn:sequenceFlow id="ToRetrieveCustomer" sourceRef="PrepareCheckoutFork" targetRef="RetrieveCustomer" />
+    <bpmn:boundaryEvent id="BasketNotFound" name="Not Found" attachedToRef="BasketReceived">
+      <bpmn:outgoing>SequenceFlow_014hny9</bpmn:outgoing>
+      <bpmn:errorEventDefinition errorRef="Error_04ctfyx" />
+    </bpmn:boundaryEvent>
+    <bpmn:serviceTask id="RetrieveCustomer" name="Retrieve Customer" camunda:delegateExpression="#{retrieveCustomer}">
+      <bpmn:incoming>ToRetrieveCustomer</bpmn:incoming>
+      <bpmn:outgoing>ToCustomerReceived</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:boundaryEvent id="CustomerTimeout" attachedToRef="CustomerReceived">
+      <bpmn:outgoing>SequenceFlow_00czaau</bpmn:outgoing>
+      <bpmn:timerEventDefinition>
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT15S</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:boundaryEvent>
+    <bpmn:boundaryEvent id="BasketReceiveTimeout" name="Timeout&#10;" attachedToRef="BasketReceived">
+      <bpmn:outgoing>SequenceFlow_075ya5a</bpmn:outgoing>
+      <bpmn:timerEventDefinition>
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT15S</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:boundaryEvent>
+    <bpmn:boundaryEvent id="CustomerNotFound" attachedToRef="CustomerReceived">
+      <bpmn:outgoing>SequenceFlow_1wci3s0</bpmn:outgoing>
+      <bpmn:errorEventDefinition errorRef="Error_04ctfyx" />
+    </bpmn:boundaryEvent>
+    <bpmn:inclusiveGateway id="ShippingCompleteJoin">
+      <bpmn:incoming>SequenceFlow_1sz0ag6</bpmn:incoming>
+      <bpmn:incoming>ShippingCompleteOK</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_0j83sgn</bpmn:outgoing>
+    </bpmn:inclusiveGateway>
+    <bpmn:sequenceFlow id="SequenceFlow_0j83sgn" sourceRef="ShippingCompleteJoin" targetRef="ReceivePaymentJoin" />
+    <bpmn:sequenceFlow id="SequenceFlow_1sz0ag6" sourceRef="ReturnItemsComp" targetRef="ShippingCompleteJoin" />
+    <bpmn:sequenceFlow id="ShippingCompleteOK" name="Shipping OK&#10;&#10;" sourceRef="ShippingCompleteFork" targetRef="ShippingCompleteJoin" />
+    <bpmn:sequenceFlow id="SequenceFlow_1wci3s0" sourceRef="CustomerNotFound" targetRef="EndEvents" />
+    <bpmn:sequenceFlow id="SequenceFlow_00czaau" sourceRef="CustomerTimeout" targetRef="EndEvents" />
+    <bpmn:sequenceFlow id="SequenceFlow_014hny9" sourceRef="BasketNotFound" targetRef="EndEvents" />
+    <bpmn:sequenceFlow id="SequenceFlow_075ya5a" sourceRef="BasketReceiveTimeout" targetRef="EndEvents" />
+    <bpmn:sequenceFlow id="SequenceFlow_0uf4leg" sourceRef="ReceivePaymentFork" targetRef="CommitReservations" />
+    <bpmn:serviceTask id="CommitReservations" name="Commit Reservations" camunda:delegateExpression="#{updateReservations}">
+      <bpmn:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="operation">COMMIT</camunda:inputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+      <bpmn:incoming>SequenceFlow_0uf4leg</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_01scivz</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="SequenceFlow_01scivz" sourceRef="CommitReservations" targetRef="ReceivePaymentJoin" />
+    <bpmn:association id="ToRefundPayment" associationDirection="One" sourceRef="IntermediateThrowEvent_15epnmd" targetRef="RefundPayment" />
+    <bpmn:association id="Association_0l52hdt" associationDirection="One" sourceRef="ReservationsLockedComp" targetRef="ReturnItems" />
+  </bpmn:process>
+  <bpmn:message id="Message_1lr5xrx" name="CUSTOMER_RESPONSE" />
+  <bpmn:message id="Message_0wfdxyx" name="RESERVATIONS_RESPONSE" />
+  <bpmn:message id="Message_03d3v2n" name="PAYMENT_RESPONSE" />
+  <bpmn:message id="Message_0bu4z8g" name="BASKET_RESPONSE" />
+  <bpmn:message id="Message_1u2y4dl" name="SHIPPING_RESPONSE" />
+  <bpmn:error id="Error_04ctfyx" name="VARIABLE_NOT_FOUND" errorCode="VARIABLE_NOT_FOUND" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="checkout">
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartCheckout">
+        <dc:Bounds x="192" y="182" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway_1bzkfoo_di" bpmnElement="PrepareCheckoutFork">
+        <dc:Bounds x="425" y="292" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1mbslu9_di" bpmnElement="ToLockReservations">
+        <di:waypoint x="450" y="342" />
+        <di:waypoint x="450" y="420" />
+        <di:waypoint x="510" y="420" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ParallelGateway_1krbz1d_di" bpmnElement="PrepareCheckoutJoin">
+        <dc:Bounds x="785" y="185" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_0fwk6rl_di" bpmnElement="ToStartPayment">
+        <di:waypoint x="835" y="210" />
+        <di:waypoint x="880" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ReceiveTask_1e2gmnx_di" bpmnElement="CustomerReceived">
+        <dc:Bounds x="660" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_0su6l5w_di" bpmnElement="ToReceivePayment">
+        <di:waypoint x="980" y="210" />
+        <di:waypoint x="1020" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ReceiveTask_10ninqq_di" bpmnElement="ReceivePayment">
+        <dc:Bounds x="1020" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent_0zvku92_di" bpmnElement="ReceivePaymentTimeout">
+        <dc:Bounds x="1052" y="152" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent_17kzph3_di" bpmnElement="IntermediateThrowEvent_15epnmd">
+        <dc:Bounds x="1102" y="195" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1sddt4t_di" bpmnElement="FromReceivePayment">
+        <di:waypoint x="1070" y="250" />
+        <di:waypoint x="1070" y="291" />
+        <di:waypoint x="1030" y="291" />
+        <di:waypoint x="1030" y="332" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ParallelGateway_0zfq37a_di" bpmnElement="ReceivePaymentFork">
+        <dc:Bounds x="1005" y="332" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1grgrpn_di" bpmnElement="ToSendInvoice">
+        <di:waypoint x="1005" y="357" />
+        <di:waypoint x="890" y="357" />
+        <di:waypoint x="890" y="420" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_0l883i4_di" bpmnElement="ToShipItems">
+        <di:waypoint x="1055" y="357" />
+        <di:waypoint x="1190" y="357" />
+        <di:waypoint x="1190" y="420" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ParallelGateway_0csbfsh_di" bpmnElement="ReceivePaymentJoin">
+        <dc:Bounds x="915" y="635" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_19e5wr6_di" bpmnElement="FromSendInvoice">
+        <di:waypoint x="890" y="500" />
+        <di:waypoint x="890" y="573" />
+        <di:waypoint x="940" y="573" />
+        <di:waypoint x="940" y="635" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="EndEvent_0hf7lqy_di" bpmnElement="EndEvents">
+        <dc:Bounds x="692" y="642" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1vwo8v2_di" bpmnElement="ToEnd">
+        <di:waypoint x="915" y="660" />
+        <di:waypoint x="728" y="660" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ReceiveTask_0yumdud_di" bpmnElement="ShippingEnded">
+        <dc:Bounds x="1140" y="560" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_0itka04_di" bpmnElement="FromShippingComplete">
+        <di:waypoint x="1190" y="640" />
+        <di:waypoint x="1190" y="675" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="IntermediateThrowEvent_0akovrn_di" bpmnElement="RefundPaymentComp">
+        <dc:Bounds x="1302" y="682" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1269" y="663" width="82" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Association_16z9vrv_di" bpmnElement="ToRefundPayment">
+        <di:waypoint x="1138" y="213" />
+        <di:waypoint x="1180" y="213" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ReceiveTask_067xwmy_di" bpmnElement="BasketReceived">
+        <dc:Bounds x="290" y="277" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_14i360z_di" bpmnElement="FromBasketReceived">
+        <di:waypoint x="390" y="317" />
+        <di:waypoint x="425" y="317" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ServiceTask_1pap8uu_di" bpmnElement="RefundPayment">
+        <dc:Bounds x="1180" y="173" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway_0cv1n95_di" bpmnElement="ShippingCompleteFork" isMarkerVisible="true">
+        <dc:Bounds x="1165" y="675" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_0nfi0h2_di" bpmnElement="RetrieveBasket">
+        <dc:Bounds x="160" y="277" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_0lpcrsm_di" bpmnElement="StartPayment">
+        <dc:Bounds x="880" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_0gi0vb5_di" bpmnElement="SendInvoice">
+        <dc:Bounds x="840" y="420" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_1sukcwl_di" bpmnElement="ShipItems">
+        <dc:Bounds x="1140" y="420" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_18e0ep4_di" bpmnElement="ToShippingComplete">
+        <di:waypoint x="1187" y="500" />
+        <di:waypoint x="1187" y="560" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1ie05a4_di" bpmnElement="SequenceFlow_1ie05a4">
+        <di:waypoint x="1215" y="700" />
+        <di:waypoint x="1302" y="700" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_083dss4_di" bpmnElement="SequenceFlow_083dss4">
+        <di:waypoint x="1320" y="718" />
+        <di:waypoint x="1320" y="812" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="IntermediateThrowEvent_0ngt70o_di" bpmnElement="ReturnItemsComp">
+        <dc:Bounds x="1302" y="812" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1288" y="855" width="64" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent_1aioql1_di" bpmnElement="ReservationsLockedComp">
+        <dc:Bounds x="542" y="442" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Association_0l52hdt_di" bpmnElement="Association_0l52hdt">
+        <di:waypoint x="560" y="478" />
+        <di:waypoint x="560" y="528" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ServiceTask_0obq48t_di" bpmnElement="ReturnItems">
+        <dc:Bounds x="510" y="528" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_0fyj6jg_di" bpmnElement="SequenceFlow_0fyj6jg">
+        <di:waypoint x="1070" y="152" />
+        <di:waypoint x="1070" y="118" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="IntermediateThrowEvent_00xfa0i_di" bpmnElement="PaymentTimeoutComp">
+        <dc:Bounds x="1052" y="82" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1042" y="52" width="65" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_022namo_di" bpmnElement="RetrieveCustomer">
+        <dc:Bounds x="510" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_0xtxdkz_di" bpmnElement="LockReservations">
+        <dc:Bounds x="510" y="380" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_0vzlkxd_di" bpmnElement="FromLockReservation">
+        <di:waypoint x="610" y="420" />
+        <di:waypoint x="810" y="420" />
+        <di:waypoint x="810" y="235" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="BoundaryEvent_0h59iwm_di" bpmnElement="BasketNotFound">
+        <dc:Bounds x="302" y="339" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="254" y="389" width="52" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_093987v_di" bpmnElement="ToBasketReceived">
+        <di:waypoint x="260" y="317" />
+        <di:waypoint x="290" y="317" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1guzuhy_di" bpmnElement="ToRetrieveBasket">
+        <di:waypoint x="210" y="218" />
+        <di:waypoint x="210" y="277" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_0okbbxb_di" bpmnElement="FromCustomerReceived">
+        <di:waypoint x="760" y="210" />
+        <di:waypoint x="785" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1uzrrqx_di" bpmnElement="ToCustomerReceived">
+        <di:waypoint x="610" y="210" />
+        <di:waypoint x="660" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_0gbmwhp_di" bpmnElement="ToRetrieveCustomer">
+        <di:waypoint x="450" y="292" />
+        <di:waypoint x="450" y="210" />
+        <di:waypoint x="510" y="210" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="421" y="153" width="89" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="BoundaryEvent_1ngcq3j_di" bpmnElement="CustomerTimeout">
+        <dc:Bounds x="672" y="232" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent_1sbhni5_di" bpmnElement="BasketReceiveTimeout">
+        <dc:Bounds x="342" y="339" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="370" y="382" width="40" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent_026j3rn_di" bpmnElement="CustomerNotFound">
+        <dc:Bounds x="712" y="232" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="InclusiveGateway_10ac67n_di" bpmnElement="ShippingCompleteJoin">
+        <dc:Bounds x="1165" y="805" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_0j83sgn_di" bpmnElement="SequenceFlow_0j83sgn">
+        <di:waypoint x="1165" y="830" />
+        <di:waypoint x="940" y="830" />
+        <di:waypoint x="940" y="685" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1sz0ag6_di" bpmnElement="SequenceFlow_1sz0ag6">
+        <di:waypoint x="1302" y="830" />
+        <di:waypoint x="1215" y="830" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1vadw91_di" bpmnElement="ShippingCompleteOK">
+        <di:waypoint x="1190" y="725" />
+        <di:waypoint x="1190" y="805" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1118" y="740" width="63" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1wci3s0_di" bpmnElement="SequenceFlow_1wci3s0">
+        <di:waypoint x="730" y="268" />
+        <di:waypoint x="730" y="455" />
+        <di:waypoint x="710" y="455" />
+        <di:waypoint x="710" y="642" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_00czaau_di" bpmnElement="SequenceFlow_00czaau">
+        <di:waypoint x="690" y="268" />
+        <di:waypoint x="690" y="455" />
+        <di:waypoint x="710" y="455" />
+        <di:waypoint x="710" y="642" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_014hny9_di" bpmnElement="SequenceFlow_014hny9">
+        <di:waypoint x="320" y="375" />
+        <di:waypoint x="320" y="660" />
+        <di:waypoint x="692" y="660" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_075ya5a_di" bpmnElement="SequenceFlow_075ya5a">
+        <di:waypoint x="360" y="375" />
+        <di:waypoint x="360" y="660" />
+        <di:waypoint x="692" y="660" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_0uf4leg_di" bpmnElement="SequenceFlow_0uf4leg">
+        <di:waypoint x="1030" y="382" />
+        <di:waypoint x="1030" y="420" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ServiceTask_181vvfy_di" bpmnElement="CommitReservations">
+        <dc:Bounds x="980" y="420" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_01scivz_di" bpmnElement="SequenceFlow_01scivz">
+        <di:waypoint x="1030" y="500" />
+        <di:waypoint x="1030" y="660" />
+        <di:waypoint x="965" y="660" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

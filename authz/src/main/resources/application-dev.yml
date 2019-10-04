@@ -6,7 +6,7 @@ database:
 server:
   port: 18080
 
-oauth.clients.poc.accessTokenValidity: 86400
+oauth.clients.poc.accessTokenValidity: 8640000
 
 spring:
   jackson:

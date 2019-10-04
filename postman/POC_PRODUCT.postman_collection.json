@@ -1,0 +1,324 @@
+{
+	"info": {
+		"_postman_id": "0904d8a8-6f6d-464f-8f8e-0485fce84606",
+		"name": "POC_PRODUCT",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get All",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "cf350735-237a-4de9-8098-a1ad50d72f12",
+						"exec": [
+							"var data = pm.response.json();",
+							"",
+							"for( var i = 0; i < data.length; i++ ) {",
+							"    pm.globals.set('product_id_' + i, data[i].id);",
+							"}",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{productURL}}/product?sort=name",
+					"host": [
+						"{{productURL}}"
+					],
+					"path": [
+						"product"
+					],
+					"query": [
+						{
+							"key": "sort",
+							"value": "name"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Reservations",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "cf350735-237a-4de9-8098-a1ad50d72f12",
+						"exec": [
+							"var data = pm.response.json();",
+							"",
+							"for( var i = 0; i < data.length; i++ ) {",
+							"    pm.globals.set('reservation_id_' + i, data[i].id);",
+							"}",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{productURL}}/reservations",
+					"host": [
+						"{{productURL}}"
+					],
+					"path": [
+						"reservations"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get One",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{productURL}}/product/{{product[0].id}}",
+					"host": [
+						"{{productURL}}"
+					],
+					"path": [
+						"product",
+						"{{product[0].id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create PET",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"name\":\"Polyethylene Terephthalate\", \"description\": \"Description of PET\", \"price\": 31.4, \"stock\": 1023 }"
+				},
+				"url": {
+					"raw": "{{productURL}}/product",
+					"host": [
+						"{{productURL}}"
+					],
+					"path": [
+						"product"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create PETG",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"name\":\"Polyethylene Terephthalate Glycol\", \"description\": \"Description of PETG\", \"price\": 51.4, \"stock\": 2340 }"
+				},
+				"url": {
+					"raw": "{{productURL}}/product",
+					"host": [
+						"{{productURL}}"
+					],
+					"path": [
+						"product"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Nylon",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"name\":\"Polyamide\", \"description\": \"A.K.A. Nylon\", \"price\": 51.4, \"stock\": 2313 }"
+				},
+				"url": {
+					"raw": "{{productURL}}/product",
+					"host": [
+						"{{productURL}}"
+					],
+					"path": [
+						"product"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Invalid",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"price\": 42 }"
+				},
+				"url": {
+					"raw": "{{productURL}}/product/{{product_id_0}}",
+					"host": [
+						"{{productURL}}"
+					],
+					"path": [
+						"product",
+						"{{product_id_0}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Patch",
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"name\": \"ABS\", \"price\": 41.7, \"description\": \"Acrylonitrile Butadiene Styrene\" }"
+				},
+				"url": {
+					"raw": "{{productURL}}/product/{{product_id_0}}",
+					"host": [
+						"{{productURL}}"
+					],
+					"path": [
+						"product",
+						"{{product_id_0}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Patch Invalid",
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"price\": -2 }"
+				},
+				"url": {
+					"raw": "{{productURL}}/product/{{product_id_0}}",
+					"host": [
+						"{{productURL}}"
+					],
+					"path": [
+						"product",
+						"{{product_id_0}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{poc_access_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "226ba4b9-d2a6-414b-8f46-0b9228e290e0",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "648b4aa1-ac5f-436b-a9ef-9a1ab4ad38c8",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"id": "89ceffef-40ab-4263-809e-d9707d98799f",
+			"key": "productURL",
+			"value": "http://localhost:1080",
+			"type": "string"
+		}
+	]
+}

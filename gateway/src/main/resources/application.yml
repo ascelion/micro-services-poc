@@ -33,15 +33,23 @@ zuul:
     baskets:
       strip-prefix: false
       sensitive-headers:
+      service-id: basket
     customers:
       strip-prefix: false
       sensitive-headers:
-    orders:
+      service-id: customer
+    checkouts:
       strip-prefix: false
       sensitive-headers:
+      service-id: checkout
     products:
       strip-prefix: false
       sensitive-headers:
+      service-id: checkout
+    payments:
+      strip-prefix: false
+      sensitive-headers:
+      service-id: payment
 #    services:
 #      service-id: eureka
 #      strip-prefix: false

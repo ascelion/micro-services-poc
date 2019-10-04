@@ -9,5 +9,13 @@ dependencies {
 
 	api 'org.springframework:spring-web'
 	api 'org.springframework:spring-context'
-	api 'org.springframework.data:spring-data-jpa'
+
+	api 'com.fasterxml.jackson.core:jackson-annotations'
+
+	implementation 'com.fasterxml.jackson.core:jackson-databind'
+
+	compileOnly 'org.springframework:spring-messaging'
+	compileOnly 'org.springframework.data:spring-data-jpa'
+
+	implementation project( ':mapper' )
 }

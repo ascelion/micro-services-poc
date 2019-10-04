@@ -1,0 +1,248 @@
+{
+	"info": {
+		"_postman_id": "a88db3fb-51b9-42e5-a0f7-84e10f6ab588",
+		"name": "POC_CUSTOMER",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get All",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "cf350735-237a-4de9-8098-a1ad50d72f12",
+						"exec": [
+							"var data = pm.response.json();",
+							"",
+							"for( var i = 0; i < data.length; i++ ) {",
+							"    pm.globals.set('customer_id_' + i, data[i].id);",
+							"}",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{customerURL}}/customer",
+					"host": [
+						"{{customerURL}}"
+					],
+					"path": [
+						"customer"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get One",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{customerURL}}/customer/{{customer_id_0}}",
+					"host": [
+						"{{customerURL}}"
+					],
+					"path": [
+						"customer",
+						"{{customer_id_0}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"firstName\":\"{{$guid}}\", \"lastName\": \"{{$guid}}\" }"
+				},
+				"url": {
+					"raw": "{{customerURL}}/customer",
+					"host": [
+						"{{customerURL}}"
+					],
+					"path": [
+						"customer"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Invalid",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"price\": 42 }"
+				},
+				"url": {
+					"raw": "{{customerURL}}/customer/3",
+					"host": [
+						"{{customerURL}}"
+					],
+					"path": [
+						"customer",
+						"3"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update",
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"price\": 41.7 }"
+				},
+				"url": {
+					"raw": "{{customerURL}}/customer/{{customer_id_0}}",
+					"host": [
+						"{{customerURL}}"
+					],
+					"path": [
+						"customer",
+						"{{customer_id_0}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Patch Invalid",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "adminadmin",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "admin",
+							"type": "string"
+						},
+						{
+							"key": "saveHelperData",
+							"type": "any"
+						},
+						{
+							"key": "showPassword",
+							"value": false,
+							"type": "boolean"
+						}
+					]
+				},
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"price\": 44 }"
+				},
+				"url": {
+					"raw": "{{customerURL}}/customer/3",
+					"host": [
+						"{{customerURL}}"
+					],
+					"path": [
+						"customer",
+						"3"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{poc_access_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "226ba4b9-d2a6-414b-8f46-0b9228e290e0",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "648b4aa1-ac5f-436b-a9ef-9a1ab4ad38c8",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"id": "89ceffef-40ab-4263-809e-d9707d98799f",
+			"key": "customerURL",
+			"value": "http://localhost:1080",
+			"type": "string"
+		}
+	]
+}

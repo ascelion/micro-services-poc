@@ -2,8 +2,10 @@ version: "3.1"
 
 services:
   rabbit:
-    image: "rabbitmq:latest"
+    image: "rabbitmq:management"
     container_name: rabbit
+#    volumes:
+#    - rabbit:/var/lib/rabbitmq
     deploy:
       restart_policy:
         condition: on-failure
@@ -13,6 +15,9 @@ services:
     ports:
       - 5672:5672
       - 15672:15672
+
+#volumes:
+#  rabbit:
 
 networks:
   micro-services:

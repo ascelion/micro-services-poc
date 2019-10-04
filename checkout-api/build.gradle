@@ -1,0 +1,7 @@
+apply plugin: 'java-library'
+
+dependencies {
+	api project( ':shared-api' )
+
+	implementation 'org.springframework.cloud:spring-cloud-stream'
+}

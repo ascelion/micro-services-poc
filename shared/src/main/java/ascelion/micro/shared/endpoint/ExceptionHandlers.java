@@ -62,11 +62,6 @@ public class ExceptionHandlers {
 	}
 
 	@ExceptionHandler
-	public ResponseEntity<?> handleException(ClientException ex) {
-		return exceptionResponse(BAD_GATEWAY, ex.getErrorMessage());
-	}
-
-	@ExceptionHandler
 	public ResponseEntity<?> handleException(SocketException ex) {
 		return exceptionResponse(BAD_GATEWAY, ex.getMessage());
 	}
@@ -109,7 +104,7 @@ public class ExceptionHandlers {
 		return exceptionResponse(ex.getStatus(), ex.getReason());
 	}
 
-	private ResponseEntity<?> exceptionResponse(HttpStatus status, Object... messages) {
+	ResponseEntity<?> exceptionResponse(HttpStatus status, Object... messages) {
 		final Map<String, Object> values = new HashMap<>();
 
 		values.put("source", this.appName);

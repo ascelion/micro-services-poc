@@ -5,7 +5,7 @@ import java.util.UUID;
 
 import ascelion.micro.mapper.BeanToBeanMapper;
 import ascelion.micro.shared.model.AbstractEntity;
-import ascelion.micro.shared.model.EntityRepository;
+import ascelion.micro.shared.model.EntityRepo;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +13,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
 @RequiredArgsConstructor
-public abstract class ViewEntityEndpointBase<T extends AbstractEntity<T>, R extends EntityRepository<T>> implements ViewEntityEndpoint<T> {
+public abstract class ViewEntityEndpointBase<T extends AbstractEntity<T>, R extends EntityRepo<T>> implements ViewEntityEndpoint<T> {
 	protected final R repo;
 
 	@Autowired

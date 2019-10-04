@@ -10,10 +10,12 @@ import org.flywaydb.core.api.configuration.FluentConfiguration;
 import org.flywaydb.core.api.resolver.MigrationResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.flyway.FlywayConfigurationCustomizer;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@ConditionalOnClass(FluentConfiguration.class)
 public class SharedFlywayConfig implements FlywayConfigurationCustomizer {
 	static private final Logger LOG = LoggerFactory.getLogger(SharedFlywayConfig.class);
 

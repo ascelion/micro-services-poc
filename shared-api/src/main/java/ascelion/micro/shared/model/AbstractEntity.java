@@ -90,13 +90,16 @@ public abstract class AbstractEntity<E extends AbstractEntity<E>> {
 		if (c1 == c2) {
 			return true;
 		}
-		if (c1 == null || c2 == null) {
-			return false;
-		}
-		if (c1.size() != c2.size()) {
-			return false;
-		}
 
+		final int z1 = c1 == null ? 0 : c1.size();
+		final int z2 = c2 == null ? 0 : c2.size();
+
+		if (z1 != z2) {
+			return false;
+		}
+		if (z1 == 0) {
+			return true;
+		}
 		for (Iterator<T> i1 = c1.iterator(), i2 = c2.iterator(); i1.hasNext();) {
 			if (!i1.next().beq(i2.next())) {
 				return false;
