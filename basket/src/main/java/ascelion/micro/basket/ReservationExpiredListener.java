@@ -1,7 +1,5 @@
 package ascelion.micro.basket;
 
-import java.math.BigDecimal;
-
 import ascelion.micro.reservation.api.ReservationExpired;
 
 import static ascelion.micro.shared.utils.LogUtils.loggerForThisClass;
@@ -26,8 +24,7 @@ public class ReservationExpiredListener {
 		for (final ReservationExpired exp : payload) {
 			this.repo.findByProductId(exp.getOwnerId(), exp.getProductId())
 					.ifPresent(item -> {
-						item.setExpired(true);
-						item.setQuantity(BigDecimal.ZERO);
+						item.expire();
 
 						this.repo.save(item);
 					});

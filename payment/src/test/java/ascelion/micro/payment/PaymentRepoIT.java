@@ -1,7 +1,6 @@
 package ascelion.micro.payment;
 
 import java.time.LocalDate;
-import java.util.Optional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.FlushModeType;
@@ -11,8 +10,6 @@ import ascelion.micro.account.AccountRepo;
 import ascelion.micro.account.IBAN;
 import ascelion.micro.card.Card;
 import ascelion.micro.card.CardRepo;
-import ascelion.micro.payment.Payment;
-import ascelion.micro.payment.PaymentRepo;
 import ascelion.micro.tests.JpaEntityIT;
 
 import static ascelion.micro.tests.RandomUtils.randomAscii;
@@ -55,7 +52,7 @@ public class PaymentRepoIT {
 	@Test
 	@Transactional
 	public void validate_table_mappings() {
-		final Account a1 = Account.builder()
+		final var a1 = Account.builder()
 				.customerId(randomUUID())
 				.amount(randomDecimal(1000, 1100))
 				.number(IBAN.valueOf(randomAscii(20, 20)))
@@ -67,11 +64,11 @@ public class PaymentRepoIT {
 
 			assertThat(a1.getId(), notNullValue());
 
-			final Optional<Account> a2o = this.accounts.findById(a1.getId());
+			final var a2o = this.accounts.findById(a1.getId());
 
 			assertThat(a2o.isPresent(), is(true));
 
-			final Account a2 = a2o.get();
+			final var a2 = a2o.get();
 
 			assertThat(a2, not(sameInstance(a1)));
 
@@ -79,7 +76,7 @@ public class PaymentRepoIT {
 			assertThat(a2.beq(a1), is(true));
 		}
 
-		final Card c1 = Card.builder()
+		final var c1 = Card.builder()
 				.account(a1)
 				.number(randomAscii(20, 20))
 				.expiration(LocalDate.now().plusYears(2))
@@ -92,23 +89,23 @@ public class PaymentRepoIT {
 
 			assertThat(c1.getId(), notNullValue());
 
-			final Optional<Card> c2o = this.cards.findById(c1.getId());
+			final var c2o = this.cards.findById(c1.getId());
 
 			assertThat(c2o.isPresent(), is(true));
 
-			final Card c2 = c2o.get();
+			final var c2 = c2o.get();
 
 			assertThat(c2, not(sameInstance(c1)));
 
 			assertThat(c2.getId(), notNullValue());
 			assertThat(c2.beq(c1), is(true));
 
-			final Optional<Card> c3o = this.cards.findByNumber(c1.getNumber());
+			final var c3o = this.cards.findByNumber(c1.getNumber());
 
 			assertThat(c3o.isPresent(), is(true));
 		}
 
-		final Payment p1 = new Payment(c1,randomDecimal(10, 20),randomUUID());
+		final Payment p1 = new Payment(c1, randomDecimal(10, 20), randomUUID());
 		{
 			this.tem.persist(p1);
 			this.tem.flush();
@@ -116,11 +113,11 @@ public class PaymentRepoIT {
 
 			assertThat(p1.getId(), notNullValue());
 
-			final Optional<Payment> p2o = this.payments.findById(p1.getId());
+			final var p2o = this.payments.findById(p1.getId());
 
 			assertThat(p2o.isPresent(), is(true));
 
-			final Payment p2 = p2o.get();
+			final var p2 = p2o.get();
 
 			assertThat(p2, not(sameInstance(p1)));
 

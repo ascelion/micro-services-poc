@@ -31,9 +31,9 @@ public class BasketCheckoutListener {
 
 	@StreamListener(target = CheckoutChannel.INPUT, condition = "headers." + HEADER_KIND + " == '" + BASKET_MESSAGE + "_REQUEST'")
 	public void messageReceived(@Payload MessagePayload<UUID> payload, @Header(HEADER_CORRELATION) UUID pid) {
-		final UUID basketId = payload.get();
+		final var basketId = payload.get();
 
-		Basket basket = this.repo.findById(basketId)
+		var basket = this.repo.findById(basketId)
 				.filter(b -> b.getStatus() != Status.FINALIZED)
 				.orElse(null);
 

@@ -58,7 +58,7 @@ public class BeanToBeanMapperTest {
 
 	@Test
 	public void bean3_to_bean1_create() {
-		final Bean1 b = this.bbm.create(Bean1.class, new Bean3(new Bean1("value1", "value2")));
+		final var b = this.bbm.create(Bean1.class, new Bean3(new Bean1("value1", "value2")));
 
 		assertThat(b.field1, equalTo("value1"));
 		assertThat(b.field2, equalTo("value2"));
@@ -66,7 +66,7 @@ public class BeanToBeanMapperTest {
 
 	@Test
 	public void bean1_to_bean3_create() {
-		final Bean3 b = this.bbm.create(Bean3.class, new Bean1("value1", "value2"));
+		final var b = this.bbm.create(Bean3.class, new Bean1("value1", "value2"));
 
 		assertThat(b.b.field1, equalTo("value1"));
 		assertThat(b.b.field2, equalTo("value2"));
@@ -74,8 +74,8 @@ public class BeanToBeanMapperTest {
 
 	@Test
 	public void bean3_to_bean1_with_nulls() {
-		final Bean3 b3 = new Bean3(new Bean1("value1", null));
-		final Bean1 b1 = new Bean1("old1", "old2");
+		final var b3 = new Bean3(new Bean1("value1", null));
+		final var b1 = new Bean1("old1", "old2");
 
 		this.bbm.copyWithNulls(b1, b3);
 
@@ -85,8 +85,8 @@ public class BeanToBeanMapperTest {
 
 	@Test
 	public void bean1_to_bean3_with_nulls() {
-		final Bean1 b1 = new Bean1("value1", null);
-		final Bean3 b3 = new Bean3(new Bean1("old1", "old2"));
+		final var b1 = new Bean1("value1", null);
+		final var b3 = new Bean3(new Bean1("old1", "old2"));
 
 		this.bbm.copyWithNulls(b3, b1);
 
@@ -96,8 +96,8 @@ public class BeanToBeanMapperTest {
 
 	@Test
 	public void bean3_to_bean1_without_nulls() {
-		final Bean3 b3 = new Bean3(new Bean1("value1", null));
-		final Bean1 b1 = new Bean1("old1", "old2");
+		final var b3 = new Bean3(new Bean1("value1", null));
+		final var b1 = new Bean1("old1", "old2");
 
 		this.bbm.copyWithoutNulls(b1, b3);
 
@@ -107,8 +107,8 @@ public class BeanToBeanMapperTest {
 
 	@Test
 	public void bean1_to_bean3_without_nulls() {
-		final Bean1 b1 = new Bean1("value1", null);
-		final Bean3 b3 = new Bean3(new Bean1("old1", "old2"));
+		final var b1 = new Bean1("value1", null);
+		final var b3 = new Bean3(new Bean1("old1", "old2"));
 
 		this.bbm.copyWithoutNulls(b3, b1);
 

@@ -1,7 +1,6 @@
 package ascelion.micro.reservation;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 import ascelion.micro.mapper.BBField;
 import ascelion.micro.mapper.BBMap;
@@ -45,13 +44,13 @@ public class ReservationCleanUpService {
 	@Scheduled(fixedDelay = 60000)
 	@Transactional
 	public void run() {
-		final LocalDateTime exp = LocalDateTime.now().minusMinutes(this.availability);
-		final List<Reservation> old = this.repo.findOlderThan(exp);
+		final var exp = LocalDateTime.now().minusMinutes(this.availability);
+		final var old = this.repo.findOlderThan(exp);
 
 		if (old.size() > 0) {
 			L.info("Found {} expired reservations", old.size());
 
-			final ReservationExpired[] payload = this.bbm.createArray(ReservationExpired.class, old);
+			final var payload = this.bbm.createArray(ReservationExpired.class, old);
 
 			this.amqp.convertAndSend(this.reservationExchange.getName(), "", payload);
 			this.repo.deleteAll(old);

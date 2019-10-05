@@ -25,6 +25,7 @@ final class AnnotationBuilder<A extends Annotation> {
 		this.type = type;
 	}
 
+	@SuppressWarnings("unchecked")
 	@SneakyThrows
 	private AnnotationBuilder(A source) {
 		this.type = (Class<A>) source.annotationType();

@@ -27,5 +27,4 @@ import org.springframework.test.context.ActiveProfiles;
 		UserDetailsServiceAutoConfiguration.class,
 })
 public @interface JpaEntityIT {
-
 }

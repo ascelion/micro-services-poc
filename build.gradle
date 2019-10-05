@@ -50,8 +50,8 @@ subprojects {
 	version = rootProject.version
 
 	plugins.withType( JavaPlugin ) {
-		sourceCompatibility = '1.8'
-		targetCompatibility = '1.8'
+		sourceCompatibility = '11'
+		targetCompatibility = '11'
 	
 		project.apply from: rootProject.file('lombok.gradle')
 		project.apply from: rootProject.file('tests.gradle')
@@ -86,6 +86,8 @@ subprojects {
 			systemProperty "APP_NAME", project.name
 			systemProperty "LOG_PATH", buildDir
 			systemProperty "dataImportLocation", project.file( 'data' )
+
+			jvmArgs '--illegal-access=permit'
 		}
 		task localRun {
 			doFirst {
@@ -142,6 +144,7 @@ subprojects {
 			}
 	
 			runtimeOnly 'org.postgresql:postgresql'
+			runtimeOnly 'org.glassfish.jaxb:jaxb-runtime:2.3.1'
 	
 			testRuntimeOnly 'com.h2database:h2'
 		}

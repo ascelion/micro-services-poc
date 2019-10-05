@@ -2,9 +2,7 @@ package ascelion.micro.payment;
 
 import java.util.UUID;
 
-import ascelion.micro.account.Account;
 import ascelion.micro.account.AccountRepo;
-import ascelion.micro.card.Card;
 import ascelion.micro.payment.api.PaymentMessageSender;
 import ascelion.micro.shared.endpoint.Endpoint;
 import ascelion.micro.shared.endpoint.ViewEntityEndpointBase;
@@ -34,14 +32,14 @@ public class PaymentEndpoint extends ViewEntityEndpointBase<Payment, PaymentRepo
 
 	@PutMapping(path = "{id}", consumes = APPLICATION_FORM_URLENCODED_VALUE)
 	public void approve(@PathVariable("id") UUID id, @RequestParam("pin") String pin) {
-		final Payment payment = this.repo.getById(id);
-		final Card card = payment.getCard();
+		final var payment = this.repo.getById(id);
+		final var card = payment.getCard();
 
 		if (!card.verify(pin)) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalid pin");
 		}
 
-		final Account account = card.getAccount();
+		final var account = card.getAccount();
 
 		if (!account.debit(payment.getAmount())) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "inssuficient funds");

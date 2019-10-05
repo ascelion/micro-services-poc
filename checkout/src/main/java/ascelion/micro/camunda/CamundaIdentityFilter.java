@@ -12,11 +12,9 @@ import javax.servlet.http.HttpServletResponse;
 import static java.util.stream.Collectors.toList;
 
 import org.apache.commons.lang3.StringUtils;
-import org.camunda.bpm.engine.IdentityService;
 import org.camunda.bpm.engine.ProcessEngine;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -33,11 +31,11 @@ public class CamundaIdentityFilter extends OncePerRequestFilter {
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
 			throws ServletException, IOException {
 
-		final Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		final String name = auth.getName();
+		final var auth = SecurityContextHolder.getContext().getAuthentication();
+		final var name = auth.getName();
 
 		if (StringUtils.isNotEmpty(name)) {
-			final IdentityService ids = this.engine.getIdentityService();
+			final var ids = this.engine.getIdentityService();
 
 			ids.setAuthentication(name, groups(auth.getAuthorities()));
 

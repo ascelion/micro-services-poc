@@ -2,13 +2,11 @@ package ascelion.micro.reservation;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.List;
 
 import ascelion.micro.mapper.BBField;
 import ascelion.micro.mapper.BBMap;
 import ascelion.micro.mapper.BeanToBeanMapper;
 import ascelion.micro.product.ProductRepo;
-import ascelion.micro.product.api.Product;
 import ascelion.micro.reservation.api.Reservation;
 import ascelion.micro.reservation.api.ReservationRequest;
 import ascelion.micro.reservation.api.ReservationResponse;
@@ -54,44 +52,44 @@ public class ReservationEndpoint extends ViewEntityEndpointBase<Reservation, Res
 	@Override
 	@Transactional
 	public ReservationResponse[] update(Operation op, ReservationRequest... reservations) {
-		final List<Reservation> result = new ArrayList<>();
+		final var result = new ArrayList<>();
 
-		for (final ReservationRequest req : reservations) {
-			final Reservation r = this.repo.getByProductIdAndOwnerId(req.getProductId(), req.getOwnerId());
+		for (final var req : reservations) {
+			final var res = this.repo.getByProductIdAndOwnerId(req.getProductId(), req.getOwnerId());
 
-			this.rs.update(op, r);
+			this.rs.update(op, res);
 
-			result.add(r);
+			result.add(res);
 		}
 
 		return this.bbm.createArray(ReservationResponse.class, result);
 	}
 
 	private ReservationResponse reserve(ReservationRequest req) {
-		final Product p = this.prdRepo.getById(req.getProductId());
-		final BigDecimal a = this.prdRepo.stockAvailability(p);
-		BigDecimal q = req.getQuantity();
+		final var product = this.prdRepo.getById(req.getProductId());
+		final var avail = this.prdRepo.stockAvailability(product);
+		var quantity = req.getQuantity();
 
-		if (q.compareTo(a) > 0) {
-			q = a;
+		if (quantity.compareTo(avail) > 0) {
+			quantity = avail;
 		}
 
-		if (q.compareTo(BigDecimal.ZERO) > 0) {
-			Reservation s = this.repo.findByProductIdAndOwnerId(req.getProductId(), req.getOwnerId())
+		if (quantity.compareTo(BigDecimal.ZERO) > 0) {
+			var res = this.repo.findByProductIdAndOwnerId(req.getProductId(), req.getOwnerId())
 					.orElse(null);
 
-			if (s == null) {
-				s = Reservation.builder()
-						.product(p)
+			if (res == null) {
+				res = Reservation.builder()
+						.product(product)
 						.ownerId(req.getOwnerId())
-						.quantity(q)
+						.quantity(quantity)
 						.build();
 			}
 
-			this.repo.save(s);
+			this.repo.save(res);
 		}
 
-		return new ReservationResponse(q, p.getPrice());
+		return new ReservationResponse(quantity, product.getPrice());
 	}
 
 }

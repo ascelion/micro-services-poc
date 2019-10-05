@@ -14,7 +14,7 @@ public class ProcessEngineConfig {
 
 	@Bean
 	public ActivitiStateAnnotationBeanPostProcessor stateAnnotationBeanPostProcessor() {
-		final ActivitiStateAnnotationBeanPostProcessor post = new ActivitiStateAnnotationBeanPostProcessor();
+		final var post = new ActivitiStateAnnotationBeanPostProcessor();
 
 		post.setRegistry(new ActivitiStateHandlerRegistry());
 
@@ -23,7 +23,7 @@ public class ProcessEngineConfig {
 
 	@Bean
 	public ProcessStartAnnotationBeanPostProcessor startAnnotationBeanPostProcessor(ProcessEngine pe) {
-		final ProcessStartAnnotationBeanPostProcessor post = new ProcessStartAnnotationBeanPostProcessor();
+		final var post = new ProcessStartAnnotationBeanPostProcessor();
 
 		post.setProcessEngine(pe);
 

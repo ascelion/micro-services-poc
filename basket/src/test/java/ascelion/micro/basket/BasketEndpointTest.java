@@ -7,12 +7,7 @@ import java.util.UUID;
 
 import javax.sql.DataSource;
 
-import ascelion.micro.basket.BasketItemRequest;
-import ascelion.micro.basket.BasketItemRepo;
-import ascelion.micro.basket.BasketRequest;
 import ascelion.micro.basket.api.Basket;
-import ascelion.micro.basket.BasketEndpoint;
-import ascelion.micro.basket.BasketRepo;
 import ascelion.micro.mapper.BeanToBeanMapper;
 import ascelion.micro.reservation.api.ReservationRequest;
 import ascelion.micro.reservation.api.ReservationResponse;
@@ -103,8 +98,8 @@ public class BasketEndpointTest {
 	@Test
 	@WithRoleAdmin
 	public void createBasket() throws Exception {
-		final BasketRequest dto = new BasketRequest(randomUUID());
-		final MockHttpServletRequestBuilder req = post("/baskets")
+		final var dto = new BasketRequest(randomUUID());
+		final var req = post("/baskets")
 				.contentType(APPLICATION_JSON)
 				.accept(APPLICATION_JSON)
 				.content(this.om.writeValueAsString(dto));
@@ -118,9 +113,9 @@ public class BasketEndpointTest {
 	@Test
 	@WithRoleAdmin
 	public void addItems() throws Exception {
-		final BasketItemRequest i1 = new BasketItemRequest(randomUUID(), randomDecimal(10, 20));
-		final BasketItemRequest i2 = new BasketItemRequest(randomUUID(), randomDecimal(10, 20));
-		final Basket ent = Basket.builder().customerId(randomUUID()).build();
+		final var i1 = new BasketItemRequest(randomUUID(), randomDecimal(10, 20));
+		final var i2 = new BasketItemRequest(randomUUID(), randomDecimal(10, 20));
+		final var ent = Basket.builder().customerId(randomUUID()).build();
 
 		this.repo.save(ent);
 

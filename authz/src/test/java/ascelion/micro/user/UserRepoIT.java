@@ -1,15 +1,11 @@
 package ascelion.micro.user;
 
-import java.util.Optional;
-
 import javax.persistence.EntityManager;
 import javax.persistence.FlushModeType;
 
 import ascelion.micro.config.OauthProperties;
 import ascelion.micro.config.SafePasswordEncoder;
 import ascelion.micro.tests.JpaEntityIT;
-import ascelion.micro.user.User;
-import ascelion.micro.user.UserRepo;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
@@ -49,7 +45,7 @@ public class UserRepoIT {
 	@Test
 	@Transactional
 	public void validate_table_mappings() {
-		final User u1 = new User("username", "password1");
+		final var u1 = new User("username", "password1");
 
 		this.tem.setFlushMode(FlushModeType.AUTO);
 
@@ -59,7 +55,7 @@ public class UserRepoIT {
 
 		assertThat(u1.getId(), notNullValue());
 
-		final Optional<User> u1o = this.repo.findById(u1.getId());
+		final var u1o = this.repo.findById(u1.getId());
 
 		assertThat(u1o.isPresent(), is(true));
 
@@ -81,7 +77,7 @@ public class UserRepoIT {
 		this.tem.flush();
 		this.tem.detach(u21);
 
-		User u22 = this.repo.findById(u1.getId()).get();
+		var u22 = this.repo.findById(u1.getId()).get();
 
 		assertThat(this.pwe.matches("password2", u22.getPassword()), is(true));
 

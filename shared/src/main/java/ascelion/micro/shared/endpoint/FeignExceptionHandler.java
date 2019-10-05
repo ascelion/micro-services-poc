@@ -1,5 +1,6 @@
 package ascelion.micro.shared.endpoint;
 
+import static java.util.Arrays.asList;
 import static org.springframework.http.HttpStatus.BAD_GATEWAY;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
@@ -28,6 +29,6 @@ public class FeignExceptionHandler {
 
 	@ExceptionHandler
 	public ResponseEntity<?> handleException(ClientException ex) {
-		return this.ehs.exceptionResponse(BAD_GATEWAY, ex.getErrorMessage());
+		return this.ehs.exceptionResponse(BAD_GATEWAY, asList(ex.getErrorMessage()));
 	}
 }

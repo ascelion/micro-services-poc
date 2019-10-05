@@ -1,6 +1,5 @@
 package ascelion.micro.basket;
 
-import java.util.Optional;
 import java.util.UUID;
 
 import javax.persistence.EntityManager;
@@ -30,10 +29,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class BasketRepoIT {
 	@Autowired
 	private EntityManager tem;
-
 	@Autowired
 	private BasketRepo repo;
-
 	@Autowired
 	private BasketItemRepo itmRepo;
 
@@ -48,14 +45,14 @@ public class BasketRepoIT {
 	@Test
 	@Transactional
 	public void validate_table_mappings() {
-		final Basket o1 = Basket.builder()
+		final var o1 = Basket.builder()
 				.customerId(randomUUID())
 				.build();
-		final BasketItem i1 = BasketItem.builder()
+		final var i1 = BasketItem.builder()
 				.productId(randomUUID())
 				.quantity(randomDecimal(10, 20))
 				.build();
-		final BasketItem i2 = BasketItem.builder()
+		final var i2 = BasketItem.builder()
 				.productId(UUID.randomUUID())
 				.quantity(randomDecimal(10, 20))
 				.build();
@@ -68,23 +65,23 @@ public class BasketRepoIT {
 
 		assertThat(o1.getId(), notNullValue());
 
-		final Optional<Basket> o2o = this.repo.findById(o1.getId());
+		final var o2o = this.repo.findById(o1.getId());
 
 		assertThat(o2o.isPresent(), is(true));
 
-		final Basket o2 = o2o.get();
+		final var o2 = o2o.get();
 
 		assertThat(o2, not(sameInstance(o1)));
 
 		assertThat(o2.getId(), notNullValue());
 		assertThat(o2.beq(o1), is(true));
 
-		final Optional<BasketItem> i1o = this.itmRepo.findById(i1.getId());
+		final var i1o = this.itmRepo.findById(i1.getId());
 
 		assertThat(i1o.isPresent(), is(true));
 		assertThat(i1.beq(i1o.get()), is(true));
 
-		final Optional<BasketItem> i2o = this.itmRepo.findByProductId(o1.getId(), i2.getProductId());
+		final var i2o = this.itmRepo.findByProductId(o1.getId(), i2.getProductId());
 
 		assertThat(i2o.isPresent(), is(true));
 		assertThat(i2.beq(i2o.get()), is(true));

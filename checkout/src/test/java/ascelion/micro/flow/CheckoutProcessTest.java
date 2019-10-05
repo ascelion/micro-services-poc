@@ -3,7 +3,15 @@ package ascelion.micro.flow;
 import static ascelion.micro.checkout.api.CheckoutChannel.BASKET_MESSAGE;
 import static ascelion.micro.checkout.api.CheckoutChannel.CUSTOMER_MESSAGE;
 import static ascelion.micro.checkout.api.CheckoutChannel.SHIPPING_MESSAGE;
-import static ascelion.micro.flow.CheckoutConstants.*;
+import static ascelion.micro.flow.CheckoutConstants.BASKET_REQUEST_TASK;
+import static ascelion.micro.flow.CheckoutConstants.CUSTOMER_REQUEST_TASK;
+import static ascelion.micro.flow.CheckoutConstants.PAYMENT_REFUND_TASK;
+import static ascelion.micro.flow.CheckoutConstants.PAYMENT_REQUEST_TASK;
+import static ascelion.micro.flow.CheckoutConstants.PROCESS_NAME;
+import static ascelion.micro.flow.CheckoutConstants.RESERVATIONS_UPDATE_TASK;
+import static ascelion.micro.flow.CheckoutConstants.SEND_INVOICE_TASK;
+import static ascelion.micro.flow.CheckoutConstants.SHIPPING_REQUEST_TASK;
+import static ascelion.micro.flow.CheckoutConstants.SHIP_ITEMS_RESPONSE_VAR;
 import static ascelion.micro.payment.api.PaymentChannel.PAYMENT_MESSAGE;
 import static java.util.Collections.singletonMap;
 import static java.util.UUID.randomUUID;
@@ -14,7 +22,6 @@ import static org.camunda.bpm.extension.mockito.CamundaMockito.verifyJavaDelegat
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 
-import org.camunda.bpm.engine.runtime.ProcessInstance;
 import org.camunda.bpm.engine.test.Deployment;
 import org.camunda.bpm.spring.boot.starter.test.helper.AbstractProcessEngineRuleTest;
 import org.junit.Before;
@@ -36,7 +43,7 @@ public class CheckoutProcessTest extends AbstractProcessEngineRuleTest {
 
 	@Test
 	public void checkoutOK() {
-		final ProcessInstance pi = runtimeService()
+		final var pi = runtimeService()
 				.startProcessInstanceByKey(PROCESS_NAME, randomUUID().toString());
 
 		verifyJavaDelegateMock(BASKET_REQUEST_TASK).executed();
@@ -69,7 +76,7 @@ public class CheckoutProcessTest extends AbstractProcessEngineRuleTest {
 
 	@Test
 	public void checkoutNOK() {
-		final ProcessInstance pi = runtimeService()
+		final var pi = runtimeService()
 				.startProcessInstanceByKey(PROCESS_NAME, randomUUID().toString());
 
 		verifyJavaDelegateMock(BASKET_REQUEST_TASK).executed();

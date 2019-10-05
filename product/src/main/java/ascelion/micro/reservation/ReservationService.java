@@ -1,9 +1,6 @@
 package ascelion.micro.reservation;
 
-import java.math.BigDecimal;
-
 import ascelion.micro.product.ProductRepo;
-import ascelion.micro.product.api.Product;
 import ascelion.micro.reservation.api.Reservation;
 import ascelion.micro.reservation.api.ReservationsApi.Operation;
 
@@ -19,8 +16,8 @@ public class ReservationService {
 
 	@Transactional
 	public Reservation update(Operation op, final Reservation res) {
-		final Product product = res.getProduct();
-		final BigDecimal quantity = product.getStock().subtract(res.getQuantity());
+		final var product = res.getProduct();
+		final var quantity = product.getStock().subtract(res.getQuantity());
 
 		switch (op) {
 		case LOCK:

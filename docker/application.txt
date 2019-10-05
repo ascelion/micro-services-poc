@@ -1,8 +1,9 @@
-FROM openjdk:8-alpine
+FROM openjdk:11
 
 ENV LOG_PATH /var/log
 ENV APP_DATA /usr/share/@application@/prod-data
 
+ENV @APPLICATION@_OPTS $@APPLICATION@_OPTS --illegal-access=permit
 ENV @APPLICATION@_OPTS $@APPLICATION@_OPTS -DAPP_NAME=@application@
 ENV @APPLICATION@_OPTS $@APPLICATION@_OPTS -DLOG_NAME=@application@
 ENV @APPLICATION@_OPTS $@APPLICATION@_OPTS -DLOG_PATH=$LOG_PATH

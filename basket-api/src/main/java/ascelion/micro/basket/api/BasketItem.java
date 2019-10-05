@@ -13,7 +13,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Builder.Default;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -38,6 +37,7 @@ public class BasketItem extends AbstractEntity<BasketItem> {
 	@Builder.Default
 	private BigDecimal quantity = BigDecimal.ZERO;
 
+	@Setter(AccessLevel.NONE)
 	private boolean expired;
 
 	@Getter(AccessLevel.NONE)
@@ -48,6 +48,11 @@ public class BasketItem extends AbstractEntity<BasketItem> {
 	public void setQuantity(BigDecimal quantity) {
 		this.quantity = quantity;
 		this.expired = false;
+	}
+
+	public void expire() {
+		this.quantity = BigDecimal.ZERO;
+		this.expired = true;
 	}
 
 	BasketItem ord(int ord) {

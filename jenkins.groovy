@@ -6,7 +6,7 @@ pipeline {
 		buildDiscarder logRotator( daysToKeepStr: "14" )
 	}
 	tools {
-		jdk 'J8'
+		jdk 'J11'
 	}
 	environment {
 		JENKINS_NODE_COOKIE = 'dontkillme'

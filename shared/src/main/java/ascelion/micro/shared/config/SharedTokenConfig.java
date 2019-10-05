@@ -24,7 +24,7 @@ public class SharedTokenConfig {
 
 		@Override
 		public OAuth2Authentication extractAuthentication(Map<String, ?> claims) {
-			final OAuth2Authentication authentication = super.extractAuthentication(claims);
+			final var authentication = super.extractAuthentication(claims);
 
 			authentication.setDetails(claims);
 
@@ -42,7 +42,7 @@ public class SharedTokenConfig {
 
 	@Bean
 	public DefaultTokenServices tokenServices(TokenStore tokenStore) {
-		final DefaultTokenServices tokenServices = new DefaultTokenServices();
+		final var tokenServices = new DefaultTokenServices();
 
 		tokenServices.setTokenStore(tokenStore);
 		tokenServices.setSupportRefreshToken(true);
@@ -53,7 +53,7 @@ public class SharedTokenConfig {
 	@Bean
 	@ConditionalOnMissingBean
 	public JwtAccessTokenConverter accessTokenConverter() throws IOException {
-		final JwtAccessTokenConverter cvt = new JwtAccessTokenConverter();
+		final var cvt = new JwtAccessTokenConverter();
 
 		this.jwt.configure(cvt);
 		cvt.setAccessTokenConverter(new DetailsAccessTokenConverter());

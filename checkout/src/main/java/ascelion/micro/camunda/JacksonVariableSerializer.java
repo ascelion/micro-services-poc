@@ -5,11 +5,11 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.SortedMap;
 
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import lombok.SneakyThrows;
 import org.camunda.bpm.engine.impl.variable.serializer.AbstractTypedValueSerializer;
@@ -61,11 +61,11 @@ public class JacksonVariableSerializer extends AbstractTypedValueSerializer<Obje
 	@Override
 	@SneakyThrows
 	public void writeValue(ObjectValue value, ValueFields fields) {
-		final Object v = value.getValue();
+		final var v = value.getValue();
 
 		if (v != null) {
-			final JavaType j = constructType(v);
-			final ObjectWriter w = this.om.writerFor(j);
+			final var j = constructType(v);
+			final var w = this.om.writerFor(j);
 
 			fields.setTextValue(j.toCanonical());
 			fields.setTextValue2(w.writeValueAsString(v));
@@ -76,17 +76,17 @@ public class JacksonVariableSerializer extends AbstractTypedValueSerializer<Obje
 	}
 
 	private JavaType constructType(Object v) {
-		final Class<?> t = v.getClass();
+		final var t = v.getClass();
 
 		if (t.isArray()) {
 			return this.tf.constructArrayType(t.getComponentType());
 		}
 		if (Map.class.isAssignableFrom(t)) {
-			final Map<?, ?> m = (Map) v;
-			final int z = m.size();
+			final var m = (Map<?, ?>) v;
+			final var z = m.size();
 
 			if (z != 0) {
-				final Map.Entry<?, ?> e = m.entrySet().iterator().next();
+				final var e = m.entrySet().iterator().next();
 
 				if (SortedMap.class.isAssignableFrom(t)) {
 					return this.tf.constructMapType(SortedMap.class, constructType(e.getKey()), constructType(e.getValue()));
@@ -99,11 +99,11 @@ public class JacksonVariableSerializer extends AbstractTypedValueSerializer<Obje
 			}
 		}
 		if (Collection.class.isAssignableFrom(t)) {
-			final Collection<?> c = (Collection) v;
-			final int z = c.size();
+			final var c = (Collection<?>) v;
+			final var z = c.size();
 
 			if (z != 0) {
-				final Object o = c.iterator().next();
+				final var o = c.iterator().next();
 
 				return this.tf.constructCollectionLikeType(t, constructType(o));
 			}
@@ -115,16 +115,16 @@ public class JacksonVariableSerializer extends AbstractTypedValueSerializer<Obje
 	@Override
 	@SneakyThrows
 	public ObjectValue readValue(ValueFields fields, boolean deserializeValue) {
-		final String t = fields.getTextValue();
+		final var text = fields.getTextValue();
 
-		if (t == null) {
+		if (isEmpty(text)) {
 			return Variables.objectValue(null).create();
 		}
 
-		final JavaType j = TypeFactory.defaultInstance()
-				.constructFromCanonical(t);
+		final var javaType = TypeFactory.defaultInstance()
+				.constructFromCanonical(text);
 
-		return Variables.objectValue(this.om.readValue(fields.getTextValue2(), j)).create();
+		return Variables.objectValue(this.om.readValue(fields.getTextValue2(), javaType)).create();
 	}
 
 	@Override

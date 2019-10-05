@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configuration>
+<configuration debug="false">
 	<property name="LOG_PATH" value="${LOG_PATH:-${user.dir}/build}" />
 	<property name="LOG_NAME" value="${LOG_NAME:-tests}" />
 	<property name="LOG_FILE" value="${LOG_NAME}.log" />
@@ -28,7 +28,7 @@
 	<logger name="org.camunda.bpm.engine.bpmn.behavior" level="INFO" />
 	<logger name="org.hibernate.type" level="INFO" />
 
-	<logger name="ascelion" level="ALL" />
+	<logger name="ascelion" level="INFO" />
 
 	<root level="INFO">
 		<appender-ref ref="FILE" />

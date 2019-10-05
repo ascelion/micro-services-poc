@@ -21,13 +21,13 @@ public abstract class ViewEntityEndpointBase<T extends AbstractEntity<T>, R exte
 
 	@Override
 	public List<T> getEntities(String[] properties, Integer page, int size) {
-		final Sort s = properties != null && properties.length > 0 ? Sort.by(properties) : Sort.unsorted();
+		final var s = properties != null && properties.length > 0 ? Sort.by(properties) : Sort.unsorted();
 
 		if (page == null) {
 			return this.repo.findAll(s);
-		} else {
-			return this.repo.findAll(PageRequest.of(page, size, s)).getContent();
 		}
+
+		return this.repo.findAll(PageRequest.of(page, size, s)).getContent();
 	}
 
 	@Override

@@ -2,11 +2,8 @@ package ascelion.micro.camunda;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
-
-import ascelion.micro.camunda.JacksonVariableSerializer;
 
 import static java.util.Collections.singletonMap;
 import static java.util.UUID.randomUUID;
@@ -43,7 +40,7 @@ public class JacksonVariableSerializerTest {
 
 	@Test
 	public void tree_map() {
-		final Map<String, String> v = new TreeMap<>();
+		final var v = new TreeMap<>();
 
 		v.put("name", "value");
 
@@ -52,7 +49,7 @@ public class JacksonVariableSerializerTest {
 
 	@Test
 	public void hash_map() {
-		final Map<String, String> v = new HashMap<>();
+		final var v = new HashMap<>();
 
 		v.put("name", "value");
 
@@ -61,7 +58,7 @@ public class JacksonVariableSerializerTest {
 
 	@Test
 	public void linked_hash_map() {
-		final Map<String, String> v = new LinkedHashMap<>();
+		final var v = new LinkedHashMap<>();
 
 		v.put("name", "value");
 
@@ -74,7 +71,7 @@ public class JacksonVariableSerializerTest {
 		System.out.printf("TEXT 1: %s\n", this.fields.getTextValue());
 		System.out.printf("TEXT 2: %s\n\n", this.fields.getTextValue2());
 
-		final Object o2 = this.jvs.readValue(this.fields, true).getValue();
+		final var o2 = this.jvs.readValue(this.fields, true).getValue();
 
 		assertThat(o1, equalTo(o2));
 	}

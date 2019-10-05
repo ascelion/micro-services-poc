@@ -2,6 +2,8 @@ package ascelion.micro.shared.config;
 
 import javax.servlet.http.HttpServletRequest;
 
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
+
 import feign.Client;
 import feign.Logger;
 import feign.RequestInterceptor;
@@ -9,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpHeaders;
 
 @Configuration
 @ConditionalOnClass(Client.class)
@@ -26,7 +27,7 @@ public class FeignClientConfig {
 	@Bean
 	RequestInterceptor feignAuthzHeader() {
 		return template -> {
-			template.header(HttpHeaders.AUTHORIZATION, this.request.getHeader(HttpHeaders.AUTHORIZATION));
+			template.header(AUTHORIZATION, this.request.getHeader(AUTHORIZATION));
 		};
 	}
 }

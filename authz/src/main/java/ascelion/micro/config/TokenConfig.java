@@ -18,7 +18,7 @@ public class TokenConfig {
 
 	@Bean
 	public JwtAccessTokenConverter accessTokenConverter() throws IOException {
-		final JwtAccessTokenConverter cvt = new JwtAccessTokenConverter();
+		final var cvt = new JwtAccessTokenConverter();
 
 		this.jwt.configure(cvt);
 

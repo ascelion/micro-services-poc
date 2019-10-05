@@ -1,13 +1,11 @@
 package ascelion.micro.shared.config;
 
-import java.util.Arrays;
-
 import ascelion.flyway.csv.CSVMigrationResolver;
 
 import static java.util.Arrays.asList;
+import static java.util.Arrays.copyOf;
 
 import org.flywaydb.core.api.configuration.FluentConfiguration;
-import org.flywaydb.core.api.resolver.MigrationResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -21,10 +19,10 @@ public class SharedFlywayConfig implements FlywayConfigurationCustomizer {
 
 	@Override
 	public void customize(FluentConfiguration cf) {
-		MigrationResolver[] resolvers = cf.getResolvers();
-		final int size = resolvers.length;
+		var resolvers = cf.getResolvers();
+		final var size = resolvers.length;
 
-		resolvers = Arrays.copyOf(resolvers, size + 1);
+		resolvers = copyOf(resolvers, size + 1);
 		resolvers[size] = new CSVMigrationResolver();
 
 		LOG.info("Flyway resolvers: {}", asList(resolvers));

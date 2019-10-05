@@ -28,14 +28,14 @@ public class EndpointHandlerMapping extends RequestMappingHandlerMapping {
 
 	@Override
 	protected RequestMappingInfo getMappingForMethod(Method method, Class<?> handlerType) {
-		final RequestMappingInfo mapping = super.getMappingForMethod(method, handlerType);
+		final var mapping = super.getMappingForMethod(method, handlerType);
 
 		if (mapping == null) {
 			return null;
 		}
 
-		final Endpoint annotation = findAnnotation(handlerType, Endpoint.class);
-		final PatternsRequestCondition patterns = new PatternsRequestCondition(annotation.value(),
+		final var annotation = findAnnotation(handlerType, Endpoint.class);
+		final var patterns = new PatternsRequestCondition(annotation.value(),
 				getUrlPathHelper(),
 				getPathMatcher(),
 				useSuffixPatternMatch(),

@@ -10,15 +10,16 @@ public abstract class AbstractExecution {
 
 	static private final ThreadLocal<Map<String, Object>> VARIABLES = new ThreadLocal<>();
 
+	@SuppressWarnings("unchecked")
 	protected final <T> T getVariable(String name) {
-		final Map<String, Object> variables = VARIABLES.get();
-		final Object value = variables.get(name);
+		final var variables = VARIABLES.get();
+		final var value = variables.get(name);
 
 		if (value == null) {
 			throw new BpmnError("VARIABLE_NOT_FOUND", "Variable not found: " + name);
 		}
 
-		return (T) variables.get(name);
+		return (T) value;
 	}
 
 	protected void setVariable(String name, Object value) {

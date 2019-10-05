@@ -1,9 +1,7 @@
 package ascelion.micro.shared.config;
 
 import java.io.IOException;
-import java.util.Map;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -19,27 +17,12 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
-import org.springframework.security.oauth2.provider.OAuth2Authentication;
-import org.springframework.security.oauth2.provider.token.DefaultAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 
 @EnableResourceServer
 @Configuration
 @RequiredArgsConstructor
 public class SharedResourceServerConfig extends ResourceServerConfigurerAdapter {
-
-	static class DetailsAccessTokenConverter extends DefaultAccessTokenConverter {
-
-		@Override
-		public OAuth2Authentication extractAuthentication(Map<String, ?> claims) {
-			final OAuth2Authentication authentication = super.extractAuthentication(claims);
-
-			authentication.setDetails(claims);
-
-			return authentication;
-		}
-
-	}
 
 	private final DefaultTokenServices tokenServices;
 
@@ -73,11 +56,11 @@ public class SharedResourceServerConfig extends ResourceServerConfigurerAdapter 
 		resources.tokenServices(this.tokenServices);
 	}
 
-	private void unauthorized(HttpServletRequest req, HttpServletResponse rsp, AuthenticationException ex) throws IOException, ServletException {
+	private void unauthorized(HttpServletRequest req, HttpServletResponse rsp, AuthenticationException ex) throws IOException {
 		rsp.sendError(HttpServletResponse.SC_UNAUTHORIZED);
 	}
 
-	private void forbidden(HttpServletRequest req, HttpServletResponse rsp, AccessDeniedException ex) throws IOException, ServletException {
+	private void forbidden(HttpServletRequest req, HttpServletResponse rsp, AccessDeniedException ex) throws IOException {
 		rsp.sendError(HttpServletResponse.SC_FORBIDDEN);
 	}
 

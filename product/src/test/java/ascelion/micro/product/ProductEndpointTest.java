@@ -7,8 +7,6 @@ import java.util.UUID;
 import javax.sql.DataSource;
 
 import ascelion.micro.mapper.BeanToBeanMapper;
-import ascelion.micro.product.ProductEndpoint;
-import ascelion.micro.product.ProductRepo;
 import ascelion.micro.product.api.Product;
 import ascelion.micro.product.api.ProductRequest;
 import ascelion.micro.shared.model.AbstractEntity;
@@ -19,6 +17,8 @@ import ascelion.micro.tests.WithRoleUser;
 
 import static ascelion.micro.tests.RandomUtils.randomAscii;
 import static ascelion.micro.tests.RandomUtils.randomDecimal;
+import static ascelion.micro.tests.RandomUtils.randomInt;
+import static java.util.UUID.randomUUID;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
@@ -43,7 +43,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(ProductEndpoint.class)
@@ -78,10 +77,9 @@ public class ProductEndpointTest {
 	@Test
 	@WithRoleUser
 	public void getEntities() throws Exception {
-		final MockHttpServletRequestBuilder req = get("/products")
+		final var req = get("/products")
 				.accept(APPLICATION_JSON);
-
-		final Product first = this.products.values().iterator().next();
+		final var first = this.products.values().iterator().next();
 
 		this.mvc.perform(req)
 				.andExpect(status().isOk())
@@ -92,7 +90,7 @@ public class ProductEndpointTest {
 
 	@Test
 	public void getEntitiesAnonymous() throws Exception {
-		final MockHttpServletRequestBuilder req = get("/products")
+		final var req = get("/products")
 				.accept(APPLICATION_JSON);
 
 		this.mvc.perform(req)
@@ -102,7 +100,7 @@ public class ProductEndpointTest {
 	@Test
 	@WithRoleUser
 	public void getEntitiesInvalid() throws Exception {
-		final MockHttpServletRequestBuilder req = get("/products")
+		final var req = get("/products")
 				.param("page", "0")
 				.param("size", "5")
 				.accept(APPLICATION_JSON);
@@ -116,21 +114,21 @@ public class ProductEndpointTest {
 	@Test
 	@WithRoleUser
 	public void getEntity() throws Exception {
-		final UUID id = this.products.values().stream().skip(this.products.size() / 2).findFirst().map(AbstractEntity::getId).get();
-		final MockHttpServletRequestBuilder req = get("/products/{id}", id)
+		final var ent = pickAny();
+		final var req = get("/products/{id}", ent.getId())
 				.accept(APPLICATION_JSON);
 
 		this.mvc.perform(req)
 				.andExpect(status().isOk())
 				.andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
-				.andExpect(jsonPath("$.id", equalTo(id.toString())));
+				.andExpect(jsonPath("$.id", equalTo(ent.getId().toString())));
 	}
 
 	@Test
 	@WithRoleUser
 	public void getEntityNotFound() throws Exception {
-		final UUID id = UUID.randomUUID();
-		final MockHttpServletRequestBuilder req = get("/products/{id}", id)
+		final var id = randomUUID();
+		final var req = get("/products/{id}", id)
 				.accept(APPLICATION_JSON);
 
 		this.mvc.perform(req)
@@ -142,13 +140,13 @@ public class ProductEndpointTest {
 	@Test
 	@WithRoleAdmin
 	public void createEntity() throws Exception {
-		final ProductRequest dto = ProductRequest.builder()
+		final var dto = ProductRequest.builder()
 				.name(randomAscii(10, 20))
 				.price(randomDecimal(10, 20))
 				.description(randomAscii(10, 20))
 				.stock(randomDecimal(10, 20))
 				.build();
-		final MockHttpServletRequestBuilder req = post("/products")
+		final var req = post("/products")
 				.contentType(APPLICATION_JSON)
 				.accept(APPLICATION_JSON)
 				.content(this.om.writeValueAsString(dto));
@@ -166,9 +164,9 @@ public class ProductEndpointTest {
 	@Test
 	@WithRoleAdmin
 	public void createEntityInvalid() throws Exception {
-		final ProductRequest dto = ProductRequest.builder()
+		final var dto = ProductRequest.builder()
 				.build();
-		final MockHttpServletRequestBuilder req = post("/products")
+		final var req = post("/products")
 				.contentType(APPLICATION_JSON)
 				.accept(APPLICATION_JSON)
 				.content(this.om.writeValueAsString(dto));
@@ -181,7 +179,7 @@ public class ProductEndpointTest {
 
 	@Test
 	public void createEntityAsAnonymous() throws Exception {
-		final MockHttpServletRequestBuilder req = post("/products")
+		final var req = post("/products")
 				.contentType(APPLICATION_JSON);
 
 		this.mvc.perform(req)
@@ -191,13 +189,13 @@ public class ProductEndpointTest {
 	@Test
 	@WithRoleUser
 	public void createEntityAsUser() throws Exception {
-		final ProductRequest dto = ProductRequest.builder()
+		final var dto = ProductRequest.builder()
 				.name(randomAscii(10, 20))
 				.price(randomDecimal(10, 20))
 				.description(randomAscii(10, 20))
 				.stock(randomDecimal(10, 20))
 				.build();
-		final MockHttpServletRequestBuilder req = post("/products")
+		final var req = post("/products")
 				.contentType(APPLICATION_JSON)
 				.accept(APPLICATION_JSON)
 				.content(this.om.writeValueAsString(dto));
@@ -209,15 +207,14 @@ public class ProductEndpointTest {
 	@Test
 	@WithRoleAdmin
 	public void updateEntity() throws Exception {
-		final ProductRequest dto = ProductRequest.builder()
+		final var dto = ProductRequest.builder()
 				.name(randomAscii(10, 20))
 				.price(randomDecimal(10, 20))
 				.description(randomAscii(10, 20))
 				.stock(randomDecimal(10, 20))
 				.build();
-
-		final UUID id = this.products.values().stream().skip(this.products.size() / 2).findFirst().map(AbstractEntity::getId).get();
-		final MockHttpServletRequestBuilder req = put("/products/{id}", id)
+		final var ent = pickAny();
+		final var req = put("/products/{id}", ent.getId())
 				.contentType(APPLICATION_JSON)
 				.accept(APPLICATION_JSON)
 				.content(this.om.writeValueAsString(dto));
@@ -225,7 +222,7 @@ public class ProductEndpointTest {
 		this.mvc.perform(req)
 				.andExpect(status().isOk())
 				.andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
-				.andExpect(jsonPath("$.id", equalTo(id.toString())))
+				.andExpect(jsonPath("$.id", equalTo(ent.getId().toString())))
 				.andExpect(jsonPath("$.name", equalTo(dto.getName())))
 				.andExpect(jsonPath("$.description", equalTo(dto.getDescription())))
 				.andExpect(jsonPath("$.price", equalTo(dto.getPrice().doubleValue())))
@@ -235,11 +232,10 @@ public class ProductEndpointTest {
 	@Test
 	@WithRoleAdmin
 	public void updateEntityInvalid() throws Exception {
-		final ProductRequest dto = ProductRequest.builder()
+		final var dto = ProductRequest.builder()
 				.build();
-
-		final UUID id = this.products.values().stream().skip(this.products.size() / 2).findFirst().map(AbstractEntity::getId).get();
-		final MockHttpServletRequestBuilder req = put("/products/{id}", id)
+		final var ent = pickAny();
+		final var req = put("/products/{id}", ent.getId())
 				.contentType(APPLICATION_JSON)
 				.accept(APPLICATION_JSON)
 				.content(this.om.writeValueAsString(dto));
@@ -253,15 +249,14 @@ public class ProductEndpointTest {
 	@Test
 	@WithRoleAdmin
 	public void updateEntityNotFound() throws Exception {
-		final ProductRequest dto = ProductRequest.builder()
+		final var dto = ProductRequest.builder()
 				.name(randomAscii(10, 20))
 				.price(randomDecimal(10, 20))
 				.description(randomAscii(10, 20))
 				.stock(randomDecimal(10, 20))
 				.build();
-
-		final UUID id = UUID.randomUUID();
-		final MockHttpServletRequestBuilder req = put("/products/{id}", id)
+		final var id = randomUUID();
+		final var req = put("/products/{id}", id)
 				.contentType(APPLICATION_JSON)
 				.accept(APPLICATION_JSON)
 				.content(this.om.writeValueAsString(dto));
@@ -274,8 +269,8 @@ public class ProductEndpointTest {
 
 	@Test
 	public void updateEntityAsAnonymous() throws Exception {
-		final UUID id = UUID.randomUUID();
-		final MockHttpServletRequestBuilder req = put("/products/{id}", id)
+		final var id = randomUUID();
+		final var req = put("/products/{id}", id)
 				.contentType(APPLICATION_JSON);
 
 		this.mvc.perform(req)
@@ -285,14 +280,14 @@ public class ProductEndpointTest {
 	@Test
 	@WithRoleUser
 	public void updateEntityAsUser() throws Exception {
-		final ProductRequest dto = ProductRequest.builder()
+		final var dto = ProductRequest.builder()
 				.name(randomAscii(10, 20))
 				.price(randomDecimal(10, 20))
 				.description(randomAscii(10, 20))
 				.stock(randomDecimal(10, 20))
 				.build();
-		final UUID id = this.products.values().stream().skip(this.products.size() / 2).findFirst().map(AbstractEntity::getId).get();
-		final MockHttpServletRequestBuilder req = put("/products/{id}", id)
+		final var ent = pickAny();
+		final var req = put("/products/{id}", ent.getId())
 				.contentType(APPLICATION_JSON)
 				.accept(APPLICATION_JSON)
 				.content(this.om.writeValueAsString(dto));
@@ -304,14 +299,12 @@ public class ProductEndpointTest {
 	@Test
 	@WithRoleAdmin
 	public void patchEntity() throws Exception {
-		final ProductRequest dto = ProductRequest.builder()
-				.name(randomAscii(10, 20))
-				.price(randomDecimal(10, 20))
+		final var dto = ProductRequest.builder()
 				.description(randomAscii(10, 20))
 				.stock(randomDecimal(10, 20))
 				.build();
-		final Product ent = this.products.values().stream().skip(this.products.size() / 2).findFirst().get();
-		final MockHttpServletRequestBuilder req = patch("/products/{id}", ent.getId())
+		final var ent = pickAny();
+		final var req = patch("/products/{id}", ent.getId())
 				.contentType(APPLICATION_JSON)
 				.accept(APPLICATION_JSON)
 				.content(this.om.writeValueAsString(dto));
@@ -322,17 +315,17 @@ public class ProductEndpointTest {
 				.andExpect(jsonPath("$.id", equalTo(ent.getId().toString())))
 				.andExpect(jsonPath("$.name", equalTo(ent.getName())))
 				.andExpect(jsonPath("$.description", equalTo(dto.getDescription())))
-				.andExpect(jsonPath("$.price", equalTo(ent.getPrice().doubleValue())));
+				.andExpect(jsonPath("$.price", equalTo(ent.getPrice().doubleValue())))
+				.andExpect(jsonPath("$.stock", equalTo(dto.getStock().doubleValue())));
 	}
 
 	@Test
 	@WithRoleAdmin
 	public void patchEntityEmpty() throws Exception {
-		final ProductRequest dto = ProductRequest.builder()
+		final var dto = ProductRequest.builder()
 				.build();
-
-		final UUID id = this.products.values().stream().skip(this.products.size() / 2).findFirst().map(AbstractEntity::getId).get();
-		final MockHttpServletRequestBuilder req = patch("/products/{id}", id)
+		final var ent = pickAny();
+		final var req = patch("/products/{id}", ent.getId())
 				.contentType(APPLICATION_JSON)
 				.accept(APPLICATION_JSON)
 				.content(this.om.writeValueAsString(dto));
@@ -353,8 +346,8 @@ public class ProductEndpointTest {
 				.stock(randomDecimal(10, 20))
 				.build();
 
-		final UUID id = UUID.randomUUID();
-		final MockHttpServletRequestBuilder req = patch("/products/{id}", id)
+		final UUID id = randomUUID();
+		final var req = patch("/products/{id}", id)
 				.contentType(APPLICATION_JSON)
 				.accept(APPLICATION_JSON)
 				.content(this.om.writeValueAsString(dto));
@@ -367,8 +360,8 @@ public class ProductEndpointTest {
 
 	@Test
 	public void patchEntityAsAnonymous() throws Exception {
-		final UUID id = UUID.randomUUID();
-		final MockHttpServletRequestBuilder req = patch("/products/{id}", id)
+		final UUID id = randomUUID();
+		final var req = patch("/products/{id}", id)
 				.contentType(APPLICATION_JSON);
 
 		this.mvc.perform(req)
@@ -386,12 +379,19 @@ public class ProductEndpointTest {
 				.build();
 
 		final UUID id = this.products.values().stream().skip(this.products.size() / 2).findFirst().map(AbstractEntity::getId).get();
-		final MockHttpServletRequestBuilder req = patch("/products/{id}", id)
+		final var req = patch("/products/{id}", id)
 				.contentType(APPLICATION_JSON)
 				.accept(APPLICATION_JSON)
 				.content(this.om.writeValueAsString(dto));
 
 		this.mvc.perform(req)
 				.andExpect(status().isForbidden());
+	}
+
+	private Product pickAny() {
+		return this.bbm.create(Product.class,
+				this.products.values().stream()
+						.skip(randomInt(0, this.products.size()))
+						.findFirst().get());
 	}
 }

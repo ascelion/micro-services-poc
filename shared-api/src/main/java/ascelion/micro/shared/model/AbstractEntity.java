@@ -86,13 +86,14 @@ public abstract class AbstractEntity<E extends AbstractEntity<E>> {
 		return EqualsBuilder.reflectionEquals(this, that, false, t);
 	}
 
+	@SuppressWarnings("null")
 	static protected <T extends AbstractEntity<T>> boolean beq(Collection<T> c1, Collection<T> c2) {
 		if (c1 == c2) {
 			return true;
 		}
 
-		final int z1 = c1 == null ? 0 : c1.size();
-		final int z2 = c2 == null ? 0 : c2.size();
+		final var z1 = c1 == null ? 0 : c1.size();
+		final var z2 = c2 == null ? 0 : c2.size();
 
 		if (z1 != z2) {
 			return false;
@@ -100,6 +101,7 @@ public abstract class AbstractEntity<E extends AbstractEntity<E>> {
 		if (z1 == 0) {
 			return true;
 		}
+
 		for (Iterator<T> i1 = c1.iterator(), i2 = c2.iterator(); i1.hasNext();) {
 			if (!i1.next().beq(i2.next())) {
 				return false;

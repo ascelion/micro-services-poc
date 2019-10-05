@@ -21,8 +21,8 @@ public interface EntityRepo<E extends AbstractEntity<E>> extends JpaRepository<E
 	default E getById(UUID id) {
 		return findById(id)
 				.orElseThrow(() -> {
-					final Class<?> type = resolveTypeArguments(getClass(), EntityRepo.class)[0];
-					final String name = ofNullable(type.getAnnotation(Entity.class))
+					final var type = resolveTypeArguments(getClass(), EntityRepo.class)[0];
+					final var name = ofNullable(type.getAnnotation(Entity.class))
 							.map(Entity::name)
 							.filter(s -> s.length() > 0)
 							.orElse(Introspector.decapitalize(type.getSimpleName()));

@@ -12,7 +12,7 @@ import org.springframework.messaging.converter.MessageConverter;
 public class SpringMessageConfig {
 	@Bean("springMessageConverter")
 	public MessageConverter messageConverter(ObjectMapper om) {
-		final MappingJackson2MessageConverter mc = new MappingJackson2MessageConverter();
+		final var mc = new MappingJackson2MessageConverter();
 
 		mc.setObjectMapper(om);
 

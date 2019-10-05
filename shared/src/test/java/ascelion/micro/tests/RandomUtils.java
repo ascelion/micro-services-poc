@@ -9,6 +9,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class RandomUtils {
 
+	static public int randomInt(int min, int max) {
+		return org.apache.commons.lang3.RandomUtils.nextInt(min, max);
+	}
+
 	static public String randomAscii(int min, int max) {
 		return org.apache.commons.lang3.RandomStringUtils.randomAscii(min, max);
 	}

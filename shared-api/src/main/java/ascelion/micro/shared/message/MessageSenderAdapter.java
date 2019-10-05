@@ -1,12 +1,10 @@
 package ascelion.micro.shared.message;
 
-import java.util.Optional;
 import java.util.UUID;
 
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
 
@@ -31,8 +29,8 @@ public abstract class MessageSenderAdapter<T> {
 
 	@SneakyThrows
 	public void send(String source, Direction d, UUID pid, String kind, MessagePayload<T> payload) {
-		final Message<Optional<MessagePayload<T>>> message = MessageBuilder
-				.withPayload(Optional.ofNullable(payload))
+		final var message = MessageBuilder
+				.withPayload(payload)
 				.setHeader(HEADER_CORRELATION, pid)
 				.setHeader(HEADER_KIND, kind + "_" + d.name())
 				.setHeader(HEADER_SOURCE, source)

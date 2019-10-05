@@ -14,7 +14,6 @@ import ascelion.micro.basket.api.BasketItem;
 import ascelion.micro.mapper.BBField;
 import ascelion.micro.mapper.BBMap;
 import ascelion.micro.reservation.api.ReservationRequest;
-import ascelion.micro.reservation.api.ReservationResponse;
 import ascelion.micro.reservation.api.ReservationsApi;
 import ascelion.micro.shared.endpoint.Endpoint;
 import ascelion.micro.shared.endpoint.ViewEntityEndpointBase;
@@ -71,14 +70,14 @@ public class BasketEndpoint extends ViewEntityEndpointBase<Basket, BasketRepo> {
 	@Validated({ Default.class, OnCreate.class })
 	@Transactional
 	public Basket addItems(@PathVariable("basketId") UUID basketId, @RequestBody @NotNull @Valid @Size(min = 1) BasketItemRequest... requests) {
-		final Basket basket = this.repo.getById(basketId);
+		final var basket = this.repo.getById(basketId);
 
 		basket.merge(this.bbm.createArray(BasketItem.class, requests));
 
-		final ReservationResponse[] reservations = this.resApi.reserve(
+		final var reservations = this.resApi.reserve(
 				this.bbm.createArray(ReservationRequest.class, basket.getItems()));
 
-		for (int k = 0; k < reservations.length; k++) {
+		for (var k = 0; k < reservations.length; k++) {
 			final BasketItem item = basket.getItems().get(k);
 
 			item.setQuantity(reservations[k].getQuantity());
@@ -92,11 +91,11 @@ public class BasketEndpoint extends ViewEntityEndpointBase<Basket, BasketRepo> {
 	@Transactional
 	public Basket udateItem(@PathVariable("itemId") UUID itemId,
 			@RequestParam(name = "quantity", required = true) @NotNull @Min(0) BigDecimal quantity) {
-		final BasketItem item = this.itmRepo.getById(itemId);
+		final var item = this.itmRepo.getById(itemId);
 
 		item.setQuantity(quantity);
 
-		final ReservationResponse[] reservations = this.resApi.reserve(
+		final var reservations = this.resApi.reserve(
 				this.bbm.create(ReservationRequest.class, item));
 
 		item.setQuantity(reservations[0].getQuantity());
@@ -108,7 +107,7 @@ public class BasketEndpoint extends ViewEntityEndpointBase<Basket, BasketRepo> {
 	@DeleteMapping(path = "{itemId}", produces = APPLICATION_JSON_VALUE)
 	@Transactional
 	public Basket deleteItem(@PathVariable("itemId") UUID itemId) {
-		final BasketItem item = this.itmRepo.getById(itemId);
+		final var item = this.itmRepo.getById(itemId);
 
 		try {
 			this.resApi.update(ReservationsApi.Operation.DISCARD,

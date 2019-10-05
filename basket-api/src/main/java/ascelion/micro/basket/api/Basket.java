@@ -143,9 +143,9 @@ public class Basket extends AbstractEntity<Basket> {
 		}
 		if (i1.getId() == null) {
 			return i2.addQuantity(i1.getQuantity());
-		} else {
-			return i1.addQuantity(i2.getQuantity());
 		}
+
+		return i1.addQuantity(i2.getQuantity());
 	}
 
 	public Basket advance() {

@@ -11,6 +11,7 @@ public abstract class EntityEndpointBase<T extends AbstractEntity<T>, R extends 
 		extends ViewEntityEndpointBase<T, R>
 		implements EntityEndpoint<T, U> {
 
+	@SuppressWarnings("unchecked")
 	private final Class<T> type = (Class<T>) resolveTypeArguments(getClass(), EntityEndpoint.class)[0];
 
 	public EntityEndpointBase(R repo) {

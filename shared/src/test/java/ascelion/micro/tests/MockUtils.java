@@ -27,10 +27,11 @@ import org.springframework.data.domain.Sort;
 public final class MockUtils {
 
 	static public <T extends AbstractEntity<T>> void mockRepository(BeanToBeanMapper bbm, EntityRepo<T> repo, Map<UUID, T> entities, Supplier<T> sup) {
+		@SuppressWarnings("unchecked")
 		final Class<T> type = (Class<T>) resolveTypeArguments(repo.getClass(), EntityRepo.class)[0];
 
 		for (int k = 0; k < 10; k++) {
-			final LocalDateTime now = LocalDateTime.now();
+			final var now = LocalDateTime.now();
 			final T ent = sup.get();
 
 			setProtectedFieldValue("id", ent, randomUUID());
@@ -53,8 +54,8 @@ public final class MockUtils {
 				});
 		when(repo.save(any()))
 				.then(ivc -> {
+					final var now = LocalDateTime.now();
 					final T ent = ivc.getArgument(0);
-					final LocalDateTime now = LocalDateTime.now();
 
 					if (ent.getId() == null) {
 						setProtectedFieldValue("id", ent, randomUUID());

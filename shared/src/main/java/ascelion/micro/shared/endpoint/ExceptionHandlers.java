@@ -2,8 +2,8 @@ package ascelion.micro.shared.endpoint;
 
 import java.net.SocketException;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.Map;
 
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.RollbackException;
@@ -11,14 +11,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.ConstraintViolationException;
 import javax.validation.Path;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.singletonMap;
 import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.toList;
 import static org.springframework.http.HttpStatus.BAD_GATEWAY;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
-import com.netflix.client.ClientException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -35,8 +36,8 @@ import org.springframework.web.server.ResponseStatusException;
 public class ExceptionHandlers {
 
 	static private String nameOf(Path path) {
-		final String str = path.toString();
-		final int dot = str.lastIndexOf('.');
+		final var str = path.toString();
+		final var dot = str.lastIndexOf('.');
 
 		return dot < 0 ? str : str.substring(dot + 1);
 	}
@@ -52,7 +53,7 @@ public class ExceptionHandlers {
 	 */
 	@ExceptionHandler
 	public ResponseEntity<?> handleException(RollbackException ex) {
-		final Throwable cause = ex.getCause();
+		final var cause = ex.getCause();
 
 		if (cause instanceof ConstraintViolationException) {
 			return handleException((ConstraintViolationException) cause);
@@ -63,7 +64,7 @@ public class ExceptionHandlers {
 
 	@ExceptionHandler
 	public ResponseEntity<?> handleException(SocketException ex) {
-		return exceptionResponse(BAD_GATEWAY, ex.getMessage());
+		return exceptionResponse(BAD_GATEWAY, asList(ex.getMessage()));
 	}
 
 	/**
@@ -71,11 +72,11 @@ public class ExceptionHandlers {
 	 */
 	@ExceptionHandler
 	public ResponseEntity<?> handleException(ConstraintViolationException ex) {
-		final Map<Path, String>[] messages = ex.getConstraintViolations().stream()
+		final var messages = ex.getConstraintViolations().stream()
 				.map(v -> singletonMap(nameOf(v.getPropertyPath()), v.getMessage()))
-				.toArray(Map[]::new);
+				.collect(toList());
 
-		return exceptionResponse(BAD_REQUEST, (Object[]) messages);
+		return exceptionResponse(BAD_REQUEST, messages);
 	}
 
 	/**
@@ -83,17 +84,17 @@ public class ExceptionHandlers {
 	 */
 	@ExceptionHandler
 	public ResponseEntity<?> handleException(MethodArgumentNotValidException ex) {
-		final Map<String, String>[] messages = ex.getBindingResult()
+		final var messages = ex.getBindingResult()
 				.getFieldErrors().stream()
 				.map(e -> singletonMap(e.getField(), e.getDefaultMessage()))
-				.toArray(Map[]::new);
+				.collect(toList());
 
-		return exceptionResponse(BAD_REQUEST, (Object[]) messages);
+		return exceptionResponse(BAD_REQUEST, messages);
 	}
 
 	@ExceptionHandler
 	public ResponseEntity<?> handleException(EntityNotFoundException ex) {
-		return exceptionResponse(NOT_FOUND, ex.getMessage());
+		return exceptionResponse(NOT_FOUND, asList(ex.getMessage()));
 	}
 
 	/**
@@ -101,11 +102,11 @@ public class ExceptionHandlers {
 	 */
 	@ExceptionHandler
 	public ResponseEntity<?> handleException(ResponseStatusException ex) {
-		return exceptionResponse(ex.getStatus(), ex.getReason());
+		return exceptionResponse(ex.getStatus(), asList(ex.getReason()));
 	}
 
-	ResponseEntity<?> exceptionResponse(HttpStatus status, Object... messages) {
-		final Map<String, Object> values = new HashMap<>();
+	ResponseEntity<?> exceptionResponse(HttpStatus status, Collection<?> messages) {
+		final var values = new HashMap<>();
 
 		values.put("source", this.appName);
 		values.put("timestamp", LocalDateTime.now());

@@ -6,10 +6,7 @@ import java.util.UUID;
 
 import javax.sql.DataSource;
 
-import ascelion.micro.customer.CustomerRequest;
 import ascelion.micro.customer.api.Customer;
-import ascelion.micro.customer.CustomerEndpoint;
-import ascelion.micro.customer.CustomerRepo;
 import ascelion.micro.mapper.BeanToBeanMapper;
 import ascelion.micro.tests.MockUtils;
 import ascelion.micro.tests.TestsResourceServerConfig;
@@ -36,7 +33,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest({
@@ -73,8 +69,8 @@ public class CustomerEndpointTest {
 	@Test
 	@WithRoleAdmin
 	public void createEntity() throws Exception {
-		final CustomerRequest dto = new CustomerRequest(randomUUID().toString(), randomUUID().toString());
-		final MockHttpServletRequestBuilder req = post("/customers")
+		final var dto = new CustomerRequest(randomUUID().toString(), randomUUID().toString());
+		final var req = post("/customers")
 				.contentType(APPLICATION_JSON)
 				.accept(APPLICATION_JSON)
 				.content(this.om.writeValueAsString(dto));

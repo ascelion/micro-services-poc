@@ -15,7 +15,7 @@ public abstract class AbstractReceiveTask<T> {
 	public abstract void messageReceived(MessagePayload<T> payload, UUID id, String kind);
 
 	protected final void received(MessagePayload<T> payload, UUID id, String kind) {
-		final String name = CaseUtils.toCamelCase(kind, false, '_');
+		final var name = CaseUtils.toCamelCase(kind, false, '_');
 
 		this.camunda
 				.createMessageCorrelation(kind)
