@@ -1,19 +1,67 @@
 version: "3.1"
 
 services:
-  @application@:
+[#if hasDatabase]
+  [=application]_db:
+    build:
+      context: .
+      dockerfile: database.txt
+    image: [=repository][=application]_db:latest
+    container_name: [=name]_[=application]_db
+    volumes:
+      - [=application]_db:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=[=application]
+      - POSTGRES_PASSWORD=[=application]
+      - POSTGRES_DB=[=application]
+    networks:
+      - [=network]
+[#if publish]
+    ports:
+      - "[=portBase + 5432]:5432"
+[/#if]
+[/#if]
+
+  [=application]:
     build:
       context: .
       dockerfile: application.txt
-    image: @repository@@application@:latest
+    image: [=repository][=application]:latest
+[#if !scalable]
+    container_name: [=name]_[=application]
+[/#if]
     deploy:
+[#if global??]
+      mode: global
+[/#if]
       restart_policy:
         condition: on-failure
         delay: 15s
     networks:
-      - @network@
+      - [=network]
+[#if publish]
     ports:
-     - "@httpPort1@-@httpPort2@:8080"
+[#if scalable]
+      - "[=portBase + 8080]-[=portBase + 8080 + portRange - 1]:8080"
+[#else]
+      - "[=portBase + 8080]:8080"
+[/#if]
+[/#if]
+[#if hasDatabase]
+    depends_on:
+      - [=application]_db
+[#if hasImportData]
+    volumes:
+      - [=application]_pd:/usr/share/[=application]/prod-data:ro
+[/#if]
+[/#if]
+
+[#if hasDatabase]
+volumes:
+  [=application]_db:
+  [#if hasImportData][=application]_pd:[/#if]
+[/#if]
 
 networks:
-  @network@:
+  [=network]:
+

@@ -5,17 +5,17 @@ services:
     build:
       context: .
       dockerfile: dockerfile.txt
-    image: apache:latest
-    container_name: apache
+    image: [=repository][=application]:latest
+    container_name: [=name]_[=application]
     deploy:
+      mode: global
       restart_policy:
         condition: on-failure
         delay: 5s
     networks:
-      - micro-services
+      - [=network]
     ports:
-      - "1080:80"
+      - "[=port]:80"
 
 networks:
-  micro-services:
-
+  [=network]:

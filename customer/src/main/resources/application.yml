@@ -1,6 +1,6 @@
 
 database:
-  host: ${APP_NAME}-db
+  host: ${APP_NAME}_db
   port: 5432
 
 security:

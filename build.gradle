@@ -7,6 +7,7 @@ buildscript {
 	dependencies {
 		classpath "org.springframework.boot:spring-boot-gradle-plugin:$springBootVersion"
 		classpath "pl.allegro.tech.build:axion-release-plugin:1.10.+"
+		classpath 'org.yaml:snakeyaml:1.25'
 	}
 }
 
@@ -16,13 +17,14 @@ group = 'ascelion.poc'
 version = scmVersion.version
 
 task clean {
-	delete buildDir
+	doLast {
+		delete buildDir
+	}
 }
 
 allprojects {
 	ext {
 		set( 'isRelease', !rootProject.version.endsWith( '-SNAPSHOT' ) )
-		set( 'dockerName', 'poc' )
 	}
 
 	repositories {
@@ -31,6 +33,7 @@ allprojects {
 	}
 
 	apply plugin: 'eclipse'
+	apply plugin: 'extend-project'
 
 	task 'clean-ext'(type: Delete) {
 		delete 'bin', 'target', '*.log'
@@ -52,7 +55,7 @@ subprojects {
 	plugins.withType( JavaPlugin ) {
 		sourceCompatibility = '11'
 		targetCompatibility = '11'
-	
+
 		project.apply from: rootProject.file('lombok.gradle')
 		project.apply from: rootProject.file('tests.gradle')
 	}
@@ -60,26 +63,25 @@ subprojects {
 		// strip version from archive name
 		archiveVersion = ''
 	}
-	plugins.withType( ApplicationPlugin ) {
+
+	plugins.withId( 'org.springframework.boot' ) {
+		project.apply plugin: 'application'
+		project.apply from: rootProject.file( 'docker.gradle' )
+
 		mainClassName = 'ascelion.micro.Main'
-	}
-	plugins.withType( DistributionPlugin ) {
+
 		distributions.all {
 			contents.into '/'
 		}
 
-		plugins.withId( 'org.springframework.boot' ) {
-			distZip.enabled = false
-			distTar.enabled = false
-			tasks.all { if( it.name == 'bootDistZip' ) it.enabled = false }
-		}
+		distZip.enabled = false
+		distTar.enabled = false
 
-		if( project.hasProperty( 'portBase' ) ) {
-			project.apply from: rootProject.file( 'docker.gradle' )
+		tasks.all { if( it.name == 'bootDistZip' ) it.enabled = false }
+
+		compileJava {
+			dependsOn 'checkDevProfile'
 		}
-	}
-	plugins.withId( 'org.springframework.boot' ) {
-		project.apply plugin: 'java'
 
 		bootRun {
 			systemProperty "spring.profiles.active", 'dev'
@@ -89,14 +91,20 @@ subprojects {
 
 			jvmArgs '--illegal-access=permit'
 		}
-		task localRun {
-			doFirst {
-				bootRun.configure {
-					systemProperty "database.port", '5432'
-				}
-			}
+	}
+	plugins.withType( ascelion.micro.gradle.DockerPlugin ) {
+		docker {
+			name 'poc'
 
-			finalizedBy bootRun
+			configuration {
+				publish     = isRelease ? false : booleanProperty( 'ublish-services', false )
+				application = project.name
+
+				hasDatabase = true
+
+				repository  = project.hasProperty( 'docker.repository' ) ? project.ext['docker.repository'] + '/' : ''
+				portRange   = 10
+			}
 		}
 	}
 
@@ -104,15 +112,15 @@ subprojects {
 		tasks.withType( Jar ) {
 			manifest {
 				attributes(
-					'Built-By'       : System.properties['user.name'],
-					'Build-Timestamp': new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(new Date()),
-					'Build-Branch'   : scmVersion.scmPosition.branch,
-					'Build-Commit'   : scmVersion.scmPosition.revision,
-					'Build-Revision' : "${scmVersion.version}-${scmVersion.scmPosition.shortRevision}",
-					'Created-By'     : "Gradle ${gradle.gradleVersion}",
-					'Build-Jdk'      : "${System.properties['java.version']} (${System.properties['java.vendor']} ${System.properties['java.vm.version']})",
-					'Build-OS'       : "${System.properties['os.name']} ${System.properties['os.arch']} ${System.properties['os.version']}"
-				)
+						'Built-By'       : System.properties['user.name'],
+						'Build-Timestamp': new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(new Date()),
+						'Build-Branch'   : scmVersion.scmPosition.branch,
+						'Build-Commit'   : scmVersion.scmPosition.revision,
+						'Build-Revision' : "${scmVersion.version}-${scmVersion.scmPosition.shortRevision}",
+						'Created-By'     : "Gradle ${gradle.gradleVersion}",
+						'Build-Jdk'      : "${System.properties['java.version']} (${System.properties['java.vendor']} ${System.properties['java.vm.version']})",
+						'Build-OS'       : "${System.properties['os.name']} ${System.properties['os.arch']} ${System.properties['os.version']}"
+						)
 			}
 		}
 	}
@@ -122,7 +130,7 @@ subprojects {
 			implementation platform( "org.springframework.boot:spring-boot-dependencies:$springBootVersion" )
 			implementation platform( 'org.springframework.cloud:spring-cloud-dependencies:Greenwich.SR3' )
 			implementation platform( 'ascelion.flywaydb:flywaydb-ext:0.1.5' )
-	
+
 			constraints {
 				implementation 'jakarta.enterprise:jakarta.enterprise.cdi-api:2.0.2'
 				implementation 'jakarta.persistence:jakarta.persistence-api:2.2.3'
@@ -142,10 +150,10 @@ subprojects {
 
 				implementation 'io.swagger:swagger-annotations:1.5.23'
 			}
-	
+
 			runtimeOnly 'org.postgresql:postgresql'
 			runtimeOnly 'org.glassfish.jaxb:jaxb-runtime:2.3.1'
-	
+
 			testRuntimeOnly 'com.h2database:h2'
 		}
 	}
@@ -155,3 +163,8 @@ subprojects {
 }
 
 eclipse.project.name = "${project.group}.${name}"
+
+wrapper {
+	distributionType = 'all'
+}
+

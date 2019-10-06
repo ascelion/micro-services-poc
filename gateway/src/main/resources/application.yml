@@ -21,15 +21,14 @@ zuul:
       strip-prefix: false
       sensitive-headers:
       service-id: authz
-#    users:
-#      service-id: authz
-#      strip-prefix: false
-#      sensitive-headers:
-#    roles:
-#      service-id: authz
-#      strip-prefix: false
-#      sensitive-headers:
-
+    users:
+      strip-prefix: false
+      sensitive-headers:
+      service-id: authz
+    roles:
+      strip-prefix: false
+      sensitive-headers:
+      service-id: authz
     baskets:
       strip-prefix: false
       sensitive-headers:
@@ -42,16 +41,20 @@ zuul:
       strip-prefix: false
       sensitive-headers:
       service-id: checkout
+    reservations:
+      strip-prefix: false
+      sensitive-headers:
+      service-id: product
     products:
       strip-prefix: false
       sensitive-headers:
-      service-id: checkout
+      service-id: product
     payments:
       strip-prefix: false
       sensitive-headers:
       service-id: payment
-#    services:
-#      service-id: eureka
-#      strip-prefix: false
-#      sensitive-headers:
+    service:
+      service-id: eureka
+      strip-prefix: false
+      sensitive-headers:
 

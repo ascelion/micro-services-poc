@@ -1,8 +1,6 @@
 FROM archlinux/base
 
-ARG SERVER_NAME
-
-ENV SERVER_NAME $SERVER_NAME
+ENV SERVER_NAME [=application]
 RUN pacman -Syu --noconfirm
 RUN pacman -S apache logrotate --needed --noconfirm
 #RUN pacman -S vim iputils psmisc bind-tools inetutils --needed --noconfirm
@@ -15,4 +13,3 @@ COPY run-httpd /usr/bin
 RUN chmod +x /usr/bin/run-httpd
 
 ENTRYPOINT [ "/usr/bin/run-httpd" ]
-

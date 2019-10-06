@@ -1,11 +1,12 @@
-ext {
-	portBase = 13000
-	hasDatabase = true
-	scalable = true
+apply plugin: 'docker'
+
+docker {
+	configuration {
+		portBase = 13000
+	}
 }
 
 apply plugin: 'org.springframework.boot'
-apply plugin: 'application'
 
 dependencies {
 	implementation project( ':shared' )

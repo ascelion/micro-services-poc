@@ -1,21 +1,28 @@
+[#assign APPLICATION][=application?upper_case][/#assign]
+
 FROM openjdk:11
 
 ENV LOG_PATH /var/log
-ENV APP_DATA /usr/share/@application@/prod-data
+ENV APP_DATA /usr/share/[=application]/prod-data
 
-ENV @APPLICATION@_OPTS $@APPLICATION@_OPTS --illegal-access=permit
-ENV @APPLICATION@_OPTS $@APPLICATION@_OPTS -DAPP_NAME=@application@
-ENV @APPLICATION@_OPTS $@APPLICATION@_OPTS -DLOG_NAME=@application@
-ENV @APPLICATION@_OPTS $@APPLICATION@_OPTS -DLOG_PATH=$LOG_PATH
-ENV @APPLICATION@_OPTS $@APPLICATION@_OPTS -DEUREKA_URI=http://eureka:8080/services/eureka
-ENV @APPLICATION@_OPTS $@APPLICATION@_OPTS -DdataImportLocation=$APP_DATA
-ENV @APPLICATION@_OPTS $@APPLICATION@_OPTS -Dspring.main.banner-mode=off
+ENV [=APPLICATION]_OPTS $[=APPLICATION]_OPTS --illegal-access=permit
+ENV [=APPLICATION]_OPTS $[=APPLICATION]_OPTS -DAPP_NAME=[=application]
+ENV [=APPLICATION]_OPTS $[=APPLICATION]_OPTS -DLOG_NAME=[=application]
+ENV [=APPLICATION]_OPTS $[=APPLICATION]_OPTS -DLOG_PATH=$LOG_PATH
+ENV [=APPLICATION]_OPTS $[=APPLICATION]_OPTS -DEUREKA_URI=http://eureka:8080/services/eureka
+ENV [=APPLICATION]_OPTS $[=APPLICATION]_OPTS -Dspring.main.banner-mode=off
+
+[#if hasImportData]
+ENV [=APPLICATION]_OPTS $[=APPLICATION]_OPTS -DdataImportLocation=$APP_DATA
+
+ADD data /usr/share/[=application]/prod-data
+[/#if]
 
 RUN mkdir -p $LOG_PATH
-RUN mkdir -p /usr/share/@application@
+RUN mkdir -p /usr/share/[=application]
 
-ADD @application@-boot.tar /usr/share/@application@
+ADD [=application]-boot.tar /usr/share/[=application]
 
-RUN ln -sf /usr/share/@application@/bin/@application@ /bin/run-@application@-service
+RUN ln -sf /usr/share/[=application]/bin/[=application] /bin/run-[=application]-service
 
-ENTRYPOINT [ "/bin/run-@application@-service" ]
+ENTRYPOINT [ "/bin/run-[=application]-service" ]

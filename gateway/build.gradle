@@ -1,5 +1,14 @@
-ext {
-	portBase = 1000
+apply plugin: 'docker'
+
+docker {
+	scalable false
+
+	configuration {
+		portBase = 8
+		hasDatabase = false
+		publish = true
+		global = true
+	}
 }
 
 apply plugin: 'org.springframework.boot'
@@ -10,3 +19,4 @@ dependencies {
 	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-zuul'
 	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
 }
+

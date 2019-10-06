@@ -1,0 +1,38 @@
+
+repositories {
+	jcenter()
+}
+
+apply plugin: 'groovy'
+apply plugin: 'eclipse'
+
+dependencies {
+	implementation localGroovy()
+	implementation gradleApi()
+
+	implementation 'org.freemarker:freemarker:2.3.29'
+	implementation 'org.yaml:snakeyaml:1.25'
+}
+
+eclipse {
+	project {
+		name = 'ascelion.poc.micro-services-build'
+	}
+	classpath {
+		file {
+			whenMerged { clp ->
+				File dist = file( "${gradle.gradleUserHomeDir}/wrapper/dists/gradle-${gradle.gradleVersion}-all" )
+
+				if( dist.exists() ) {
+					File gradleSrc = file( "${dist.listFiles()[0]}/gradle-${gradle.gradleVersion}/src" )
+
+					clp.entries
+							.findAll {  it.kind == 'lib' && it.sourcePath == null && it.path =~ "/gradle[^/]*.jar" }
+							.each { it.sourcePath = clp.fileReference( gradleSrc ) }
+				}
+			}
+		}
+	}
+}
+
+apply from: '../lombok.gradle'

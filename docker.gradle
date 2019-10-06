@@ -1,139 +1,14 @@
-import org.apache.tools.ant.filters.*
 
-final def maxScale = 10
-
-def dockerScale
-
-if( hasProperty( 'scale' ) && hasProperty( 'scalable' ) && scalable ) {
-	dockerScale = Math.min( maxScale, Integer.parseInt( scale ) )
-}
-else {
-	dockerScale = 1
-}
-
-def dockerData = hasProperty( 'hasDatabase' ) && hasDatabase
-def dockerFile = dockerData ? 'docker-compose-db.yml' : 'docker-compose.yml'
-def dockerDist = file( "${buildDir}/distributions" )
-
-def jdbcPort = Integer.toString( portBase + 5432 )
-
-def httpPort1 = Integer.toString( portBase + 8080 )
-def httpPort2 = Integer.toString( portBase + 8080 + dockerScale - 1 )
-
-task 'docker-files'(type: Copy) {
-	doFirst {
-		mkdir "${dockerDist}/data"
-	}
-
-	into dockerDist
-
-	from( rootProject.file('docker') ) {
-		if( dockerData ) {
-			include 'docker-compose-db.yml'
-			include 'database.*'
-		}
-		else {
-			include 'docker-compose.yml'
-		}
-
-		include 'application.txt'
-
-		filter ReplaceTokens, tokens: [
-			application: project.name,
-			APPLICATION: project.name.toUpperCase(),
-			network: rootProject.name,
-			jdbcPort: jdbcPort,
-			httpPort1: httpPort1,
-			httpPort2: httpPort2,
-			repository: '',
-//			repository: 'localhost:5000/poc/',
-			]
-	}
-	from( file('data') ) {
-		into 'data'
-	}
-}
-
-task 'docker-build'(type: Exec) {
-	dependsOn 'docker-files'
-	dependsOn 'assemble'
-
-	def touch = file( "${dockerDist}/${project.name}.touch")
-
-	doLast {
-		ant.touch( file: touch )
-	}
-
-	inputs.files fileTree( dockerDist ) {
-		exclude '*.touch'
-	}
-	outputs.files touch
-
-	executable 'docker-compose'
-	workingDir dockerDist
-
-	args '-f', dockerFile, '-p', dockerName
-	args 'build'
-}
-
-task 'docker-up'(type: Exec) {
-	dependsOn 'docker-build', 'stopDB'
-
-	executable 'docker-compose'
-	workingDir dockerDist
-
-	args '-f', dockerFile, '-p', dockerName
-	args 'up', '-d'
-
-	if( dockerScale > 1 && project.hasProperty( 'scale' ) ) {
-		if( Integer.parseInt( scale ) <= maxScale ) {
-			args '--scale', "${project.name}=$scale"
-		}
-	}
-}
-
-task 'docker-down'(type: Exec) {
-	dependsOn 'docker-files'
-
-	executable 'docker-compose'
-	workingDir dockerDist
-
-	ignoreExitValue true
-
-	args '-f', dockerFile, '-p', dockerName
-	args 'down'
-}
-
-task 'docker-start'(type: Exec) {
-	dependsOn 'docker-files'
-
-	executable 'docker-compose'
-	workingDir dockerDist
-
-	ignoreExitValue true
-
-	args '-f', dockerFile, '-p', dockerName
-	args 'start'
-}
-
-task 'docker-stop'(type: Exec) {
-	dependsOn 'docker-files'
-
-	executable 'docker-compose'
-	workingDir dockerDist
-
-	ignoreExitValue true
-
-	args '-f', dockerFile, '-p', dockerName
-	args 'stop'
-}
+final def dataDir        = file 'data'
+final def destination    = file "$buildDir/distributions"
+final def jdbcPort       = docker.configuration.portBase + 5432
 
 bootRun {
 	systemProperty "database.port", jdbcPort
 }
 
 task startDB(type: Exec) {
-	enabled = dockerData
+	onlyIf { docker.configuration.hasDatabase }
 
 	executable 'docker'
 
@@ -147,7 +22,7 @@ task startDB(type: Exec) {
 }
 
 task stopDB(type: Exec) {
-	enabled = dockerData
+	onlyIf { docker.configuration.hasDatabase }
 
 	executable 'docker'
 
@@ -155,3 +30,27 @@ task stopDB(type: Exec) {
 
 	args 'stop', "${project.name}-db-dev"
 }
+
+docker {
+	outputDirectory destination
+	templates rootProject.fileTree( 'docker' )
+
+	configuration {
+		hasImportData = dataDir.exists()
+	}
+}
+
+task dockerFilesData(type: Copy) {
+	into destination
+
+	from( file('data') ) {
+		into 'data'
+	}
+
+	onlyIf { docker.configuration.hasImportData }
+}
+
+dockerFiles {
+	dependsOn dockerFilesData
+}
+

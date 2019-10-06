@@ -1,3 +1,4 @@
 
 server:
-  port: 1080
+  port: 8088
+

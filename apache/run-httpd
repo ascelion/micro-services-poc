@@ -1,6 +1,6 @@
 #!/bin/bash
 
-[[ -z $SERVER_NAME ]] && SERVER_NAME=apache
+[[ -z $SERVER_NAME ]] && SERVER_NAME=[=application]
 
 set -e
 
