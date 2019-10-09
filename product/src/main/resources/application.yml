@@ -1,4 +1,3 @@
-
 database:
   host: ${APP_NAME}_db
   port: 5432

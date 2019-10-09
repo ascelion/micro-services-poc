@@ -1,12 +1,12 @@
 
 eureka:
   client:
-    registerWithEureka: false
-    fetchRegistry: false
+    registerWithEureka: true
+    fetchRegistry: true
     serviceUrl:
-      defaultZone: ${EUREKA_URI:http://localhost:48080/services/eureka/}
-#  instance:
-#    preferIpAddress: true
+      defaultZone: ${EUREKA_URI:http://localhost:48080/services/eureka}
+  instance:
+    preferIpAddress: true
 
 spring:
   application:
@@ -16,45 +16,45 @@ spring:
     banner-mode: 'off'
 
 zuul:
+  ignored-services: '*'
   routes:
     oauth:
+      service-id: authz
       strip-prefix: false
       sensitive-headers:
-      service-id: authz
     users:
+      service-id: authz
       strip-prefix: false
       sensitive-headers:
-      service-id: authz
     roles:
-      strip-prefix: false
-      sensitive-headers:
       service-id: authz
+      strip-prefix: false
+      sensitive-headers:
     baskets:
-      strip-prefix: false
-      sensitive-headers:
       service-id: basket
+      strip-prefix: false
+      sensitive-headers:
     customers:
-      strip-prefix: false
-      sensitive-headers:
       service-id: customer
+      strip-prefix: false
+      sensitive-headers:
     checkouts:
-      strip-prefix: false
-      sensitive-headers:
       service-id: checkout
+      strip-prefix: false
+      sensitive-headers:
     reservations:
+      service-id: product
       strip-prefix: false
       sensitive-headers:
-      service-id: product
     products:
-      strip-prefix: false
-      sensitive-headers:
       service-id: product
-    payments:
       strip-prefix: false
       sensitive-headers:
+    payments:
       service-id: payment
-    service:
+      strip-prefix: false
+      sensitive-headers:
+    services:
       service-id: eureka
       strip-prefix: false
       sensitive-headers:
-

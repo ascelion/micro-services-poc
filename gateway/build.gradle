@@ -4,7 +4,7 @@ docker {
 	scalable false
 
 	configuration {
-		portBase = 8
+		portBase = -6999
 		hasDatabase = false
 		publish = true
 		global = true
