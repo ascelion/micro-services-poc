@@ -30,6 +30,11 @@ allprojects {
 	repositories {
 		mavenLocal()
 		jcenter()
+		
+		maven {
+			name = 'flywaydb-snapshots'
+			url = 'https://oss.jfrog.org/artifactory/oss-snapshot-local'
+		}
 	}
 
 	apply plugin: 'eclipse'
@@ -129,7 +134,8 @@ subprojects {
 		dependencies {
 			implementation platform( "org.springframework.boot:spring-boot-dependencies:$springBootVersion" )
 			implementation platform( 'org.springframework.cloud:spring-cloud-dependencies:Greenwich.SR3' )
-			implementation platform( 'ascelion.flywaydb:flywaydb-ext:0.1.5' )
+
+			implementation platform( 'ascelion.flywaydb:flywaydb-ext:1.0.0' )
 
 			constraints {
 				implementation 'jakarta.enterprise:jakarta.enterprise.cdi-api:2.0.2'
