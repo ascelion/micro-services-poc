@@ -25,6 +25,7 @@ task clean {
 allprojects {
 	ext {
 		set( 'isRelease', !rootProject.version.endsWith( '-SNAPSHOT' ) )
+		set( 'dockerTag', isRelease ? project.version : new java.text.SimpleDateFormat("'0.'yyMMdd'.'HHmm").format(new Date()) )
 	}
 
 	repositories {
@@ -100,6 +101,8 @@ subprojects {
 	plugins.withType( ascelion.micro.gradle.DockerPlugin ) {
 		docker {
 			name 'poc'
+			//tagName dockerTag
+			tagName 'latest'
 
 			configuration {
 				publish     = isRelease ? false : booleanProperty( 'ublish-services', false )

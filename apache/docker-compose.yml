@@ -5,7 +5,7 @@ services:
     build:
       context: .
       dockerfile: dockerfile.txt
-    image: [=repository][=application]:latest
+    image: [=repository][=application]:[=tagName]
     container_name: [=name]_[=application]
     deploy:
       mode: global

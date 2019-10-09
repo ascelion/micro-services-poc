@@ -6,7 +6,7 @@ services:
     build:
       context: .
       dockerfile: database.txt
-    image: [=repository][=application]_db:latest
+    image: [=repository][=application]_db:[=tagName]
     container_name: [=name]_[=application]_db
     volumes:
       - [=application]_db:/var/lib/postgresql/data/
@@ -26,7 +26,7 @@ services:
     build:
       context: .
       dockerfile: application.txt
-    image: [=repository][=application]:latest
+    image: [=repository][=application]:[=tagName]
 [#if !scalable]
     container_name: [=name]_[=application]
 [/#if]

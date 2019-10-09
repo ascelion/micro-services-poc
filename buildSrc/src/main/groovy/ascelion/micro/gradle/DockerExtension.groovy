@@ -24,6 +24,7 @@ class DockerExtension {
 
 		configuration.name(project.rootProject.name)
 		configuration.scalable(true)
+		configuration.tagName(project.version)
 	}
 
 	String getName() {
@@ -32,12 +33,17 @@ class DockerExtension {
 	void setName(String name) {
 		this.configuration.name(name)
 	}
-
 	boolean isScalable() {
 		return configuration.scalable
 	}
 	void setScalable(boolean scalable) {
 		configuration.scalable(scalable)
+	}
+	String getTagName() {
+		return configuration.tagName
+	}
+	void setTagName(String tagName) {
+		this.configuration.tagName(tagName)
 	}
 
 	void templates( FileCollection templates ) {

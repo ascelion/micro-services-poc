@@ -5,7 +5,7 @@ import org.gradle.internal.metaobject.AbstractDynamicObject
 import org.gradle.internal.metaobject.DynamicInvokeResult
 
 class DockerConfiguration extends AbstractDynamicObject implements Serializable {
-	static private final Set<String> RO_PROPERTIES = ['properties', 'name', 'scalable']
+	static private final Set<String> RO_PROPERTIES = ['properties', 'name', 'scalable', 'tagName']
 
 	private final Map<String, Object> properties = new HashMap<>()
 
@@ -21,6 +21,10 @@ class DockerConfiguration extends AbstractDynamicObject implements Serializable 
 	@PackageScope
 	void scalable(boolean scalable) {
 		this.properties.put("scalable", scalable)
+	}
+	@PackageScope
+	void tagName(String tagName) {
+		this.properties.put("tagName", tagName)
 	}
 
 	@Override
