@@ -25,7 +25,8 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 
 @MappedSuperclass
 @Getter
-@Setter // this is temporary
+// Orika is not able to inject fields, don't use the setters directly
+@Setter(onMethod_ = @Deprecated)
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public abstract class AbstractEntity<E extends AbstractEntity<E>> {

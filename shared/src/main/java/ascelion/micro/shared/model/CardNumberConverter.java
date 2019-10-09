@@ -1,7 +1,9 @@
-package ascelion.micro.customer.api;
+package ascelion.micro.shared.model;
 
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
+
+import ascelion.micro.shared.model.CardNumber;
 
 @Converter(autoApply = true)
 public class CardNumberConverter implements AttributeConverter<CardNumber, String> {

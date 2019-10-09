@@ -8,6 +8,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
 import ascelion.micro.shared.model.AbstractEntity;
+import ascelion.micro.shared.model.CardNumber;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;

@@ -7,9 +7,9 @@ import javax.persistence.FlushModeType;
 
 import ascelion.micro.account.Account;
 import ascelion.micro.account.AccountRepo;
-import ascelion.micro.account.IBAN;
 import ascelion.micro.card.Card;
 import ascelion.micro.card.CardRepo;
+import ascelion.micro.shared.model.IBAN;
 import ascelion.micro.tests.JpaEntityIT;
 
 import static ascelion.micro.tests.RandomUtils.randomAscii;

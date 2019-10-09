@@ -1,4 +1,4 @@
-package ascelion.micro.account;
+package ascelion.micro.shared.model;
 
 import javax.validation.constraints.Size;
 

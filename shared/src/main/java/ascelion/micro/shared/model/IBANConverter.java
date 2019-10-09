@@ -1,7 +1,9 @@
-package ascelion.micro.account;
+package ascelion.micro.shared.model;
 
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
+
+import ascelion.micro.shared.model.IBAN;
 
 @Converter(autoApply = true)
 public class IBANConverter implements AttributeConverter<IBAN, String> {

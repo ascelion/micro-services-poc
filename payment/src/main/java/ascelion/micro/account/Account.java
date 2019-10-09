@@ -10,6 +10,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import ascelion.micro.shared.model.AbstractEntity;
+import ascelion.micro.shared.model.IBAN;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;

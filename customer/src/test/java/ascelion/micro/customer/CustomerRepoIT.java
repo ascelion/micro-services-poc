@@ -6,8 +6,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.FlushModeType;
 
 import ascelion.micro.customer.CustomerRepo;
-import ascelion.micro.customer.api.CardNumber;
 import ascelion.micro.customer.api.Customer;
+import ascelion.micro.shared.model.CardNumber;
 import ascelion.micro.tests.JpaEntityIT;
 
 import static ascelion.micro.tests.RandomUtils.randomAscii;
