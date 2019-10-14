@@ -24,4 +24,5 @@ dependencies {
 	implementation 'ascelion.flywaydb:flywaydb-ext-util5'
 
 	testImplementation project( path: ':shared', configuration: 'test' )
+	testImplementation project( path: ':shared-api', configuration: 'test' )
 }

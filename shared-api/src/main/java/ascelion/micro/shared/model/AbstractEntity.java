@@ -16,21 +16,16 @@ import javax.validation.constraints.NotNull;
 
 import ascelion.micro.shared.validation.OnUpdate;
 
-import static java.util.UUID.randomUUID;
-
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
 @MappedSuperclass
 @Getter
-// Orika is not able to inject fields, don't use these setters directly
-@Setter(onMethod_ = @Deprecated)
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
@@ -39,7 +34,7 @@ public abstract class AbstractEntity<E extends AbstractEntity<E>> {
 	@GeneratedValue
 	@Column(nullable = false, insertable = false, updatable = false, unique = true)
 	@NotNull(groups = OnUpdate.class)
-	private UUID id;
+	UUID id;
 	@Column(nullable = false, updatable = false)
 	@NotNull
 	private LocalDateTime createdAt;
@@ -47,17 +42,8 @@ public abstract class AbstractEntity<E extends AbstractEntity<E>> {
 	@NotNull
 	private LocalDateTime updatedAt;
 
-	static public <T extends AbstractEntity<T>> T populate(T t) {
-		final AbstractEntity<T> ent = t;
-
-		ent.id = randomUUID();
-		ent.init();
-
-		return t;
-	}
-
 	@PrePersist
-	private void init() {
+	void init() {
 		this.createdAt = this.updatedAt = LocalDateTime.now();
 	}
 

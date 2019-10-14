@@ -1,11 +1,10 @@
 package ascelion.micro.reservation;
 
 import ascelion.micro.mapper.BeanToBeanMapper;
-import ascelion.micro.product.ProductRepo;
 import ascelion.micro.product.api.Product;
 import ascelion.micro.reservation.api.Reservation;
 import ascelion.micro.reservation.api.ReservationResponse;
-import ascelion.micro.shared.model.AbstractEntity;
+import ascelion.micro.shared.model.EntityUtil;
 
 import static ascelion.micro.tests.RandomUtils.randomDecimal;
 import static java.util.UUID.randomUUID;
@@ -13,32 +12,20 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
+import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
-@Import({
-		BeanToBeanMapper.class,
-		ReservationEndpoint.class,
-})
 public class ReservationMappingsTest {
 
-	@Autowired
-	private final BeanToBeanMapper bbm = new BeanToBeanMapper(true);
+	private final BeanToBeanMapper bbm = new BeanToBeanMapper();
 
-	@MockBean
-	private ReservationService resServ;
-	@MockBean
-	private ReservationRepo resRepo;
-	@MockBean
-	private ProductRepo prdRepo;
+	@Before
+	public void setUp() {
+		this.bbm.afterPropertiesSet();
+	}
 
 	@Test
-	public void mapReservationToReservationResponse() {
+	public void Reservation_To_ReservationResponse() {
 		final var prod = Product.builder()
 				.price(randomDecimal(10, 20))
 				.stock(randomDecimal(1000, 2000))
@@ -49,8 +36,7 @@ public class ReservationMappingsTest {
 				.quantity(randomDecimal(10, 20))
 				.build();
 
-		AbstractEntity.populate(prod);
-		AbstractEntity.populate(res);
+		EntityUtil.populate(prod, res);
 
 		final var rsp = this.bbm.create(ReservationResponse.class, res);
 

@@ -4,14 +4,16 @@ import java.math.BigDecimal;
 
 import javax.validation.constraints.NotNull;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.NoArgsConstructor;
 
 @Getter
-@RequiredArgsConstructor
+@NoArgsConstructor
+@AllArgsConstructor
 public class ReservationResponse {
 	@NotNull
-	private final BigDecimal quantity;
+	private BigDecimal quantity;
 	@NotNull
-	private final BigDecimal price;
+	private BigDecimal price;
 }

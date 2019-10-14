@@ -2,6 +2,8 @@ package ascelion.micro.basket.api;
 
 import java.io.IOException;
 
+import ascelion.micro.shared.model.EntityUtil;
+
 import static ascelion.micro.tests.RandomUtils.randomDecimal;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.Matchers.is;
@@ -28,9 +30,7 @@ public class BasketTest {
 				.customerId(randomUUID())
 				.build();
 
-		item0.setId(randomUUID());
-		item1.setId(randomUUID());
-		basket1.setId(randomUUID());
+		EntityUtil.populate(item0, item1, basket1);
 
 		basket1.merge(item0, item1);
 

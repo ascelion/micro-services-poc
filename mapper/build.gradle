@@ -3,8 +3,9 @@ apply plugin: 'java-library'
 dependencies {
 	implementation 'org.springframework:spring-context'
 
-	implementation 'ma.glasnost.orika:orika-core'
-	implementation 'ma.glasnost.orika:orika-eclipse-tools'
+	implementation 'com.github.dozermapper:dozer-core'
+	implementation 'jakarta.el:jakarta.el-api'
+	implementation 'org.glassfish:jakarta.el'
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }

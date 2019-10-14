@@ -33,5 +33,6 @@ public class Reservation extends AbstractEntity<Reservation> {
 	private UUID ownerId;
 	@NotNull
 	private BigDecimal quantity;
+
 	private boolean locked;
 }

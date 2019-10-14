@@ -119,7 +119,7 @@
     </bpmn:boundaryEvent>
     <bpmn:serviceTask id="ReturnItems" name="Return Items" isForCompensation="true" camunda:delegateExpression="#{updateReservations}">
       <bpmn:extensionElements>
-        <camunda:executionListener delegateExpression="#{basketStatus}" event="start">
+        <camunda:executionListener delegateExpression="#{basketStatus}" event="end">
           <camunda:field name="status">
             <camunda:string>RETURNED</camunda:string>
           </camunda:field>

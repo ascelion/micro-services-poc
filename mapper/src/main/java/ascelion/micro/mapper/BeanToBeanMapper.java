@@ -1,10 +1,8 @@
 package ascelion.micro.mapper;
 
 import java.lang.reflect.Array;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Formatter;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -15,26 +13,21 @@ import java.util.stream.Stream;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toList;
 
+import com.github.dozermapper.core.DozerBeanMapperBuilder;
+import com.github.dozermapper.core.Mapper;
+import com.github.dozermapper.core.loader.api.BeanMappingBuilder;
+import com.github.dozermapper.core.loader.api.FieldsMappingOption;
+import com.github.dozermapper.core.loader.api.FieldsMappingOptions;
+import com.github.dozermapper.core.loader.api.TypeMappingOptions;
 import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.ToString;
-import ma.glasnost.orika.MapperFacade;
-import ma.glasnost.orika.MapperFactory;
-import ma.glasnost.orika.constructor.ConstructorResolverStrategy.ConstructorMapping;
-import ma.glasnost.orika.constructor.SimpleConstructorResolverStrategy;
-import ma.glasnost.orika.impl.DefaultMapperFactory;
-import ma.glasnost.orika.impl.generator.EclipseJdtCompilerStrategy;
-import ma.glasnost.orika.metadata.ClassMap;
-import ma.glasnost.orika.metadata.MapperKey;
-import ma.glasnost.orika.metadata.Type;
-import ma.glasnost.orika.metadata.TypeFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.context.annotation.Lazy;
@@ -58,15 +51,9 @@ public class BeanToBeanMapper implements InitializingBean, BeanClassLoaderAware 
 		final boolean mapNulls;
 	}
 
-	private final Map<Key, MapperFacade> mappers = new ConcurrentHashMap<>();
+	private final Map<Key, Mapper> mappers = new ConcurrentHashMap<>();
 
-	@Value("${orika.sources:false}")
-	private boolean sources;
 	private ClassLoader cld = getClass().getClassLoader();
-
-	public BeanToBeanMapper(boolean sources) {
-		this.sources = sources;
-	}
 
 	public <T> T[] createArray(Class<T> target, Object[] sources, @NonNull Object... extra) {
 		return createArray(target, stream(sources), extra);
@@ -260,61 +247,6 @@ public class BeanToBeanMapper implements InitializingBean, BeanClassLoaderAware 
 		this.mappers.put(key, createOneWayMapper(key, map, component));
 	}
 
-	private MapperFacade createOneWayMapper(Key key, BBMap map, Class<?> component) {
-		final var typeA = TypeFactory.valueOf(key.typeA);
-		final var typeB = TypeFactory.valueOf(key.typeB);
-
-		L.trace("{}: adding mapping {} nulls from {} to {}", component.getName(), key.mapNulls ? "with" : "without", key.typeA.getName(), key.typeB.getName());
-
-		final var mf = buildFactory(key.mapNulls);
-		final var cmb = mf.classMap(typeA, typeB);
-
-		for (final var field : map.fields()) {
-			var to = field.to();
-
-			if (to.isEmpty()) {
-				to = field.from();
-			}
-
-			final var fmb = cmb.fieldMap(field.from(), to);
-
-			L.trace("\tincluded from {} to {}", field.from(), to);
-
-			if (field.hintFrom() != Void.class) {
-				fmb.aElementType(field.hintFrom());
-			}
-			if (field.hintTo() != Void.class) {
-				fmb.bElementType(field.hintTo());
-			}
-
-			fmb.add();
-		}
-
-		for (final var x : map.excludes()) {
-			L.trace("\texcluded {}", x);
-
-			cmb.exclude(x);
-		}
-
-		cmb.byDefault().register();
-
-		if (L.isDebugEnabled()) {
-			final var f = new Formatter();
-			final var k = new MapperKey(typeA, typeB);
-
-			f.format("ClassMap %s\n", k);
-
-			mf.getClassMap(k).getFieldsMapping()
-					.forEach(fm -> {
-						f.format("\t%s %s %s\n", fm, fm.isExcluded() ? "excluded" : "", fm.isByDefault() ? "default" : "");
-					});
-
-			L.trace("\n{}\n", f);
-		}
-
-		return mf.getMapperFacade();
-	}
-
 	private <T> UnaryOperator<T> mapper(Object source, Class<T> target, boolean mapNulls) {
 		final var sourceType = source.getClass();
 		final var key = new Key(sourceType, target, mapNulls);
@@ -342,35 +274,79 @@ public class BeanToBeanMapper implements InitializingBean, BeanClassLoaderAware 
 		};
 	}
 
-	private MapperFactory buildFactory(boolean mapNulls) {
-		final var bld = new DefaultMapperFactory.Builder()
-				.constructorResolverStrategy(this::resolve)
-				.mapNulls(mapNulls);
-
-		if (this.sources) {
-			bld.compilerStrategy(new EclipseJdtCompilerStrategy());
-		}
-
-		return bld.build();
+	private Mapper createOneWayMapper(Key key, BBMap map, Class<?> component) {
+		return DozerBeanMapperBuilder.create()
+				.withClassLoader(this.cld)
+				.withMappingBuilder(new BeanMappingBuilder() {
+					@Override
+					protected void configure() {
+						configureBMB(this, key, map, component);
+					}
+				})
+				.build();
 	}
 
-	@SuppressWarnings("unchecked")
-	private <T, A, B> ConstructorMapping<T> resolve(ClassMap<A, B> classMap, Type<T> sourceType) {
-		final var aToB = classMap.getBType().equals(sourceType);
-		final var targetClass = aToB ? classMap.getBType() : classMap.getAType();
-		final var def = stream(targetClass.getRawType().getConstructors())
-				.filter(c -> c.getParameterCount() == 0)
-				.findFirst().orElse(null);
+	protected void configureBMB(BeanMappingBuilder bmb, Key key, BBMap map, Class<?> component) {
+		L.trace("{}: adding mapping {} nulls from {} to {}", component.getName(), key.mapNulls ? "with" : "without", key.typeA.getName(), key.typeB.getName());
 
-		if (def == null || !Modifier.isPublic(def.getModifiers())) {
-			return new SimpleConstructorResolverStrategy().resolve(classMap, sourceType);
+		final var typeA = bmb.type(key.typeA)
+				.accessible();
+		final var typeB = bmb.type(key.typeB)
+				.accessible()
+				.mapNull(key.mapNulls);
+		final var tmb = bmb.mapping(typeA, typeB, TypeMappingOptions.oneWay());
+
+		for (final var field : map.fields()) {
+			var to = field.to();
+
+			if (to.isEmpty()) {
+				to = field.from();
+			}
+
+			L.trace("\tincluded from {} to {}", field.from(), to);
+
+			final var options = new ArrayList<FieldsMappingOption>();
+
+			if (field.hintFrom() != Void.class) {
+				options.add(FieldsMappingOptions.hintA(field.hintFrom()));
+			}
+			if (field.hintTo() != Void.class) {
+				options.add(FieldsMappingOptions.hintB(field.hintTo()));
+			}
+
+			tmb.fields(field.from(), to, options.toArray(FieldsMappingOption[]::new));
 		}
-
-		final var cm = new ConstructorMapping<T>();
-
-		cm.setConstructor((Constructor<T>) def);
-		cm.setParameterTypes(new Type[0]);
-
-		return cm;
 	}
+
+//	private MapperFactory buildFactory(boolean mapNulls) {
+//		final var bld = new DefaultMapperFactory.Builder()
+//				.constructorResolverStrategy(this::resolve)
+//				.mapNulls(mapNulls);
+//
+//		if (this.sources) {
+//			bld.compilerStrategy(new EclipseJdtCompilerStrategy());
+//		}
+//
+//		return bld.build();
+//	}
+//
+//	@SuppressWarnings("unchecked")
+//	private <T, A, B> ConstructorMapping<T> resolve(ClassMap<A, B> classMap, Type<T> sourceType) {
+//		final var aToB = classMap.getBType().equals(sourceType);
+//		final var targetClass = aToB ? classMap.getBType() : classMap.getAType();
+//		final var def = stream(targetClass.getRawType().getConstructors())
+//				.filter(c -> c.getParameterCount() == 0)
+//				.findFirst().orElse(null);
+//
+//		if (def == null || !Modifier.isPublic(def.getModifiers())) {
+//			return new SimpleConstructorResolverStrategy().resolve(classMap, sourceType);
+//		}
+//
+//		final var cm = new ConstructorMapping<T>();
+//
+//		cm.setConstructor((Constructor<T>) def);
+//		cm.setParameterTypes(new Type[0]);
+//
+//		return cm;
+//	}
 }
