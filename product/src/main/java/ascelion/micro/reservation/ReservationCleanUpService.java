@@ -2,6 +2,8 @@ package ascelion.micro.reservation;
 
 import java.time.LocalDateTime;
 
+import javax.annotation.PostConstruct;
+
 import ascelion.micro.mapper.BBField;
 import ascelion.micro.mapper.BBMap;
 import ascelion.micro.mapper.BeanToBeanMapper;
@@ -15,23 +17,29 @@ import org.slf4j.Logger;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.amqp.core.FanoutExchange;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@EnableScheduling
 @BBMap(from = Reservation.class, to = ReservationExpired.class, bidi = false, fields = {
 		@BBField(from = "product.id", to = "productId"),
 })
+@EnableConfigurationProperties(ReservationProperties.class)
 public class ReservationCleanUpService {
 	static private final Logger L = loggerForThisClass();
 
 	private final ReservationRepo repo;
 
-	@Value("${reservation.availability:60}")
-	private int availability;
+	@Autowired
+	private ReservationProperties config;
+
+	@Autowired
+	private TaskScheduler ts;
 
 	@Autowired
 	private BeanToBeanMapper bbm;
@@ -41,10 +49,11 @@ public class ReservationCleanUpService {
 	@Autowired
 	private FanoutExchange reservationExchange;
 
-	@Scheduled(fixedDelay = 60000)
 	@Transactional
 	public void run() {
-		final var exp = LocalDateTime.now().minusMinutes(this.availability);
+		L.info("Running reservation cleaner");
+
+		final var exp = LocalDateTime.now().minus(this.config.getAvailability());
 		final var old = this.repo.findOlderThan(exp);
 
 		if (old.size() > 0) {
@@ -55,5 +64,10 @@ public class ReservationCleanUpService {
 			this.amqp.convertAndSend(this.reservationExchange.getName(), "", payload);
 			this.repo.deleteAll(old);
 		}
+	}
+
+	@PostConstruct
+	private void postConstruct() {
+		this.ts.scheduleAtFixedRate(this::run, this.config.getCheckInterval());
 	}
 }

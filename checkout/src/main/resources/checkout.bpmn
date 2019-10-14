@@ -21,7 +21,7 @@
       <bpmn:incoming>ToReceivePayment</bpmn:incoming>
       <bpmn:outgoing>FromReceivePayment</bpmn:outgoing>
     </bpmn:receiveTask>
-    <bpmn:boundaryEvent id="ReceivePaymentTimeout" attachedToRef="ReceivePayment">
+    <bpmn:boundaryEvent id="PaymentTimeout" attachedToRef="ReceivePayment">
       <bpmn:outgoing>SequenceFlow_0fyj6jg</bpmn:outgoing>
       <bpmn:timerEventDefinition>
         <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">P10M</bpmn:timeDuration>
@@ -55,6 +55,13 @@
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="ToEnd" sourceRef="ReceivePaymentJoin" targetRef="EndEvents" />
     <bpmn:receiveTask id="ShippingEnded" name="Shipping Ended" messageRef="Message_1u2y4dl">
+      <bpmn:extensionElements>
+        <camunda:executionListener delegateExpression="#{verifyVariable}" event="end">
+          <camunda:field name="variableName">
+            <camunda:string>shippingResponse</camunda:string>
+          </camunda:field>
+        </camunda:executionListener>
+      </bpmn:extensionElements>
       <bpmn:incoming>ToShippingComplete</bpmn:incoming>
       <bpmn:outgoing>FromShippingComplete</bpmn:outgoing>
     </bpmn:receiveTask>
@@ -66,7 +73,11 @@
     </bpmn:intermediateThrowEvent>
     <bpmn:receiveTask id="BasketReceived" name="Basket Received" messageRef="Message_0bu4z8g">
       <bpmn:extensionElements>
-        <camunda:executionListener delegateExpression="#{basketVerify}" event="end" />
+        <camunda:executionListener delegateExpression="#{verifyVariable}" event="end">
+          <camunda:field name="variableName">
+            <camunda:string>basketResponse</camunda:string>
+          </camunda:field>
+        </camunda:executionListener>
       </bpmn:extensionElements>
       <bpmn:incoming>ToBasketReceived</bpmn:incoming>
       <bpmn:outgoing>FromBasketReceived</bpmn:outgoing>
@@ -79,6 +90,13 @@
       <bpmn:outgoing>ShippingCompleteOK</bpmn:outgoing>
     </bpmn:exclusiveGateway>
     <bpmn:serviceTask id="StartPayment" name="Start Payment" camunda:delegateExpression="#{startPayment}">
+      <bpmn:extensionElements>
+        <camunda:executionListener delegateExpression="#{basketStatus}" event="end">
+          <camunda:field name="status">
+            <camunda:string>WAITING_FOR_PAYMENT</camunda:string>
+          </camunda:field>
+        </camunda:executionListener>
+      </bpmn:extensionElements>
       <bpmn:incoming>ToStartPayment</bpmn:incoming>
       <bpmn:outgoing>ToReceivePayment</bpmn:outgoing>
     </bpmn:serviceTask>
@@ -86,13 +104,9 @@
       <bpmn:incoming>ToSendInvoice</bpmn:incoming>
       <bpmn:outgoing>FromSendInvoice</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:serviceTask id="ShipItems" name="Ship Items" camunda:delegateExpression="#{shipItems}">
-      <bpmn:incoming>ToShipItems</bpmn:incoming>
-      <bpmn:outgoing>ToShippingComplete</bpmn:outgoing>
-    </bpmn:serviceTask>
     <bpmn:sequenceFlow id="ToShippingComplete" sourceRef="ShipItems" targetRef="ShippingEnded" />
     <bpmn:sequenceFlow id="SequenceFlow_1ie05a4" sourceRef="ShippingCompleteFork" targetRef="RefundPaymentComp">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">#{shipItemsResponse != 'OK'}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">#{shippingResponse != 'OK'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="SequenceFlow_083dss4" sourceRef="RefundPaymentComp" targetRef="ReturnItemsComp" />
     <bpmn:intermediateThrowEvent id="ReturnItemsComp" name="Return Items">
@@ -105,21 +119,26 @@
     </bpmn:boundaryEvent>
     <bpmn:serviceTask id="ReturnItems" name="Return Items" isForCompensation="true" camunda:delegateExpression="#{updateReservations}">
       <bpmn:extensionElements>
-        <camunda:inputOutput>
-          <camunda:inputParameter name="operation">DISCARD</camunda:inputParameter>
-        </camunda:inputOutput>
+        <camunda:executionListener delegateExpression="#{basketStatus}" event="start">
+          <camunda:field name="status">
+            <camunda:string>RETURNED</camunda:string>
+          </camunda:field>
+        </camunda:executionListener>
+        <camunda:field name="operation">
+          <camunda:string>DISCARD</camunda:string>
+        </camunda:field>
       </bpmn:extensionElements>
     </bpmn:serviceTask>
-    <bpmn:sequenceFlow id="SequenceFlow_0fyj6jg" sourceRef="ReceivePaymentTimeout" targetRef="PaymentTimeoutComp" />
+    <bpmn:sequenceFlow id="SequenceFlow_0fyj6jg" sourceRef="PaymentTimeout" targetRef="PaymentTimeoutComp" />
     <bpmn:intermediateThrowEvent id="PaymentTimeoutComp" name="Discard Reservations">
       <bpmn:incoming>SequenceFlow_0fyj6jg</bpmn:incoming>
       <bpmn:compensateEventDefinition activityRef="LockReservations" />
     </bpmn:intermediateThrowEvent>
     <bpmn:serviceTask id="LockReservations" name="Lock Reservations" camunda:delegateExpression="#{updateReservations}">
       <bpmn:extensionElements>
-        <camunda:inputOutput>
-          <camunda:inputParameter name="operation">LOCK</camunda:inputParameter>
-        </camunda:inputOutput>
+        <camunda:field name="operation">
+          <camunda:string>LOCK</camunda:string>
+        </camunda:field>
       </bpmn:extensionElements>
       <bpmn:incoming>ToLockReservations</bpmn:incoming>
       <bpmn:outgoing>FromLockReservation</bpmn:outgoing>
@@ -127,14 +146,18 @@
     <bpmn:sequenceFlow id="FromLockReservation" sourceRef="LockReservations" targetRef="PrepareCheckoutJoin" />
     <bpmn:sequenceFlow id="ToBasketReceived" sourceRef="RetrieveBasket" targetRef="BasketReceived" />
     <bpmn:sequenceFlow id="ToRetrieveBasket" sourceRef="StartCheckout" targetRef="RetrieveBasket" />
-    <bpmn:serviceTask id="RetrieveBasket" name="Retrieve Basket" camunda:delegateExpression="#{retrieveBasket}">
+    <bpmn:serviceTask id="RetrieveBasket" name="Retrieve Basket" camunda:delegateExpression="#{basketStatus}">
       <bpmn:incoming>ToRetrieveBasket</bpmn:incoming>
       <bpmn:outgoing>ToBasketReceived</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:sequenceFlow id="FromCustomerReceived" sourceRef="CustomerReceived" targetRef="PrepareCheckoutJoin" />
     <bpmn:receiveTask id="CustomerReceived" name="Customer Received" messageRef="Message_1lr5xrx">
       <bpmn:extensionElements>
-        <camunda:executionListener delegateExpression="#{customerVerify}" event="end" />
+        <camunda:executionListener delegateExpression="#{verifyVariable}" event="end">
+          <camunda:field name="variableName">
+            <camunda:string>customerResponse</camunda:string>
+          </camunda:field>
+        </camunda:executionListener>
       </bpmn:extensionElements>
       <bpmn:incoming>ToCustomerReceived</bpmn:incoming>
       <bpmn:outgoing>FromCustomerReceived</bpmn:outgoing>
@@ -155,7 +178,7 @@
         <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT15S</bpmn:timeDuration>
       </bpmn:timerEventDefinition>
     </bpmn:boundaryEvent>
-    <bpmn:boundaryEvent id="BasketReceiveTimeout" name="Timeout&#10;" attachedToRef="BasketReceived">
+    <bpmn:boundaryEvent id="BasketTimeout" name="Basket Timeout" attachedToRef="BasketReceived">
       <bpmn:outgoing>SequenceFlow_075ya5a</bpmn:outgoing>
       <bpmn:timerEventDefinition>
         <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT15S</bpmn:timeDuration>
@@ -172,22 +195,41 @@
     </bpmn:inclusiveGateway>
     <bpmn:sequenceFlow id="SequenceFlow_0j83sgn" sourceRef="ShippingCompleteJoin" targetRef="ReceivePaymentJoin" />
     <bpmn:sequenceFlow id="SequenceFlow_1sz0ag6" sourceRef="ReturnItemsComp" targetRef="ShippingCompleteJoin" />
-    <bpmn:sequenceFlow id="ShippingCompleteOK" name="Shipping OK&#10;&#10;" sourceRef="ShippingCompleteFork" targetRef="ShippingCompleteJoin" />
+    <bpmn:sequenceFlow id="ShippingCompleteOK" name="Shipping OK&#10;&#10;" sourceRef="ShippingCompleteFork" targetRef="ShippingCompleteJoin">
+      <bpmn:extensionElements>
+        <camunda:executionListener delegateExpression="#{basketStatus}" event="take">
+          <camunda:field name="status">
+            <camunda:string>FINALIZED</camunda:string>
+          </camunda:field>
+        </camunda:executionListener>
+      </bpmn:extensionElements>
+    </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="SequenceFlow_1wci3s0" sourceRef="CustomerNotFound" targetRef="EndEvents" />
     <bpmn:sequenceFlow id="SequenceFlow_00czaau" sourceRef="CustomerTimeout" targetRef="EndEvents" />
     <bpmn:sequenceFlow id="SequenceFlow_014hny9" sourceRef="BasketNotFound" targetRef="EndEvents" />
-    <bpmn:sequenceFlow id="SequenceFlow_075ya5a" sourceRef="BasketReceiveTimeout" targetRef="EndEvents" />
+    <bpmn:sequenceFlow id="SequenceFlow_075ya5a" sourceRef="BasketTimeout" targetRef="EndEvents" />
     <bpmn:sequenceFlow id="SequenceFlow_0uf4leg" sourceRef="ReceivePaymentFork" targetRef="CommitReservations" />
     <bpmn:serviceTask id="CommitReservations" name="Commit Reservations" camunda:delegateExpression="#{updateReservations}">
       <bpmn:extensionElements>
-        <camunda:inputOutput>
-          <camunda:inputParameter name="operation">COMMIT</camunda:inputParameter>
-        </camunda:inputOutput>
+        <camunda:field name="operation">
+          <camunda:string>COMMIT</camunda:string>
+        </camunda:field>
       </bpmn:extensionElements>
       <bpmn:incoming>SequenceFlow_0uf4leg</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_01scivz</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:sequenceFlow id="SequenceFlow_01scivz" sourceRef="CommitReservations" targetRef="ReceivePaymentJoin" />
+    <bpmn:serviceTask id="ShipItems" name="Ship Items" camunda:delegateExpression="#{shipItems}">
+      <bpmn:extensionElements>
+        <camunda:executionListener delegateExpression="#{basketStatus}" event="start">
+          <camunda:field name="status">
+            <camunda:string>SHIPPING</camunda:string>
+          </camunda:field>
+        </camunda:executionListener>
+      </bpmn:extensionElements>
+      <bpmn:incoming>ToShipItems</bpmn:incoming>
+      <bpmn:outgoing>ToShippingComplete</bpmn:outgoing>
+    </bpmn:serviceTask>
     <bpmn:association id="ToRefundPayment" associationDirection="One" sourceRef="IntermediateThrowEvent_15epnmd" targetRef="RefundPayment" />
     <bpmn:association id="Association_0l52hdt" associationDirection="One" sourceRef="ReservationsLockedComp" targetRef="ReturnItems" />
   </bpmn:process>
@@ -197,6 +239,7 @@
   <bpmn:message id="Message_0bu4z8g" name="BASKET_RESPONSE" />
   <bpmn:message id="Message_1u2y4dl" name="SHIPPING_RESPONSE" />
   <bpmn:error id="Error_04ctfyx" name="VARIABLE_NOT_FOUND" errorCode="VARIABLE_NOT_FOUND" />
+  <bpmn:error id="Error_0obihl8" name="BASKET_INVALID" errorCode="BASKET_INVALID" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="checkout">
       <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartCheckout">
@@ -227,7 +270,7 @@
       <bpmndi:BPMNShape id="ReceiveTask_10ninqq_di" bpmnElement="ReceivePayment">
         <dc:Bounds x="1020" y="170" width="100" height="80" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BoundaryEvent_0zvku92_di" bpmnElement="ReceivePaymentTimeout">
+      <bpmndi:BPMNShape id="BoundaryEvent_0zvku92_di" bpmnElement="PaymentTimeout">
         <dc:Bounds x="1052" y="152" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BoundaryEvent_17kzph3_di" bpmnElement="IntermediateThrowEvent_15epnmd">
@@ -307,9 +350,6 @@
       <bpmndi:BPMNShape id="ServiceTask_0gi0vb5_di" bpmnElement="SendInvoice">
         <dc:Bounds x="840" y="420" width="100" height="80" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="ServiceTask_1sukcwl_di" bpmnElement="ShipItems">
-        <dc:Bounds x="1140" y="420" width="100" height="80" />
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_18e0ep4_di" bpmnElement="ToShippingComplete">
         <di:waypoint x="1187" y="500" />
         <di:waypoint x="1187" y="560" />
@@ -362,7 +402,7 @@
       <bpmndi:BPMNShape id="BoundaryEvent_0h59iwm_di" bpmnElement="BasketNotFound">
         <dc:Bounds x="302" y="339" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="254" y="389" width="52" height="14" />
+          <dc:Bounds x="255" y="389" width="52" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_093987v_di" bpmnElement="ToBasketReceived">
@@ -392,10 +432,10 @@
       <bpmndi:BPMNShape id="BoundaryEvent_1ngcq3j_di" bpmnElement="CustomerTimeout">
         <dc:Bounds x="672" y="232" width="36" height="36" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BoundaryEvent_1sbhni5_di" bpmnElement="BasketReceiveTimeout">
+      <bpmndi:BPMNShape id="BoundaryEvent_1sbhni5_di" bpmnElement="BasketTimeout">
         <dc:Bounds x="342" y="339" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="370" y="382" width="40" height="27" />
+          <dc:Bounds x="322" y="382" width="76" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BoundaryEvent_026j3rn_di" bpmnElement="CustomerNotFound">
@@ -454,6 +494,9 @@
         <di:waypoint x="1030" y="660" />
         <di:waypoint x="965" y="660" />
       </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ServiceTask_1kxefp9_di" bpmnElement="ShipItems">
+        <dc:Bounds x="1140" y="420" width="100" height="80" />
+      </bpmndi:BPMNShape>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
 </bpmn:definitions>

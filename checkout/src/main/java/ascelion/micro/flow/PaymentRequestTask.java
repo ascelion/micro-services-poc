@@ -1,7 +1,6 @@
 package ascelion.micro.flow;
 
 import java.math.BigDecimal;
-import java.util.UUID;
 
 import ascelion.micro.customer.api.Customer;
 import ascelion.micro.payment.api.PaymentMessageSender;
@@ -25,7 +24,7 @@ public class PaymentRequestTask extends AbstractSendTask<PaymentRequest> {
 	}
 
 	@Override
-	protected void execute(UUID pid) {
+	protected void execute() {
 		final Customer customer = getVariable(CUSTOMER_RESPONSE_VAR);
 		final ReservationResponse[] reservations = getVariable(RESERVATIONS_VAR);
 		var amount = BigDecimal.ZERO;
@@ -37,6 +36,6 @@ public class PaymentRequestTask extends AbstractSendTask<PaymentRequest> {
 		final var card = customer.getCards().iterator().next().getValue();
 		final var request = new PaymentRequest(card, amount);
 
-		this.msa.send(Direction.REQUEST, pid, PAYMENT_MESSAGE, MessagePayload.of(request));
+		this.msa.send(Direction.REQUEST, basketId(), PAYMENT_MESSAGE, MessagePayload.of(request));
 	}
 }

@@ -2,16 +2,7 @@ database:
   host: ${APP_NAME}_db
   port: 5432
 
-reservation:
-  availability: 1
-
-security:
-  signKey: 0123456789
-
 spring:
-  application:
-    name: ${APP_NAME}
-
   datasource:
     username: ${APP_NAME}
     password: ${APP_NAME}
@@ -22,12 +13,6 @@ spring:
     locations:
       - classpath:db
       - filesystem:${dataImportLocation:data}
-
-  jpa:
-    properties:
-      hibernate:
-        temp:
-          use_jdbc_metadata_defaults: false
 
   rabbitmq:
     host: rabbit

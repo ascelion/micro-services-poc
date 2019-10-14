@@ -5,8 +5,6 @@ eureka:
     fetchRegistry: true
     serviceUrl:
       defaultZone: ${EUREKA_URI:http://localhost:48080/services/eureka}
-  instance:
-    preferIpAddress: true
 
 spring:
   application:
@@ -38,7 +36,7 @@ zuul:
       service-id: customer
       strip-prefix: false
       sensitive-headers:
-    checkouts:
+    checkout:
       service-id: checkout
       strip-prefix: false
       sensitive-headers:

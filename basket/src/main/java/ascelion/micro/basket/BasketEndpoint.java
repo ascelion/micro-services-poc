@@ -19,6 +19,8 @@ import ascelion.micro.shared.endpoint.Endpoint;
 import ascelion.micro.shared.endpoint.ViewEntityEndpointBase;
 import ascelion.micro.shared.validation.OnCreate;
 
+import static java.util.Arrays.stream;
+import static java.util.stream.Collectors.toSet;
 import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED_VALUE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -69,21 +71,26 @@ public class BasketEndpoint extends ViewEntityEndpointBase<Basket, BasketRepo> {
 	@ResponseStatus(HttpStatus.CREATED)
 	@Validated({ Default.class, OnCreate.class })
 	@Transactional
-	public Basket addItems(@PathVariable("basketId") UUID basketId, @RequestBody @NotNull @Valid @Size(min = 1) BasketItemRequest... requests) {
+	public Basket addItems(@PathVariable("basketId") UUID basketId,
+			@RequestBody @NotNull @Valid @Size(min = 1) BasketItemRequest... requests) {
 		final var basket = this.repo.getById(basketId);
 
 		basket.merge(this.bbm.createArray(BasketItem.class, requests));
 
+		final var prodIds = stream(requests).map(BasketItemRequest::getProductId).collect(toSet());
+		final var updated = basket.getItems().stream().filter(item -> prodIds.contains(item.getProductId()))
+				.toArray(BasketItem[]::new);
+
 		final var reservations = this.resApi.reserve(
-				this.bbm.createArray(ReservationRequest.class, basket.getItems()));
+				this.bbm.createArray(ReservationRequest.class, updated));
 
 		for (var k = 0; k < reservations.length; k++) {
-			final BasketItem item = basket.getItems().get(k);
+			final BasketItem item = updated[k];
 
 			item.setQuantity(reservations[k].getQuantity());
 		}
 
-		return this.repo.save(basket);
+		return this.repo.save(basket.pruneEmptpyItems());
 	}
 
 	@ApiOperation("Update the quantity of an item")
@@ -100,7 +107,7 @@ public class BasketEndpoint extends ViewEntityEndpointBase<Basket, BasketRepo> {
 
 		item.setQuantity(reservations[0].getQuantity());
 
-		return this.repo.save(item.getBasket());
+		return this.repo.save(item.getBasket().pruneEmptpyItems());
 	}
 
 	@ApiOperation("Remove an item from the basket")
@@ -120,6 +127,6 @@ public class BasketEndpoint extends ViewEntityEndpointBase<Basket, BasketRepo> {
 
 		item.getBasket().delItem(itemId);
 
-		return this.repo.save(item.getBasket());
+		return this.repo.save(item.getBasket().pruneEmptpyItems());
 	}
 }

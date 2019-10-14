@@ -13,7 +13,7 @@ import org.springframework.boot.autoconfigure.flyway.FlywayConfigurationCustomiz
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ConditionalOnClass(FluentConfiguration.class)
+@ConditionalOnClass(name = "org.flywaydb.core.Flyway")
 public class SharedFlywayConfig implements FlywayConfigurationCustomizer {
 	static private final Logger LOG = LoggerFactory.getLogger(SharedFlywayConfig.class);
 

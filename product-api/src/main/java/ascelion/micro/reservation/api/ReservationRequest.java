@@ -6,15 +6,15 @@ import java.util.UUID;
 import javax.validation.constraints.NotNull;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
 @Getter
-@RequiredArgsConstructor
+@Setter
 public class ReservationRequest {
 	@NotNull
-	private final UUID ownerId;
+	private UUID ownerId;
 	@NotNull
-	private final UUID productId;
+	private UUID productId;
 	@NotNull
-	private final BigDecimal quantity;
+	private BigDecimal quantity;
 }

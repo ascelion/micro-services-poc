@@ -27,6 +27,8 @@ import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.reducing;
 import static java.util.stream.Collectors.toList;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.util.StdConverter;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -40,27 +42,38 @@ import org.apache.commons.lang3.builder.EqualsExclude;
 @Entity
 @Table(name = "baskets")
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
+@JsonDeserialize(converter = Basket.RelinkItems.class)
 public class Basket extends AbstractEntity<Basket> {
+	static class RelinkItems extends StdConverter<Basket, Basket> {
+		@Override
+		public Basket convert(Basket basket) {
+			return basket.reLink();
+		}
+	}
+
 	public enum Status {
 		CONSTRUCT,
 		ORDERING,
-		ORDERED,
+		WAITING_FOR_PAYMENT,
+		SHIPPING,
+		RETURNED,
 		FINALIZED,
 	}
 
 	@NotNull
+	@Setter
 	private UUID customerId;
 
 	@Enumerated(EnumType.STRING)
 	@Default
+	@Setter
 	private Status status = Status.CONSTRUCT;
 
 	@OneToMany(mappedBy = "basket", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-	@OrderBy("ord")
+	@OrderBy("index")
 	@EqualsExclude
 	private List<BasketItem> items;
 
@@ -86,16 +99,6 @@ public class Basket extends AbstractEntity<Basket> {
 		this.items.removeIf(item -> itemId.equals(item.getId()));
 
 		return doMerge();
-	}
-
-	public int pruneItems() {
-		if (this.items == null) {
-			return 0;
-		}
-
-		this.items.removeIf(item -> item.getQuantity().equals(BigDecimal.ZERO));
-
-		return this.items.size();
 	}
 
 	public Optional<BasketItem> getItem(@NonNull UUID itemId) {
@@ -126,9 +129,13 @@ public class Basket extends AbstractEntity<Basket> {
 		this.items.clear();
 		this.items.addAll(merged);
 
-		for (int o = 0; o < this.items.size(); o++) {
-			this.items.get(o).setBasket(this);
-			this.items.get(o).ord(o);
+		return reLink();
+	}
+
+	private Basket reLink() {
+		for (int k = 0; k < this.items.size(); k++) {
+			this.items.get(k).setBasket(this);
+			this.items.get(k).setIndex(k);
 		}
 
 		return this;
@@ -148,15 +155,15 @@ public class Basket extends AbstractEntity<Basket> {
 		return i1.addQuantity(i2.getQuantity());
 	}
 
-	public Basket advance() {
-		if (this.status == null) {
-			throw new IllegalStateException("Basket has no status");
-		}
-		if (this.status == Status.FINALIZED) {
-			throw new IllegalStateException("Basket has been finalized");
-		}
+	public Basket pruneEmptpyItems() {
+		if (this.items != null) {
+			this.items.removeIf(item -> {
+				final BigDecimal q = item.getQuantity();
+				final BigDecimal z = BigDecimal.ZERO.setScale(q.scale());
 
-		this.status = Status.values()[this.status.ordinal() + 1];
+				return q.equals(z);
+			});
+		}
 
 		return this;
 	}

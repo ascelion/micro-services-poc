@@ -5,8 +5,6 @@ eureka:
     fetchRegistry: false
     serviceUrl:
       defaultZone: ${EUREKA_URI:http://localhost:48080/services/eureka/}
-#  instance:
-#    preferIpAddress: true
 
 #server:
 #  servlet:

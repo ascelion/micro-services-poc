@@ -17,6 +17,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
+import org.apache.commons.lang3.builder.EqualsExclude;
 
 @Entity
 @Table(name = "basket_items")
@@ -27,8 +28,9 @@ import lombok.Setter;
 @Builder
 public class BasketItem extends AbstractEntity<BasketItem> {
 	@ManyToOne(optional = false)
-	@JsonIgnore
 	@Setter(AccessLevel.PACKAGE)
+	@EqualsExclude
+	@JsonIgnore
 	private Basket basket;
 
 	@NonNull
@@ -41,9 +43,9 @@ public class BasketItem extends AbstractEntity<BasketItem> {
 	private boolean expired;
 
 	@Getter(AccessLevel.NONE)
-	@Setter(AccessLevel.NONE)
+	@Setter(AccessLevel.PACKAGE)
 	@JsonIgnore
-	private int ord;
+	private int index;
 
 	public void setQuantity(BigDecimal quantity) {
 		this.quantity = quantity;
@@ -53,12 +55,6 @@ public class BasketItem extends AbstractEntity<BasketItem> {
 	public void expire() {
 		this.quantity = BigDecimal.ZERO;
 		this.expired = true;
-	}
-
-	BasketItem ord(int ord) {
-		this.ord = ord;
-
-		return this;
 	}
 
 	BasketItem addQuantity(BigDecimal quantity) {

@@ -23,10 +23,12 @@
 	<logger name="org.springframework" level="INFO" />
 	<logger name="org.springframework.security" level="INFO" />
 	<!-- <logger name="org.springframework.security.access.prepost.PrePostAnnotationSecurityMetadataSource" level="INFO" /> -->
+	<logger name="org.springframework.context.annotation" level="INFO" />
 
 	<logger name="ma.glasnost.orika" level="INFO" />
-	<logger name="org.camunda.bpm.engine.bpmn.behavior" level="INFO" />
-	<logger name="org.camunda.bpm.extension.mockito" level="INFO" />
+
+	<logger name="org.camunda.bpm.engine.bpmn.behavior" level="ALL" />
+	<logger name="org.camunda.bpm.extension.mockito" level="ALL" />
 
 	<logger name="ascelion" level="INFO" />
 

@@ -6,9 +6,9 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
 
 public interface CheckoutChannel {
-	static public final String BASKET_MESSAGE = "BASKET";
-	static public final String CUSTOMER_MESSAGE = "CUSTOMER";
-	static public final String SHIPPING_MESSAGE = "SHIPPING";
+	String BASKET_MESSAGE = "BASKET";
+	String CUSTOMER_MESSAGE = "CUSTOMER";
+	String SHIPPING_MESSAGE = "SHIPPING";
 
 	String INPUT = "checkout-input";
 	String OUTPUT = "checkout-output";

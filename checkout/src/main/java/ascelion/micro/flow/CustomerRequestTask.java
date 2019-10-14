@@ -20,9 +20,9 @@ public class CustomerRequestTask extends AbstractSendTask<UUID> {
 	}
 
 	@Override
-	protected void execute(UUID pid) {
+	protected void execute() {
 		final Basket basket = getVariable(BASKET_RESPONSE_VAR);
 
-		this.msa.send(Direction.REQUEST, pid, CUSTOMER_MESSAGE, MessagePayload.of(basket.getCustomerId()));
+		this.msa.send(Direction.REQUEST, basketId(), CUSTOMER_MESSAGE, MessagePayload.of(basket.getCustomerId()));
 	}
 }

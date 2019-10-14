@@ -62,7 +62,11 @@ public class BeanToBeanMapper implements InitializingBean, BeanClassLoaderAware 
 
 	@Value("${orika.sources:false}")
 	private boolean sources;
-	private ClassLoader cld;
+	private ClassLoader cld = getClass().getClassLoader();
+
+	public BeanToBeanMapper(boolean sources) {
+		this.sources = sources;
+	}
 
 	public <T> T[] createArray(Class<T> target, Object[] sources, @NonNull Object... extra) {
 		return createArray(target, stream(sources), extra);
@@ -135,10 +139,13 @@ public class BeanToBeanMapper implements InitializingBean, BeanClassLoaderAware 
 	}
 
 	@Override
-	public void afterPropertiesSet() throws Exception {
+	public void afterPropertiesSet() {
+		this.mappers.clear();
+
 		final var cps = new ClassPathScanningCandidateComponentProvider(false);
 
 		cps.addIncludeFilter(new AnnotationTypeFilter(BBMap.class));
+		cps.addIncludeFilter(new AnnotationTypeFilter(BBMap.Repeatable.class));
 		cps.findCandidateComponents("ascelion")
 				.forEach(this::initMapperFromBean);
 	}
@@ -215,7 +222,6 @@ public class BeanToBeanMapper implements InitializingBean, BeanClassLoaderAware 
 		initMapper(new Key(type, type, false), map, type);
 	}
 
-	//
 	private void initMapper(Key key, BBMap map, Class<?> component) {
 		initOneWayMapper(key, map, component);
 
@@ -235,7 +241,7 @@ public class BeanToBeanMapper implements InitializingBean, BeanClassLoaderAware 
 								.build();
 					})
 					.toArray(BBField[]::new);
-//
+
 			bld.with("fields", fields);
 
 			map = bld.build();

@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.NotNull;
 
 import ascelion.micro.checkout.api.CheckoutMessageSender;
@@ -16,6 +17,7 @@ import static ascelion.micro.checkout.api.CheckoutChannel.SHIPPING_MESSAGE;
 import static ascelion.micro.flow.CheckoutConstants.PROCESS_NAME;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.TEXT_PLAIN_VALUE;
 
@@ -32,9 +34,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-@Endpoint("checkouts")
-public class CheckoutEndpoint {
+@Endpoint("process")
+public class ProcessEndpoint {
 
+	@Autowired
+	private HttpServletRequest request;
 	@Autowired
 	private CheckoutFlow flow;
 	@Autowired
@@ -43,13 +47,13 @@ public class CheckoutEndpoint {
 	@ApiOperation("Start the checkout process")
 	@PostMapping(path = "{basketId}", produces = TEXT_PLAIN_VALUE)
 	@ResponseStatus(HttpStatus.CREATED)
-	public String checkout(
+	public void checkout(
 	//@formatter:off
 	        @ApiParam(value = "The basket id", required = true)
 	        @PathVariable("basketId")
 	        @NotNull UUID basketId ) {
 	//@formatter:on
-		return this.flow.start(basketId);
+		this.flow.start(basketId, this.request.getHeader(AUTHORIZATION));
 	}
 
 	@GetMapping(produces = APPLICATION_JSON_VALUE)
@@ -110,16 +114,16 @@ public class CheckoutEndpoint {
 	private CheckoutMessageSender<String> cms;
 
 	@ApiOperation("Complete shipping")
-	@PostMapping(path = "{pid}/{status}")
+	@PostMapping(path = "{basketId}/{status}")
 	public void complete(
 	//@formatter:off
-	        @ApiParam(value = "The process id", required = true)
-	        @PathVariable("pid")
-	        @NotNull UUID pid,
+	        @ApiParam(value = "The basket id", required = true)
+	        @PathVariable("basketId")
+	        @NotNull UUID basketId,
 	        @ApiParam(value = "The shipping status", required = true)
 	        @PathVariable("status")
 	        @NotNull String  status) {
 	//@formatter:on
-		this.cms.send("shipping", Direction.RESPONSE, pid, SHIPPING_MESSAGE, MessagePayload.of(status));
+		this.cms.send("shipping", Direction.RESPONSE, basketId, SHIPPING_MESSAGE, MessagePayload.of(status));
 	}
 }

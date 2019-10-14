@@ -1,7 +1,6 @@
 package ascelion.micro.reservation;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 
 import ascelion.micro.mapper.BBField;
 import ascelion.micro.mapper.BBMap;
@@ -20,9 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 @Endpoint("reservations")
-@BBMap(from = Reservation.class, to = ReservationRequest.class, bidi = false, fields = {
-		@BBField(from = "product.id", to = "productId"),
-})
 @BBMap(from = Reservation.class, to = ReservationResponse.class, bidi = false, fields = {
 		@BBField(from = "product.price", to = "price")
 })
@@ -51,18 +47,17 @@ public class ReservationEndpoint extends ViewEntityEndpointBase<Reservation, Res
 
 	@Override
 	@Transactional
-	public ReservationResponse[] update(Operation op, ReservationRequest... reservations) {
-		final var result = new ArrayList<>();
+	public ReservationResponse[] update(Operation op, ReservationRequest... requests) {
+		final var reservations = new Reservation[requests.length];
 
-		for (final var req : reservations) {
+		for (int k = 0; k < requests.length; k++) {
+			final var req = requests[k];
 			final var res = this.repo.getByProductIdAndOwnerId(req.getProductId(), req.getOwnerId());
 
-			this.rs.update(op, res);
-
-			result.add(res);
+			reservations[k] = this.rs.update(op, res);
 		}
 
-		return this.bbm.createArray(ReservationResponse.class, result);
+		return this.bbm.createArray(ReservationResponse.class, reservations);
 	}
 
 	private ReservationResponse reserve(ReservationRequest req) {
@@ -82,9 +77,10 @@ public class ReservationEndpoint extends ViewEntityEndpointBase<Reservation, Res
 				res = Reservation.builder()
 						.product(product)
 						.ownerId(req.getOwnerId())
-						.quantity(quantity)
 						.build();
 			}
+
+			res.setQuantity(quantity);
 
 			this.repo.save(res);
 		}

@@ -1,0 +1,1 @@
+ALTER TABLE basket_items RENAME COLUMN ord TO index;

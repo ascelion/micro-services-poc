@@ -5,14 +5,9 @@ import java.util.UUID;
 import ascelion.micro.shared.model.AbstractEntity;
 import ascelion.micro.shared.model.EntityRepo;
 
-import static org.springframework.core.GenericTypeResolver.resolveTypeArguments;
-
 public abstract class EntityEndpointBase<T extends AbstractEntity<T>, R extends EntityRepo<T>, U>
 		extends ViewEntityEndpointBase<T, R>
 		implements EntityEndpoint<T, U> {
-
-	@SuppressWarnings("unchecked")
-	private final Class<T> type = (Class<T>) resolveTypeArguments(getClass(), EntityEndpoint.class)[0];
 
 	public EntityEndpointBase(R repo) {
 		super(repo);

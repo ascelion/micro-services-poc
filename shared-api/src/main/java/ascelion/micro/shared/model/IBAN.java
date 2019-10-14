@@ -21,6 +21,6 @@ public class IBAN {
 	}
 
 	@Getter(onMethod_ = @JsonValue)
-	@Size(min = 12, max = 20)
+	@Size(min = 12, max = 24)
 	private final String value;
 }

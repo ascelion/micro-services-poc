@@ -3,7 +3,6 @@ package ascelion.micro.basket;
 import java.util.UUID;
 
 import ascelion.micro.basket.api.Basket;
-import ascelion.micro.basket.api.Basket.Status;
 import ascelion.micro.checkout.api.CheckoutChannel;
 import ascelion.micro.checkout.api.CheckoutMessageSender;
 import ascelion.micro.shared.message.MessagePayload;
@@ -30,29 +29,26 @@ public class BasketCheckoutListener {
 	private CheckoutMessageSender<Basket> cms;
 
 	@StreamListener(target = CheckoutChannel.INPUT, condition = "headers." + HEADER_KIND + " == '" + BASKET_MESSAGE + "_REQUEST'")
-	public void messageReceived(@Payload MessagePayload<UUID> payload, @Header(HEADER_CORRELATION) UUID pid) {
-		final var basketId = payload.get();
+	public void getBasket(
+			@Payload MessagePayload<Basket.Status> payload,
+			@Header(HEADER_CORRELATION) UUID basketId) {
 
+		final var status = payload.orElse(null);
 		var basket = this.repo.findById(basketId)
-				.filter(b -> b.getStatus() != Status.FINALIZED)
 				.orElse(null);
 
 		if (basket != null) {
-			switch (basket.getStatus()) {
-			case CONSTRUCT:
-				if (basket.pruneItems() > 0) {
-					this.repo.save(basket.advance());
-				} else {
-					basket = null;
-				}
-				break;
-
-			default:
-				this.repo.save(basket.advance());
-				break;
+			if (status == null) {
+				basket.setStatus(Basket.Status.ORDERING);
+			} else {
+				basket.setStatus(status);
 			}
+
+			basket = this.repo.save(basket);
 		}
 
-		this.cms.send(Direction.RESPONSE, pid, BASKET_MESSAGE, MessagePayload.of(basket));
+		if (status == null) {
+			this.cms.send(Direction.RESPONSE, basketId, BASKET_MESSAGE, MessagePayload.of(basket));
+		}
 	}
 }

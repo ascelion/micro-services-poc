@@ -2,7 +2,10 @@ version: "3.1"
 
 services:
   rabbit:
-    image: "rabbitmq:management"
+    build:
+      context: .
+      dockerfile: dockerfile.txt
+    image: [=repository][=application]:[=tagName]
     container_name: [=name]_[=application]
     volumes:
     - rabbit:/var/lib/rabbitmq

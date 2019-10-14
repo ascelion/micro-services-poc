@@ -23,7 +23,7 @@ public class BasketReceiveTask extends AbstractReceiveTask<Basket> {
 
 	@Override
 	@StreamListener(target = CheckoutChannel.INPUT, condition = "headers." + HEADER_KIND + " == '" + BASKET_MESSAGE + "_RESPONSE'")
-	public void messageReceived(@Payload MessagePayload<Basket> payload, @Header(HEADER_CORRELATION) UUID pid, @Header(HEADER_KIND) String kind) {
-		received(payload, pid, kind);
+	public void messageReceived(@Payload MessagePayload<Basket> payload, @Header(HEADER_CORRELATION) UUID basketId, @Header(HEADER_KIND) String kind) {
+		received(payload, basketId, kind);
 	}
 }

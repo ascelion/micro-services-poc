@@ -4,4 +4,6 @@ dependencies {
 	implementation project( ':shared-api' )
 
 	implementation 'org.springframework.cloud:spring-cloud-stream'
+
+	testImplementation project( path: ':shared', configuration: 'test' )
 }

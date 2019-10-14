@@ -16,6 +16,10 @@ import javax.validation.constraints.NotNull;
 
 import ascelion.micro.shared.validation.OnUpdate;
 
+import static java.util.UUID.randomUUID;
+
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -25,10 +29,11 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 
 @MappedSuperclass
 @Getter
-// Orika is not able to inject fields, don't use the setters directly
+// Orika is not able to inject fields, don't use these setters directly
 @Setter(onMethod_ = @Deprecated)
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public abstract class AbstractEntity<E extends AbstractEntity<E>> {
 	@Id
 	@GeneratedValue
@@ -41,6 +46,15 @@ public abstract class AbstractEntity<E extends AbstractEntity<E>> {
 	@Column(nullable = false, updatable = true)
 	@NotNull
 	private LocalDateTime updatedAt;
+
+	static public <T extends AbstractEntity<T>> T populate(T t) {
+		final AbstractEntity<T> ent = t;
+
+		ent.id = randomUUID();
+		ent.init();
+
+		return t;
+	}
 
 	@PrePersist
 	private void init() {

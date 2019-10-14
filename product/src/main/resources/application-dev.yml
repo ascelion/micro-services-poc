@@ -3,8 +3,9 @@ database:
   host: localhost
   port: 18432
 
-reservation:
-  availability: 1
+#reservation:
+#  availability: PT10M
+#  check-interval: PT60S
 
 server:
   port: 21080
@@ -12,12 +13,6 @@ server:
 spring:
   jackson:
     serialization.indent_output: true
-
-  jpa:
-    properties:
-      hibernate:
-#        show_sql: true
-        format_sql: true
 
   rabbitmq:
     host: localhost

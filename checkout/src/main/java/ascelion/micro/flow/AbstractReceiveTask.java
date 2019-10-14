@@ -14,12 +14,12 @@ public abstract class AbstractReceiveTask<T> {
 
 	public abstract void messageReceived(MessagePayload<T> payload, UUID id, String kind);
 
-	protected final void received(MessagePayload<T> payload, UUID id, String kind) {
+	protected final void received(MessagePayload<T> payload, UUID basketId, String kind) {
 		final var name = CaseUtils.toCamelCase(kind, false, '_');
 
 		this.camunda
 				.createMessageCorrelation(kind)
-				.processInstanceId(id.toString())
+				.processInstanceBusinessKey(basketId.toString())
 				.setVariable(name, payload.orElse(null))
 				.correlate();
 	}

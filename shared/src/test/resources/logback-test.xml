@@ -24,11 +24,10 @@
 	<logger name="org.springframework.security" level="INFO" />
 	<!-- <logger name="org.springframework.security.access.prepost.PrePostAnnotationSecurityMetadataSource" level="INFO" /> -->
 
-	<logger name="ma.glasnost.orika" level="INFO" />
 	<logger name="org.camunda.bpm.engine.bpmn.behavior" level="INFO" />
-	<logger name="org.hibernate.type" level="INFO" />
+	<logger name="ma.glasnost.orika" level="ALL" />
 
-	<logger name="ascelion" level="INFO" />
+	<logger name="ascelion" level="ALL" />
 
 	<root level="INFO">
 		<appender-ref ref="FILE" />
