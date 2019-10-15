@@ -16,7 +16,7 @@ services:
       - POSTGRES_DB=[=application]
     deploy:
       restart_policy:
-        condition: always
+        condition: any
         delay: 5s
     networks:
       - [=network]
@@ -39,7 +39,7 @@ services:
       mode: global
 [/#if]
       restart_policy:
-        condition: always
+        condition: any
         delay: 5s
     networks:
       - [=network]
