@@ -13,11 +13,13 @@ import static ascelion.micro.flow.CheckoutConstants.CUSTOMER_RESPONSE_VAR;
 import static ascelion.micro.flow.CheckoutConstants.PAYMENT_REQUEST_TASK;
 import static ascelion.micro.flow.CheckoutConstants.RESERVATIONS_VAR;
 import static ascelion.micro.payment.api.PaymentChannel.PAYMENT_MESSAGE;
+import static ascelion.micro.shared.utils.LogUtils.loggerForThisClass;
 
-import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
 
-@Service(PAYMENT_REQUEST_TASK)
+@Action(PAYMENT_REQUEST_TASK)
 public class PaymentRequestTask extends AbstractSendTask<PaymentRequest> {
+	static private final Logger LOG = loggerForThisClass();
 
 	public PaymentRequestTask(PaymentMessageSender<PaymentRequest> pms) {
 		super(pms);
@@ -35,6 +37,8 @@ public class PaymentRequestTask extends AbstractSendTask<PaymentRequest> {
 
 		final var card = customer.getCards().iterator().next().getValue();
 		final var request = new PaymentRequest(card, amount);
+
+		LOG.info("Basket[{}]: requesting payment: {}", basketId(), amount);
 
 		this.msa.send(Direction.REQUEST, basketId(), PAYMENT_MESSAGE, MessagePayload.of(request));
 	}

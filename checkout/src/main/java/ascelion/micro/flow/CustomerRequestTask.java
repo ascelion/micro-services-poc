@@ -10,11 +10,14 @@ import ascelion.micro.shared.message.MessageSenderAdapter.Direction;
 import static ascelion.micro.checkout.api.CheckoutChannel.CUSTOMER_MESSAGE;
 import static ascelion.micro.flow.CheckoutConstants.BASKET_RESPONSE_VAR;
 import static ascelion.micro.flow.CheckoutConstants.CUSTOMER_REQUEST_TASK;
+import static ascelion.micro.shared.utils.LogUtils.loggerForThisClass;
 
-import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
 
-@Service(CUSTOMER_REQUEST_TASK)
+@Action(CUSTOMER_REQUEST_TASK)
 public class CustomerRequestTask extends AbstractSendTask<UUID> {
+	static private final Logger LOG = loggerForThisClass();
+
 	public CustomerRequestTask(CheckoutMessageSender<UUID> cms) {
 		super(cms);
 	}
@@ -23,6 +26,8 @@ public class CustomerRequestTask extends AbstractSendTask<UUID> {
 	protected void execute() {
 		final Basket basket = getVariable(BASKET_RESPONSE_VAR);
 
-		this.msa.send(Direction.REQUEST, basketId(), CUSTOMER_MESSAGE, MessagePayload.of(basket.getCustomerId()));
+		LOG.info("Basket[{}]: getting customer {}", basket.getId(), basket.getCustomerId());
+
+		this.msa.send(Direction.REQUEST, basket.getId(), CUSTOMER_MESSAGE, MessagePayload.of(basket.getCustomerId()));
 	}
 }

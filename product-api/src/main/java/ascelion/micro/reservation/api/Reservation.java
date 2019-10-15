@@ -11,6 +11,8 @@ import javax.validation.constraints.NotNull;
 import ascelion.micro.product.api.Product;
 import ascelion.micro.shared.model.AbstractEntity;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -28,6 +30,7 @@ import lombok.Setter;
 public class Reservation extends AbstractEntity<Reservation> {
 	@ManyToOne(optional = false)
 	@NotNull
+	@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 	private Product product;
 	@NotNull
 	private UUID ownerId;

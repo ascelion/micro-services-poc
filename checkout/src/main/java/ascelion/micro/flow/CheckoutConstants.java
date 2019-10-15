@@ -11,6 +11,7 @@ public class CheckoutConstants {
 	static public final String CUSTOMER_RESPONSE_VAR = "customerResponse";
 	static public final String RESERVATIONS_VAR = "reservations";
 	static public final String SHIP_ITEMS_RESPONSE_VAR = "shippingResponse";
+	static public final String PAYMENT_RESPONSE_VAR = "paymentResponse";
 
 	static public final String BASKET_STATUS_TASK = "basketStatus";
 	static public final String BASKET_RECEIVE_TASK = "basketReceive";

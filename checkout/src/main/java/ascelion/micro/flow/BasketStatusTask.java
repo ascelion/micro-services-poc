@@ -6,14 +6,16 @@ import ascelion.micro.shared.message.MessageSenderAdapter.Direction;
 
 import static ascelion.micro.checkout.api.CheckoutChannel.BASKET_MESSAGE;
 import static ascelion.micro.flow.CheckoutConstants.BASKET_STATUS_TASK;
+import static ascelion.micro.shared.utils.LogUtils.loggerForThisClass;
 import static org.apache.commons.lang3.StringUtils.trimToNull;
 
 import lombok.Setter;
 import org.camunda.bpm.engine.delegate.Expression;
-import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
 
-@Service(BASKET_STATUS_TASK)
+@Action(BASKET_STATUS_TASK)
 public class BasketStatusTask extends AbstractSendTask<String> {
+	static private final Logger LOG = loggerForThisClass();
 
 	@Setter
 	private Expression status;
@@ -24,8 +26,10 @@ public class BasketStatusTask extends AbstractSendTask<String> {
 
 	@Override
 	protected void execute() {
-		final var value = trimToNull(evaluate(this.status));
+		final var status = trimToNull(evaluate(this.status));
 
-		this.msa.send(Direction.REQUEST, basketId(), BASKET_MESSAGE, MessagePayload.of(value));
+		LOG.info("Basket[{}]: status {}", basketId(), status);
+
+		this.msa.send(Direction.REQUEST, basketId(), BASKET_MESSAGE, MessagePayload.of(status));
 	}
 }

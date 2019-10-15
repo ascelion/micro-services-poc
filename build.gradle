@@ -173,6 +173,12 @@ subprojects {
 
 			testRuntimeOnly 'com.h2database:h2'
 		}
+
+		configurations.all {
+			resolutionStrategy.dependencySubstitution {
+				substitute module('javax.ws.rs:jsr311-api') with module( 'javax.ws.rs:javax.ws.rs-api:2.1' )
+			}
+		}
 	}
 
 	eclipse.project.name = "${project.group}.${rootProject.name}${path.replace(':', '-')}"

@@ -14,10 +14,9 @@ import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.validation.constraints.NotNull;
 
+import ascelion.micro.shared.POJO;
 import ascelion.micro.shared.validation.OnUpdate;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -28,14 +27,14 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-public abstract class AbstractEntity<E extends AbstractEntity<E>> {
+public abstract class AbstractEntity<E extends AbstractEntity<E>> extends POJO {
+
 	@Id
 	@GeneratedValue
 	@Column(nullable = false, insertable = false, updatable = false, unique = true)
 	@NotNull(groups = OnUpdate.class)
 	UUID id;
-	@Column(nullable = false, updatable = false)
+	@Column(insertable = false, updatable = false, nullable = false)
 	@NotNull
 	private LocalDateTime createdAt;
 	@Column(nullable = false, updatable = true)

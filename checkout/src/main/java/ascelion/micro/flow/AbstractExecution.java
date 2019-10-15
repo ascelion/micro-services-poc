@@ -1,6 +1,5 @@
 package ascelion.micro.flow;
 
-import java.util.Map;
 import java.util.UUID;
 import java.util.function.Supplier;
 
@@ -12,8 +11,7 @@ import org.camunda.bpm.engine.delegate.JavaDelegate;
 
 public abstract class AbstractExecution implements JavaDelegate, ExecutionListener {
 
-	static private final ThreadLocal<Map<String, Object>> VARIABLES = new ThreadLocal<>();
-	static private final ThreadLocal<DelegateExecution> EXECUTION = new ThreadLocal<>();
+	private DelegateExecution execution;
 
 	@Override
 	public final void execute(DelegateExecution execution) throws Exception {
@@ -21,14 +19,19 @@ public abstract class AbstractExecution implements JavaDelegate, ExecutionListen
 	}
 
 	@Override
-	public void notify(DelegateExecution execution) throws Exception {
+	public final void notify(DelegateExecution execution) throws Exception {
 		doExecute(execution);
+	}
+
+	protected final void doExecute(DelegateExecution execution) throws Exception {
+		this.execution = execution;
+
+		execute();
 	}
 
 	@SuppressWarnings("unchecked")
 	protected final <T> T getVariable(String name) {
-		final var variables = VARIABLES.get();
-		final var value = variables.get(name);
+		final var value = this.execution.getVariable(name);
 
 		if (value == null) {
 			throw new BpmnError("VARIABLE_NOT_FOUND", "Variable not found: " + name);
@@ -39,8 +42,7 @@ public abstract class AbstractExecution implements JavaDelegate, ExecutionListen
 
 	@SuppressWarnings("unchecked")
 	protected final <T> T getVariableOr(String name, Supplier<T> defValue) {
-		final var variables = VARIABLES.get();
-		final var value = variables.get(name);
+		final var value = this.execution.getVariable(name);
 
 		if (value == null) {
 			return defValue != null ? defValue.get() : null;
@@ -49,31 +51,17 @@ public abstract class AbstractExecution implements JavaDelegate, ExecutionListen
 		return (T) value;
 	}
 
-	protected void setVariable(String name, Object value) {
-		VARIABLES.get().put(name, value);
-	}
-
-	protected void doExecute(DelegateExecution execution) throws Exception {
-		EXECUTION.set(execution);
-		VARIABLES.set(execution.getVariables());
-
-		try {
-			execute();
-
-			execution.setVariables(VARIABLES.get());
-		} finally {
-			VARIABLES.remove();
-			EXECUTION.remove();
-		}
+	protected final void setVariable(String name, Object value) {
+		this.execution.setVariable(name, value);
 	}
 
 	@SuppressWarnings("unchecked")
-	protected <T> T evaluate(Expression expression) {
-		return expression != null ? (T) expression.getValue(EXECUTION.get()) : null;
+	protected final <T> T evaluate(Expression expression) {
+		return expression != null ? (T) expression.getValue(this.execution) : null;
 	}
 
 	protected final UUID basketId() {
-		return UUID.fromString(EXECUTION.get().getBusinessKey());
+		return UUID.fromString(this.execution.getBusinessKey());
 	}
 
 	protected abstract void execute();

@@ -42,6 +42,7 @@ import org.apache.commons.lang3.builder.EqualsExclude;
 @Entity
 @Table(name = "baskets")
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
@@ -133,6 +134,10 @@ public class Basket extends AbstractEntity<Basket> {
 	}
 
 	private Basket reLink() {
+		if (this.items == null) {
+			return this;
+		}
+
 		for (int k = 0; k < this.items.size(); k++) {
 			this.items.get(k).setBasket(this);
 			this.items.get(k).setIndex(k);

@@ -6,7 +6,8 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
 
 public interface PaymentChannel {
-	static public final String PAYMENT_MESSAGE = "PAYMENT";
+	String PAYMENT_MESSAGE = "PAYMENT";
+	String REFUND_MESSAGE = "REFUND";
 
 	String INPUT = "payment-input";
 	String OUTPUT = "payment-output";

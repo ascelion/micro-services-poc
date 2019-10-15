@@ -1,11 +1,14 @@
 package ascelion.micro.payment;
 
 import java.math.BigDecimal;
+import java.nio.channels.IllegalSelectorException;
 import java.util.UUID;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.validation.Valid;
@@ -24,6 +27,12 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class Payment extends AbstractEntity<Payment> {
+	public enum Status {
+		WAITING,
+		APPROVED,
+		REFUND,
+	}
+
 	@ManyToOne(optional = false, cascade = CascadeType.MERGE)
 	@NotNull
 	@Valid
@@ -37,7 +46,9 @@ public class Payment extends AbstractEntity<Payment> {
 	@Column(updatable = false)
 	private UUID requestId;
 
-	private boolean approved;
+	@NotNull
+	@Enumerated(EnumType.STRING)
+	private Status status = Status.WAITING;
 
 	Payment(Card card, BigDecimal amount, UUID requestId) {
 		this.card = card;
@@ -46,6 +57,18 @@ public class Payment extends AbstractEntity<Payment> {
 	}
 
 	void approve() {
-		this.approved = true;
+		if (this.status != Status.WAITING) {
+			throw new IllegalSelectorException();
+		}
+
+		this.status = Status.APPROVED;
+	}
+
+	void refund() {
+		if (this.status != Status.APPROVED) {
+			throw new IllegalSelectorException();
+		}
+
+		this.status = Status.REFUND;
 	}
 }

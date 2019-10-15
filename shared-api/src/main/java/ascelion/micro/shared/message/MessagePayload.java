@@ -8,6 +8,8 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+import static java.lang.String.format;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -71,5 +73,12 @@ public final class MessagePayload<T> {
 
 	public <X extends Throwable> T orElseThrow(Supplier<? extends X> exceptionSupplier) throws X {
 		return this.value.orElseThrow(exceptionSupplier);
+	}
+
+	@Override
+	public String toString() {
+		return this.value.isPresent()
+				? format("MessagePayload[%s]", this.value.get())
+				: "MessagePayload.empty";
 	}
 }

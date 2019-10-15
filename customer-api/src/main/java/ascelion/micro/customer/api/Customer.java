@@ -4,7 +4,17 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.CollectionTable;
+import javax.persistence.Column;
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.OneToMany;
+import javax.persistence.OrderColumn;
+import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
 import ascelion.micro.shared.model.AbstractEntity;
@@ -28,9 +38,11 @@ import org.apache.commons.lang3.builder.EqualsExclude;
 public class Customer extends AbstractEntity<Customer> {
 	@NotNull
 	private String firstName;
-
 	@NotNull
 	private String lastName;
+
+	@NotNull
+	private String email;
 
 	@ElementCollection(fetch = FetchType.EAGER)
 	@CollectionTable(name = "cards", joinColumns = @JoinColumn(name = "customer_id", referencedColumnName = "id"))
