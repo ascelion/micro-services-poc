@@ -15,8 +15,6 @@ camunda:
     admin-user:
       id: admin
       password: admin
-    webapp:
-      index-redirect-enabled: false
     jpa:
       enabled: false
     history-level: FULL

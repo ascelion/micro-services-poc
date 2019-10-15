@@ -18,13 +18,12 @@ dependencies {
 
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-jdbc'
-	implementation 'org.springframework.boot:spring-boot-starter-aop'
 
+	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
 	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
 	implementation 'org.springframework.cloud:spring-cloud-starter-stream-rabbit'
 
 	implementation 'org.camunda.bpm.springboot:camunda-bpm-spring-boot-starter-rest'
-	implementation 'org.camunda.bpm.springboot:camunda-bpm-spring-boot-starter-webapp'
 
 	implementation 'org.apache.commons:commons-text'
 

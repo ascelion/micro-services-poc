@@ -1,0 +1,30 @@
+
+database:
+  name: checkout
+  user: checkout
+  pass: checkout
+  host: checkout_db
+  port: 5432
+
+checkout:
+  bpm:
+    database:
+      schema-update: false
+    admin-user:
+      id: admin
+      password: admin
+    webapp:
+      index-redirect-enabled: true
+
+server:
+  servlet:
+    context-path: /checkout/ui
+
+spring:
+  application:
+    name: ${APP_NAME}
+
+  datasource:
+    username: ${database.user}
+    password: ${database.pass}
+    url: jdbc:postgresql://${database.host}:${database.port}/${database.name}

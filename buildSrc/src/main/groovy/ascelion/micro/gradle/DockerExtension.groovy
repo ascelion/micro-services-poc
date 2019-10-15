@@ -25,6 +25,7 @@ class DockerExtension {
 		configuration.name(project.rootProject.name)
 		configuration.scalable(true)
 		configuration.tagName(project.version)
+		configuration.repository('')
 	}
 
 	String getName() {
@@ -44,6 +45,12 @@ class DockerExtension {
 	}
 	void setTagName(String tagName) {
 		this.configuration.tagName(tagName)
+	}
+	String getRepository() {
+		return configuration.repository
+	}
+	void setRepository(String repository) {
+		this.configuration.repository(repository)
 	}
 
 	void templates( FileCollection templates ) {

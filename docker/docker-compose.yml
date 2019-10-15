@@ -26,13 +26,13 @@ services:
 [/#if]
 [/#if]
 
-  [=application]:
+  [=application?replace('-', '_')]:
     build:
       context: .
       dockerfile: application.txt
-    image: [=repository][=application]:[=tagName]
+    image: [=repository][=application?replace('-', '_')]:[=tagName]
 [#if !scalable]
-    container_name: [=name]_[=application]
+    container_name: [=name]_[=application?replace('-', '_')]
 [/#if]
     deploy:
 [#if global??]
@@ -56,7 +56,7 @@ services:
       - [=application]_db
 [#if hasImportData]
     volumes:
-      - [=application]_pd:/usr/share/[=application]/prod-data:ro
+      - [=application]_pd:/usr/share/[=application]/data:ro
 [/#if]
 [/#if]
 

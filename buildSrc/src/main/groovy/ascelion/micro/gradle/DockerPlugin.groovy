@@ -14,6 +14,8 @@ class DockerPlugin implements Plugin<Project> {
 			group = 'docker'
 			description = 'Creates Docker files'
 		}
+		project.tasks.register('dockerTag', TagTask ) {
+		}
 		project.tasks.register('dockerBuild', BuildTask ) {
 			group = 'docker'
 			description = 'Build Docker services'
@@ -23,6 +25,8 @@ class DockerPlugin implements Plugin<Project> {
 			project.plugins.withType( ApplicationPlugin ) {
 				dependsOn 'assemble'
 			}
+
+			finalizedBy 'dockerTag'
 		}
 		project.tasks.register('dockerUp', UpTask ) {
 			group = 'docker'

@@ -3,8 +3,10 @@ final def dataDir        = file 'data'
 final def destination    = file "$buildDir/libs"
 final def jdbcPort       = docker.configuration.portBase + 5432
 
-bootRun {
-	systemProperty "database.port", jdbcPort
+if( docker.configuration.hasDatabase ) {
+	bootRun {
+		systemProperty "database.port", jdbcPort
+	}
 }
 
 task startDB(type: Exec) {

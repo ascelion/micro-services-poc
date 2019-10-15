@@ -40,6 +40,10 @@ zuul:
       service-id: checkout
       strip-prefix: false
       sensitive-headers:
+    checkout/ui:
+      service-id: checkout_ui
+      strip-prefix: false
+      sensitive-headers:
     reservations:
       service-id: product
       strip-prefix: false

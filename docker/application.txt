@@ -1,4 +1,4 @@
-[#assign APPLICATION][=application?upper_case][/#assign]
+[#assign APPLICATION][=application?upper_case?replace('-', '_')][/#assign]
 
 FROM openjdk:11
 
