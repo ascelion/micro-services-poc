@@ -25,7 +25,9 @@
 	<!-- <logger name="org.springframework.security.access.prepost.PrePostAnnotationSecurityMetadataSource" level="INFO" /> -->
 
 	<logger name="org.camunda.bpm.engine.bpmn.behavior" level="INFO" />
-	<logger name="ma.glasnost.orika" level="ALL" />
+
+	<logger name="com.github.dozermapper.core.DozerBeanMapperBuilder" level="WARN" />
+	<logger name="com.github.dozermapper.core.config.resolvers.LegacyPropertiesSettingsResolver" level="WARN" />
 
 	<logger name="ascelion" level="ALL" />
 

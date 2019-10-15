@@ -76,19 +76,6 @@ subprojects {
 
 		mainClassName = 'ascelion.micro.Main'
 
-		distributions.all {
-			contents.into '/'
-		}
-
-		distZip.enabled = false
-		distTar.enabled = false
-
-		tasks.all { if( it.name == 'bootDistZip' ) it.enabled = false }
-
-		compileJava {
-			dependsOn 'checkDevProfile'
-		}
-
 		bootRun {
 			systemProperty "spring.profiles.active", 'dev'
 			systemProperty "APP_NAME", project.name
@@ -96,6 +83,21 @@ subprojects {
 			systemProperty "dataImportLocation", project.file( 'data' )
 
 			jvmArgs '--illegal-access=permit'
+		}
+
+		distributions.all {
+			contents.into '/'
+		}
+
+		tasks.all {
+			if( it.name == 'bootDistZip' ) it.enabled = false
+			if( it.name == 'bootDistTar' ) it.enabled = false
+		}
+
+		distZip.enabled = false
+
+		compileJava {
+			dependsOn 'checkDevProfile'
 		}
 	}
 	plugins.withType( ascelion.micro.gradle.DockerPlugin ) {
@@ -134,6 +136,10 @@ subprojects {
 	}
 
 	plugins.withType( JavaPlugin ) {
+		jar {
+			baseName = "poc-${project.name}"
+		}
+
 		dependencies {
 			implementation platform( "org.springframework.boot:spring-boot-dependencies:$springBootVersion" )
 			implementation platform( 'org.springframework.cloud:spring-cloud-dependencies:Greenwich.SR3' )

@@ -1,6 +1,6 @@
 
 final def dataDir        = file 'data'
-final def destination    = file "$buildDir/distributions"
+final def destination    = file "$buildDir/libs"
 final def jdbcPort       = docker.configuration.portBase + 5432
 
 bootRun {
@@ -40,6 +40,32 @@ docker {
 	}
 }
 
+bootJar.enabled = false
+jar.enabled = true
+
+task dockerBaseJars( type: Copy ) {
+	dependsOn assemble
+
+	from tarTree( "$buildDir/distributions/${project.name}.tar" )
+	into destination
+	exclude "bin/*.bat"
+	exclude "lib/poc-*.jar"
+}
+
+task dockerBaseDist( type: Copy ) {
+	dependsOn assemble
+
+	from tarTree( "$buildDir/distributions/${project.name}.tar" )
+	into "$destination/lib1"
+	include "lib/poc-*.jar"
+
+	includeEmptyDirs = false
+
+	eachFile {
+		path = name
+	}
+}
+
 task dockerFilesData(type: Copy) {
 	into destination
 
@@ -51,6 +77,6 @@ task dockerFilesData(type: Copy) {
 }
 
 dockerFiles {
+	dependsOn dockerBaseJars, dockerBaseDist
 	dependsOn dockerFilesData
 }
-
