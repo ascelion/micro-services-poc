@@ -175,11 +175,11 @@ subprojects {
 		}
 	}
 
-	eclipse.project.name = "${project.group}.${rootProject.name}${path.replace(':', '-')}"
+	eclipse.project.name = "ascelion.${rootProject.name}-${name}"
 	eclipse.classpath.downloadSources = true
 }
 
-eclipse.project.name = "${project.group}.${name}"
+eclipse.project.name = "ascelion.${name}"
 
 wrapper {
 	distributionType = 'all'

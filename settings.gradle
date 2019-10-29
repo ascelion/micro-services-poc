@@ -1,4 +1,4 @@
-rootProject.name = 'micro-services'
+rootProject.name = 'microservices-demo'
 
 include ':apache'
 include ':authz'
