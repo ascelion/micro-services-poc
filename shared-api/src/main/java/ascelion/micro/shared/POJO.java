@@ -13,5 +13,4 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 		setterVisibility = Visibility.NONE)
 @JsonInclude(content = Include.NON_NULL, value = Include.NON_NULL)
 public abstract class POJO {
-
 }

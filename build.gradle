@@ -38,8 +38,8 @@ allprojects {
 		}
 	}
 
-	apply plugin: 'eclipse'
 	apply plugin: 'extend-project'
+	apply plugin: 'eclipse'
 
 	task 'clean-ext'(type: Delete) {
 		delete 'bin', 'target', '*.log'

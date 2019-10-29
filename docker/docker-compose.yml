@@ -11,9 +11,11 @@ services:
     volumes:
       - [=application]_db:/var/lib/postgresql/data/
     environment:
+      - LANG=en_GB.UTF-8
       - POSTGRES_USER=[=application]
       - POSTGRES_PASSWORD=[=application]
       - POSTGRES_DB=[=application]
+    restart: always
     deploy:
       restart_policy:
         condition: any

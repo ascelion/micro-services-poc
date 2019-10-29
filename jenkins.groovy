@@ -24,14 +24,15 @@ pipeline {
 		stage('Checks') {
 			steps {
 				sh "./gradlew check --continue || true"
+
 				junit allowEmptyResults: true, testResults: "**/TEST-*.xml"
-				step([$class: 'Publisher', reportFilenamePattern: '**/testng-results.xml'])
 			}
 		}
-		stage('Archive') {
+		stage('Deploy') {
 			steps {
-				archiveArtifacts fingerprint: true,
-				artifacts: '**/build/publications/*/pom-*.xml, **/build/libs/*.jar'
+				sh "./gradlew publish"
+
+				archiveArtifacts fingerprint: true, artifacts: '**/build/publications/*/pom-*.xml, **/build/libs/*.jar'
 			}
 		}
 	}
